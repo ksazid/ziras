@@ -3,7 +3,7 @@
   "sliceId": "VS-02",
   "title": "Discovery Kernel Foundation",
   "status": "active",
-  "lifecycle": "ready-for-implementation",
+  "lifecycle": "testing",
   "riskLevel": "medium",
   "implementationMode": "runtime-enabled",
   "requirements": [
@@ -115,8 +115,8 @@
   "progress": {
     "discovery": 100,
     "decisions": 100,
-    "implementation": 0,
-    "testing": 0,
+    "implementation": 100,
+    "testing": 100,
     "certification": 0,
     "release": 0,
     "validation": 0
@@ -151,7 +151,9 @@
     "implementationPr": null,
     "evidence": [
       "docs/architecture/ADR-001-DISCOVERY-ENGINE.md",
-      "research/oss-qualification/README.md"
+      "research/oss-qualification/README.md",
+      "https://github.com/ksazid/ziras/actions/runs/33342896051/job/99341606844",
+      "tested-sha:c41e079639b213c0df4075220ed60eb708f0717f"
     ]
   },
   "maxAttempts": 3
