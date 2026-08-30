@@ -1,0 +1,13 @@
+perTask:
+  maxAttempts: 3
+  maxAgents: 2
+  maxVerificationRuns: 1
+  maxCiRepairAttempts: 1
+daily:
+  maxAgentRuns: 8
+stopConditions:
+  - requirements_conflict
+  - repeated_unchanged_failure
+  - protected_path_changed
+  - acceptance_criteria_missing
+  - budget_exceeded
