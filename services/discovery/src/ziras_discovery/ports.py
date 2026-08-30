@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol, Sequence
 
-from .domain import Discovery
+from .domain import Discovery, SourceObservation
 
 
 @dataclass(frozen=True, slots=True)
@@ -20,6 +20,26 @@ class GeocodeResult:
     longitude: float
     label: str
     confidence: float | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class SourceAdapterResult:
+    observation: SourceObservation
+    discoveries: tuple[Discovery, ...]
+
+
+class SourceAdapter(Protocol):
+    name: str
+
+    def extract(
+        self,
+        *,
+        source_key: str,
+        source_url: str,
+        html: str,
+        observed_at: datetime,
+        content_hash: str,
+    ) -> SourceAdapterResult: ...
 
 
 class BrowserRenderer(Protocol):
