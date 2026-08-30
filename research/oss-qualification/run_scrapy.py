@@ -6,7 +6,7 @@ from scrapy.crawler import CrawlerProcess
 from common import UA, load_sources, normalize_text, signals, write_results
 
 RESULTS = []
-SOURCES = {s["url"]: s for s in load_sources() if s.get("live")}
+LIVE_SOURCES = [s for s in load_sources() if s.get("live")]
 
 
 class QualificationSpider(scrapy.Spider):
@@ -23,16 +23,19 @@ class QualificationSpider(scrapy.Spider):
         "COOKIES_ENABLED": False,
         "TELNETCONSOLE_ENABLED": False,
     }
-    start_urls = list(SOURCES)
 
-    def parse(self, response):
-        source = SOURCES[response.request.url]
+    def start_requests(self):
+        for source in LIVE_SOURCES:
+            yield scrapy.Request(source["url"], callback=self.parse, cb_kwargs={"source": source})
+
+    def parse(self, response, source):
         text = normalize_text(response.text)
         row = {
             "id": source["id"],
             "class": source["class"],
             "adapter": "scrapy",
             "http_status": response.status,
+            "final_url": response.url,
         }
         row.update(signals(text, source["expected"]))
         row["status"] = "PASS" if response.status < 400 and row["expected_ratio"] >= 0.5 else "WEAK"
@@ -48,7 +51,7 @@ if __name__ == "__main__":
     process.crawl(QualificationSpider)
     process.start()
     seen = {r["id"] for r in RESULTS}
-    for source in SOURCES.values():
+    for source in LIVE_SOURCES:
         if source["id"] not in seen:
             RESULTS.append({"id": source["id"], "class": source["class"], "adapter": "scrapy", "status": "SKIP_OR_FAILED", "reason": "No response reached spider; robots denial or transport failure."})
     write_results("scrapy", skipped + RESULTS)
