@@ -9,6 +9,7 @@ on:
       - 'docs/slices/VS-02.md'
       - 'product/TRD.md'
       - 'delivery/current-slice.json'
+      - 'delivery/decisions.json'
       - '.github/workflows/discovery-kernel.yml'
   pull_request:
     paths:
@@ -16,6 +17,7 @@ on:
       - 'docs/slices/VS-02.md'
       - 'product/TRD.md'
       - 'delivery/current-slice.json'
+      - 'delivery/decisions.json'
       - '.github/workflows/discovery-kernel.yml'
   workflow_dispatch:
 
@@ -27,6 +29,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  pes-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.13.1'
+      - name: Install repository dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: PES preflight
+        run: npm run preflight
+
   kernel:
     runs-on: ubuntu-latest
     timeout-minutes: 20
