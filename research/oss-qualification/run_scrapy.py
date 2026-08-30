@@ -24,7 +24,7 @@ class QualificationSpider(scrapy.Spider):
         "TELNETCONSOLE_ENABLED": False,
     }
 
-    def start_requests(self):
+    async def start(self):
         for source in LIVE_SOURCES:
             yield scrapy.Request(source["url"], callback=self.parse, cb_kwargs={"source": source})
 
