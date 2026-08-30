@@ -1,18 +1,22 @@
 {
   "schemaVersion": 2,
-  "sliceId": "R-OSS-01",
-  "title": "Open-source discovery stack qualification",
+  "sliceId": "VS-02",
+  "title": "Discovery Kernel Foundation",
   "status": "active",
-  "lifecycle": "implementing",
+  "lifecycle": "ready-for-implementation",
   "riskLevel": "medium",
-  "implementationMode": "runtime-disabled",
+  "implementationMode": "runtime-enabled",
   "requirements": [
-    "QUAL-CRAWL-001",
-    "QUAL-CRAWL-002",
-    "QUAL-SOURCE-001",
-    "QUAL-SOURCE-002",
-    "QUAL-EXTRACT-001",
-    "QUAL-SEC-001"
+    "REQ-DK-001",
+    "REQ-DK-002",
+    "REQ-DK-003",
+    "REQ-DK-004",
+    "REQ-DK-005",
+    "REQ-DK-006",
+    "REQ-DK-007",
+    "REQ-DK-008",
+    "REQ-DK-009",
+    "REQ-DK-010"
   ],
   "owners": {
     "product": "ksazid",
@@ -21,96 +25,134 @@
     "security": null
   },
   "dependencies": [
-    "publicly accessible source pages only",
-    "robots-aware collection",
-    "no credentials, proxies, stealth or anti-bot bypass",
-    "no production deployment"
+    "ADR-001 approved discovery-engine architecture",
+    "DEC-01 approved architecture decision",
+    "PostgreSQL 16 with PostGIS and pgvector for integration tests",
+    "No production source collection in this slice"
   ],
   "blockers": [],
   "allowedPaths": [
-    "research/oss-qualification/**",
-    ".github/workflows/oss-qualification.yml",
-    "delivery/current-slice.json",
-    "delivery/decisions.json",
-    "docs/architecture/ADR-001-DISCOVERY-ENGINE.md",
-    "product/TRD.md"
+    "services/discovery/**",
+    ".github/workflows/discovery-kernel.yml",
+    "docs/slices/VS-02.md",
+    "product/TRD.md",
+    "delivery/current-slice.json"
   ],
   "protectedPaths": [
     ".github/workflows/release.yml"
   ],
   "impact": {
     "areas": [
-      "external-web-access",
-      "security",
-      "architecture"
+      "architecture",
+      "api",
+      "database",
+      "legal-privacy",
+      "operations-support"
     ],
     "notes": [
-      "Qualification sends at most one low-rate request per configured source per adapter run.",
-      "Robots policy must be respected where supported and no anti-bot bypass is allowed.",
-      "A successful technical fetch does not grant production source-policy approval."
+      "This slice establishes the discovery-domain contracts and persistence model but does not enable production crawling.",
+      "Source policy is fail-closed and vendor-specific production permissions remain separate decisions.",
+      "External infrastructure remains behind ADR-001 boundaries so adapters can be replaced without changing domain logic."
     ]
   },
   "approvals": [
     {
       "type": "scope",
       "status": "approved",
-      "version": "R-OSS-01",
+      "version": "VS-02",
       "commitSha": null,
       "by": "ksazid",
-      "at": "2026-08-31T01:02:45+02:00",
-      "rationale": "Product owner approved an OSS qualification spike and explicitly requested broader testing across more vendors before implementation."
+      "at": "2026-08-31T01:42:00+02:00",
+      "rationale": "Product owner explicitly approved the Discovery Kernel implementation slice after approving ADR-001."
     },
     {
       "type": "policy",
-      "status": "approved",
-      "version": "R-OSS-01",
+      "status": "not-required",
+      "version": "VS-02",
       "commitSha": null,
-      "by": "ksazid",
-      "at": "2026-08-31T01:02:45+02:00",
-      "rationale": "Research is restricted to low-rate public-source qualification; production collection remains separately gated per source."
+      "by": null,
+      "at": null,
+      "rationale": "No vendor-specific production source permission is enabled by this slice; source policy defaults fail closed."
     },
     {
       "type": "implementation",
       "status": "approved",
-      "version": "R-OSS-01",
+      "version": "VS-02",
       "commitSha": null,
       "by": "ksazid",
-      "at": "2026-08-31T01:02:45+02:00",
-      "rationale": "Approval applies only to disposable research harnesses and CI qualification, not product runtime."
+      "at": "2026-08-31T01:42:00+02:00",
+      "rationale": "Product owner explicitly approved implementation of the Discovery Kernel slice."
     },
-    {"type":"certification","status":"not-required","version":"R-OSS-01","commitSha":null,"by":"ksazid","at":"2026-08-31T01:02:45+02:00","rationale":"Research-only qualification is not a releasable product slice."},
-    {"type":"release","status":"not-required","version":"R-OSS-01","commitSha":null,"by":"ksazid","at":"2026-08-31T01:02:45+02:00","rationale":"No release is permitted from this research slice."},
-    {"type":"production-enable","status":"not-required","version":"R-OSS-01","commitSha":null,"by":"ksazid","at":"2026-08-31T01:02:45+02:00","rationale":"Research harness must remain non-production."}
+    {
+      "type": "certification",
+      "status": "pending",
+      "version": null,
+      "commitSha": null,
+      "by": null,
+      "at": null,
+      "rationale": null
+    },
+    {
+      "type": "release",
+      "status": "pending",
+      "version": null,
+      "commitSha": null,
+      "by": null,
+      "at": null,
+      "rationale": null
+    },
+    {
+      "type": "production-enable",
+      "status": "pending",
+      "version": null,
+      "commitSha": null,
+      "by": null,
+      "at": null,
+      "rationale": null
+    }
   ],
   "decisionIds": ["DEC-01"],
   "progress": {
     "discovery": 100,
     "decisions": 100,
-    "implementation": 10,
-    "testing": 100,
+    "implementation": 0,
+    "testing": 0,
     "certification": 0,
     "release": 0,
     "validation": 0
   },
-  "certification": {"status":"not-required","commitSha":null,"evidence":[]},
-  "release": {"status":"not-authorized","releaseId":null},
-  "rollback": {"status":"not-applicable","rollbackId":null},
+  "certification": {
+    "status": "not-started",
+    "commitSha": null,
+    "evidence": []
+  },
+  "release": {
+    "status": "not-authorized",
+    "releaseId": null
+  },
+  "rollback": {
+    "status": "not-applicable",
+    "rollbackId": null
+  },
   "postRelease": {
-    "status":"not-applicable",
-    "reviewAt":null,
-    "expectedOutcome":"Select a stable OSS discovery stack based on reproducible source-class tests rather than popularity alone.",
-    "metrics":[
-      "source fetch success",
-      "structured extraction coverage",
-      "browser fallback rate",
-      "robots/policy denials",
-      "adapter failure isolation"
+    "status": "not-started",
+    "reviewAt": null,
+    "expectedOutcome": "Establish a stable discovery kernel whose source, data and ranking infrastructure can evolve without rewriting Ziras domain logic.",
+    "metrics": [
+      "kernel unit-test pass rate",
+      "policy-denial correctness",
+      "stale-observation rejection",
+      "entity collision false-merge count",
+      "explicit-expiry leakage count"
     ]
   },
   "links": {
-    "specification":"research/oss-qualification/README.md",
-    "implementationPr":null,
-    "evidence":["docs/architecture/ADR-001-DISCOVERY-ENGINE.md"]
+    "specification": "docs/slices/VS-02.md",
+    "implementationPr": null,
+    "evidence": [
+      "docs/architecture/ADR-001-DISCOVERY-ENGINE.md",
+      "research/oss-qualification/README.md"
+    ]
   },
   "maxAttempts": 3
 }
