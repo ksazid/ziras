@@ -43,12 +43,24 @@ def main():
     value = result(blocking=True, timeout=3)
 
     add.schedule(args=(4, 5), delay=60, priority=30)
+    pending_after_schedule = huey.pending_count()
+    scheduled_task = huey.dequeue()
+    scheduled_metadata_ok = bool(
+        scheduled_task
+        and scheduled_task.eta is not None
+        and scheduled_task.priority == 30
+        and not huey.ready_to_run(scheduled_task)
+    )
+    if scheduled_task is not None:
+        huey.execute(scheduled_task)
     scheduled_count = huey.scheduled_count()
 
     passed = (
         pending_before >= 1
         and task_metadata_ok
         and value == 5
+        and pending_after_schedule >= 1
+        and scheduled_metadata_ok
         and scheduled_count >= 1
     )
 
@@ -62,6 +74,8 @@ def main():
                 "pending_before_execute": pending_before,
                 "executed_result": value,
                 "task_metadata_ok": task_metadata_ok,
+                "pending_after_schedule": pending_after_schedule,
+                "scheduled_metadata_ok": scheduled_metadata_ok,
                 "scheduled_count": scheduled_count,
                 "storage": "PostgreSQL",
                 "production_note": "Use the application PostgreSQL database through a dedicated queue namespace; keep the queue behind a JobQueue port.",
