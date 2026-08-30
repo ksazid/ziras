@@ -30,7 +30,10 @@
   "allowedPaths": [
     "research/oss-qualification/**",
     ".github/workflows/oss-qualification.yml",
-    "delivery/current-slice.json"
+    "delivery/current-slice.json",
+    "delivery/decisions.json",
+    "docs/architecture/ADR-001-DISCOVERY-ENGINE.md",
+    "product/TRD.md"
   ],
   "protectedPaths": [
     ".github/workflows/release.yml"
@@ -79,12 +82,12 @@
     {"type":"release","status":"not-required","version":"R-OSS-01","commitSha":null,"by":"ksazid","at":"2026-08-31T01:02:45+02:00","rationale":"No release is permitted from this research slice."},
     {"type":"production-enable","status":"not-required","version":"R-OSS-01","commitSha":null,"by":"ksazid","at":"2026-08-31T01:02:45+02:00","rationale":"Research harness must remain non-production."}
   ],
-  "decisionIds": [],
+  "decisionIds": ["DEC-01"],
   "progress": {
-    "discovery": 80,
-    "decisions": 60,
+    "discovery": 100,
+    "decisions": 100,
     "implementation": 10,
-    "testing": 10,
+    "testing": 100,
     "certification": 0,
     "release": 0,
     "validation": 0
@@ -107,7 +110,7 @@
   "links": {
     "specification":"research/oss-qualification/README.md",
     "implementationPr":null,
-    "evidence":[]
+    "evidence":["docs/architecture/ADR-001-DISCOVERY-ENGINE.md"]
   },
   "maxAttempts": 3
 }
