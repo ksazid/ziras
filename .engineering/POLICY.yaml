@@ -1,0 +1,7 @@
+architecture: modular-monolith
+activeSlices: 1
+fullRepositoryContext: false
+deterministicChecksFirst: true
+codexSecurity:
+  enabled: false
+  mode: risk-triggered
