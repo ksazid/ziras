@@ -36,7 +36,8 @@
     ".github/workflows/discovery-kernel.yml",
     "docs/slices/VS-02.md",
     "product/TRD.md",
-    "delivery/current-slice.json"
+    "delivery/current-slice.json",
+    "delivery/decisions.json"
   ],
   "protectedPaths": [
     ".github/workflows/release.yml"
@@ -148,12 +149,12 @@
   },
   "links": {
     "specification": "docs/slices/VS-02.md",
-    "implementationPr": null,
+    "implementationPr": "https://github.com/ksazid/ziras/pull/2",
     "evidence": [
       "docs/architecture/ADR-001-DISCOVERY-ENGINE.md",
       "research/oss-qualification/README.md",
-      "https://github.com/ksazid/ziras/actions/runs/33342896051/job/99341606844",
-      "tested-sha:c41e079639b213c0df4075220ed60eb708f0717f"
+      "https://github.com/ksazid/ziras/actions/runs/33342957975/job/99341773634",
+      "tested-sha:4b3a2379d5c9c3e0829e7abf4fe422404d58c415"
     ]
   },
   "maxAttempts": 3
