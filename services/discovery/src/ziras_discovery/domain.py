@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
+from decimal import Decimal
 from enum import StrEnum
 from typing import Mapping, Sequence
 from uuid import UUID
@@ -86,8 +87,8 @@ class Discovery:
     observed_at: datetime
     starts_at: datetime | None = None
     expires_at: datetime | None = None
-    original_price: str | None = None
-    current_price: str | None = None
+    original_price: Decimal | None = None
+    current_price: Decimal | None = None
     currency: str | None = None
     freshness: FreshnessState = FreshnessState.UNVERIFIED
     evidence: Sequence[Evidence] = field(default_factory=tuple)
