@@ -22,6 +22,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: discovery-kernel-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   kernel:
     runs-on: ubuntu-latest
