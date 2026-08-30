@@ -1,0 +1,110 @@
+name: OSS Qualification
+
+on:
+  push:
+    branches:
+      - research/oss-qualification
+    paths:
+      - 'research/oss-qualification/**'
+      - '.github/workflows/oss-qualification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oss-qualification-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  http-baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r research/oss-qualification/requirements-base.txt
+      - run: python research/oss-qualification/run_http.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: oss-http-results
+          path: research/oss-qualification/results/*.json
+          if-no-files-found: warn
+
+  scrapy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r research/oss-qualification/requirements-base.txt 'scrapy==2.18.0'
+      - run: python research/oss-qualification/run_scrapy.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: oss-scrapy-results
+          path: research/oss-qualification/results/*.json
+          if-no-files-found: warn
+
+  crawlee:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r research/oss-qualification/requirements-base.txt 'crawlee[parsel,playwright]==1.9.3'
+      - run: python -m playwright install --with-deps chromium
+      - run: python research/oss-qualification/run_crawlee.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: oss-crawlee-results
+          path: research/oss-qualification/results/*.json
+          if-no-files-found: warn
+
+  crawl4ai:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r research/oss-qualification/requirements-base.txt 'crawl4ai==0.9.2'
+      - run: crawl4ai-setup
+      - run: python research/oss-qualification/run_crawl4ai.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: oss-crawl4ai-results
+          path: research/oss-qualification/results/*.json
+          if-no-files-found: warn
+
+  scrapling-adaptive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r research/oss-qualification/requirements-base.txt 'scrapling==0.4.8'
+      - run: python research/oss-qualification/run_scrapling.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: oss-scrapling-results
+          path: research/oss-qualification/results/*.json
+          if-no-files-found: warn
