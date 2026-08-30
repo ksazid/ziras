@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ziras-discovery"
+version = "0.1.0"
+description = "Ziras discovery kernel"
+requires-python = ">=3.12"
+dependencies = [
+  "extruct==0.18.0",
+  "trafilatura==2.2.0",
+  "dateparser==1.4.2",
+  "price-parser==0.5.1",
+  "RapidFuzz==3.14.5",
+  "psycopg[binary]==3.3.4",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3,<9",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "-q"
