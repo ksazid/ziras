@@ -1,0 +1,97 @@
+# Progressive complexity profile.
+# Start with lite. The advisor recommends upgrades when repository evidence justifies them.
+mode: lite
+
+available_modes:
+  lite:
+    description: PRD/TRD intake, planning, vertical slices, deterministic preflight, human review, and optional knowledge/memory/brevity/deployment guidance.
+    capabilities:
+      - planning
+      - slices
+      - deterministic-validation
+      - baseline-security
+      - optional-notebooklm-export
+      - optional-mempalace-memory
+      - optional-caveman-lite
+      - optional-deployment-cost-advisor
+  standard:
+    description: Lite plus ADR governance, evidence bundles, threat modelling, certification and an optional risk-triggered review graph.
+    capabilities:
+      - planning
+      - slices
+      - deterministic-validation
+      - baseline-security
+      - optional-notebooklm-export
+      - optional-mempalace-memory
+      - optional-caveman-lite
+      - optional-deployment-cost-advisor
+      - adrs
+      - evidence
+      - threat-model
+      - certification
+      - optional-standard-delivery-graph
+  enterprise:
+    description: Standard plus maker/checker separation, worktrees, budgets, risk-triggered Codex Security and an optional full delivery graph.
+    capabilities:
+      - planning
+      - slices
+      - deterministic-validation
+      - baseline-security
+      - optional-notebooklm-export
+      - optional-mempalace-memory
+      - optional-caveman-lite
+      - optional-deployment-cost-advisor
+      - adrs
+      - evidence
+      - threat-model
+      - certification
+      - maker-checker
+      - worktrees
+      - agent-budgets
+      - codex-security
+      - optional-enterprise-delivery-graph
+
+plugins:
+  enabled:
+    - planning
+    - security-baseline
+    - web-ui
+  optional_enabled_by_user: []
+  available:
+    - notebooklm-knowledge
+    - mempalace-memory
+    - caveman-lite
+    - caveman-context-compress
+    - deployment-cost-advisor
+    - standard-delivery-graph
+    - enterprise-delivery-graph
+    - deploy-cloudflare
+    - deploy-netlify
+    - deploy-vercel
+    - deploy-render
+    - codex-security
+    - maker-checker
+    - worktrees
+    - redis
+    - object-storage
+    - background-jobs
+    - ai-rag
+    - payments
+    - multi-tenancy
+
+policy:
+  auto_enable_recommendations: false
+  require_human_approval_for_mode_change: true
+  require_human_approval_for_context_compression: true
+  require_human_approval_for_deployment_provider: true
+  require_human_approval_for_production_deployment: true
+  require_human_approval_for_delivery_graph: true
+  notebooklm_is_non_authoritative: true
+  mempalace_is_non_authoritative: true
+  mempalace_default_storage: local
+  caveman_default_level: lite
+  deployment_advisor_is_recommendation_only: true
+  deployment_provider_default: none
+  delivery_graph_default: disabled
+  delivery_graph_lite_allowed: false
+  recommend_only_when_threshold_met: true
