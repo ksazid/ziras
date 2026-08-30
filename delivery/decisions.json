@@ -3,7 +3,7 @@
   "decisions": [
     {
       "id": "DEC-01",
-      "sliceId": "R-OSS-01",
+      "sliceId": "VS-02",
       "question": "Which open-source architecture should Ziras adopt for the discovery engine core?",
       "status": "approved",
       "options": [
