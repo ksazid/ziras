@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import tempfile
-
 from scrapling import Selector
 
 from common import write_results
@@ -22,25 +20,24 @@ AFTER = """
 
 
 def main():
-    with tempfile.TemporaryDirectory() as tmp:
-        storage_args = {"storage_file": f"{tmp}/adaptive.db"}
-        first = Selector(BEFORE, adaptive=True, url="https://fixture.ziras.local/deals", storage_args=storage_args)
-        original = first.css("#deal-card", identifier="offer-card", auto_save=True)
-        second = Selector(AFTER, adaptive=True, url="https://fixture.ziras.local/deals", storage_args=storage_args)
-        recovered = second.css("#deal-card", identifier="offer-card", adaptive=True, percentage=30)
-        text = recovered[0].get_all_text(separator=" ", strip=True) if recovered else ""
-        result = {
-            "id": "scrapling-adaptive-dom-change",
-            "class": "selector-resilience",
-            "adapter": "scrapling-parser",
-            "original_found": bool(original),
-            "recovered_found": bool(recovered),
-            "recovered_text": str(text),
-            "status": "PASS" if recovered and "Tikka Masala" in str(text) and "25%" in str(text) else "FAIL",
-            "fetcher_used": False,
-            "stealth_used": False,
-        }
-        write_results("scrapling-adaptive", [result])
+    url = "https://fixture.ziras.local/deals"
+    first = Selector(BEFORE, adaptive=True, url=url)
+    original = first.css("#deal-card", identifier="offer-card", auto_save=True)
+    second = Selector(AFTER, adaptive=True, url=url)
+    recovered = second.css("#deal-card", identifier="offer-card", adaptive=True, percentage=30)
+    text = recovered[0].get_all_text(separator=" ", strip=True) if recovered else ""
+    result = {
+        "id": "scrapling-adaptive-dom-change",
+        "class": "selector-resilience",
+        "adapter": "scrapling-parser",
+        "original_found": bool(original),
+        "recovered_found": bool(recovered),
+        "recovered_text": str(text),
+        "status": "PASS" if recovered and "Tikka Masala" in str(text) and "25%" in str(text) else "FAIL",
+        "fetcher_used": False,
+        "stealth_used": False,
+    }
+    write_results("scrapling-adaptive", [result])
 
 
 if __name__ == "__main__":
