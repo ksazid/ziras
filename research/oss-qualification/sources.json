@@ -1,0 +1,21 @@
+[
+  {"id":"lidl-mt","class":"supermarket","url":"https://www.lidl.com.mt/c/","expected":["Fresh offers every week","In store"],"live":true,"browser":false},
+  {"id":"eurospin-mt","class":"supermarket","url":"https://www.eurospin.mt/promotions/","expected":["Promotions","Discover our offers"],"live":true,"browser":false},
+  {"id":"smart-mt","class":"supermarket-legacy","url":"https://www.smart.com.mt/forms/SpecialOffers.aspx","expected":["Special Offer","Special Offers"],"live":true,"browser":true},
+  {"id":"greens-mt","class":"supermarket-commerce","url":"https://www.greens.com.mt/","expected":["Our Latest Offers","Greens"],"live":true,"browser":true},
+  {"id":"homemate-mt","class":"home-retail","url":"https://www.homemate.com.mt/special-offers","expected":["Special Offers","€"],"live":true,"browser":false},
+  {"id":"scan-mt","class":"electronics","url":"https://www.scanmalta.com/","expected":["Special Price","Super Savers"],"live":true,"browser":true},
+  {"id":"decathlon-mt","class":"sports-retail","url":"https://www.decathlon.mt/5430-sale","expected":["Price before reduction","Discount"],"live":true,"browser":true},
+  {"id":"mango-mt","class":"fashion","url":"https://shop.mango.com/mt/en","expected":["SALE","Final Prices"],"live":true,"browser":true},
+  {"id":"atrium-mt","class":"home-retail","url":"https://www.theatrium.com.mt/","expected":["Sale","Special Offers"],"live":true,"browser":true},
+  {"id":"deal-mt","class":"deal-marketplace","url":"https://deal.com.mt/","expected":["daily deals","OFF"],"live":true,"browser":false},
+  {"id":"malta-discount-card","class":"discount-directory","url":"https://maltadiscountcard.com/portfolio-item/tikka-masala/","expected":["Discount on Food Bill","Tikka Masala"],"live":true,"browser":false},
+  {"id":"visitmalta-events","class":"events-official","url":"https://www.visitmalta.com/en/events-in-malta-and-gozo/","expected":["Events","More Info"],"live":true,"browser":true},
+  {"id":"ticketline-mt","class":"ticketing","url":"https://www.ticketline.com.mt/","expected":["Upcoming Events","September 2026"],"live":true,"browser":false},
+  {"id":"showshappening-mt","class":"ticketing-marketplace","url":"https://www.showshappening.com/country/malta","expected":["Live Music","€"],"live":true,"browser":true},
+  {"id":"ohmymalta-openings","class":"local-news-openings","url":"https://ohmymalta.com.mt/2026/07/17/saint-tropez-dubai-mykonos-and-now-malta-bagatelle-opening-soon/","expected":["Opening Soon","St Julian"],"live":true,"browser":false},
+  {"id":"prezz-mt","class":"supermarket-aggregator","url":"https://prezz.mt/offers/","expected":["Supermarket Offers","Smart"],"live":true,"browser":false},
+  {"id":"wolt-mt","class":"delivery-marketplace","url":"https://wolt.com/en/mlt/malta/promotions-near-you","expected":["Offers near you","off"],"live":false,"browser":false,"reason":"Production/source-policy review required before automated collection."},
+  {"id":"zara-mt","class":"fashion","url":"https://www.zara.com/mt/","expected":["SALE","OFF"],"live":false,"browser":false,"reason":"Production/source-policy review required before automated collection."},
+  {"id":"cloudigo-mt","class":"deal-platform","url":"https://www.cloudigo.app/","expected":["offers","brands"],"live":false,"browser":false,"reason":"Competitor/proprietary inventory; use public market evidence only unless permission/partnership is established."}
+]
