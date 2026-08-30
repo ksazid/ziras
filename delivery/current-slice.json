@@ -1,67 +1,113 @@
 {
   "schemaVersion": 2,
-  "sliceId": null,
-  "title": null,
-  "status": "inactive",
-  "lifecycle": "proposed",
-  "riskLevel": "low",
-  "implementationMode": "specification-only",
-  "requirements": [],
+  "sliceId": "R-OSS-01",
+  "title": "Open-source discovery stack qualification",
+  "status": "active",
+  "lifecycle": "implementing",
+  "riskLevel": "medium",
+  "implementationMode": "runtime-disabled",
+  "requirements": [
+    "QUAL-CRAWL-001",
+    "QUAL-CRAWL-002",
+    "QUAL-SOURCE-001",
+    "QUAL-SOURCE-002",
+    "QUAL-EXTRACT-001",
+    "QUAL-SEC-001"
+  ],
   "owners": {
-    "product": null,
-    "engineering": null,
+    "product": "ksazid",
+    "engineering": "ksazid",
     "operations": null,
     "security": null
   },
-  "dependencies": [],
+  "dependencies": [
+    "publicly accessible source pages only",
+    "robots-aware collection",
+    "no credentials, proxies, stealth or anti-bot bypass",
+    "no production deployment"
+  ],
   "blockers": [],
-  "allowedPaths": [],
-  "protectedPaths": [".github/workflows/release.yml"],
+  "allowedPaths": [
+    "research/oss-qualification/**",
+    ".github/workflows/oss-qualification.yml",
+    "delivery/current-slice.json"
+  ],
+  "protectedPaths": [
+    ".github/workflows/release.yml"
+  ],
   "impact": {
-    "areas": [],
-    "notes": []
+    "areas": [
+      "external-web-access",
+      "security",
+      "architecture"
+    ],
+    "notes": [
+      "Qualification sends at most one low-rate request per configured source per adapter run.",
+      "Robots policy must be respected where supported and no anti-bot bypass is allowed.",
+      "A successful technical fetch does not grant production source-policy approval."
+    ]
   },
   "approvals": [
-    {"type": "scope", "status": "pending", "version": null, "commitSha": null, "by": null, "at": null, "rationale": null},
-    {"type": "policy", "status": "pending", "version": null, "commitSha": null, "by": null, "at": null, "rationale": null},
-    {"type": "implementation", "status": "pending", "version": null, "commitSha": null, "by": null, "at": null, "rationale": null},
-    {"type": "certification", "status": "pending", "version": null, "commitSha": null, "by": null, "at": null, "rationale": null},
-    {"type": "release", "status": "pending", "version": null, "commitSha": null, "by": null, "at": null, "rationale": null},
-    {"type": "production-enable", "status": "pending", "version": null, "commitSha": null, "by": null, "at": null, "rationale": null}
+    {
+      "type": "scope",
+      "status": "approved",
+      "version": "R-OSS-01",
+      "commitSha": null,
+      "by": "ksazid",
+      "at": "2026-08-31T01:02:45+02:00",
+      "rationale": "Product owner approved an OSS qualification spike and explicitly requested broader testing across more vendors before implementation."
+    },
+    {
+      "type": "policy",
+      "status": "approved",
+      "version": "R-OSS-01",
+      "commitSha": null,
+      "by": "ksazid",
+      "at": "2026-08-31T01:02:45+02:00",
+      "rationale": "Research is restricted to low-rate public-source qualification; production collection remains separately gated per source."
+    },
+    {
+      "type": "implementation",
+      "status": "approved",
+      "version": "R-OSS-01",
+      "commitSha": null,
+      "by": "ksazid",
+      "at": "2026-08-31T01:02:45+02:00",
+      "rationale": "Approval applies only to disposable research harnesses and CI qualification, not product runtime."
+    },
+    {"type":"certification","status":"not-required","version":"R-OSS-01","commitSha":null,"by":"ksazid","at":"2026-08-31T01:02:45+02:00","rationale":"Research-only qualification is not a releasable product slice."},
+    {"type":"release","status":"not-required","version":"R-OSS-01","commitSha":null,"by":"ksazid","at":"2026-08-31T01:02:45+02:00","rationale":"No release is permitted from this research slice."},
+    {"type":"production-enable","status":"not-required","version":"R-OSS-01","commitSha":null,"by":"ksazid","at":"2026-08-31T01:02:45+02:00","rationale":"Research harness must remain non-production."}
   ],
   "decisionIds": [],
   "progress": {
-    "discovery": 0,
-    "decisions": 0,
-    "implementation": 0,
-    "testing": 0,
+    "discovery": 80,
+    "decisions": 60,
+    "implementation": 10,
+    "testing": 10,
     "certification": 0,
     "release": 0,
     "validation": 0
   },
-  "certification": {
-    "status": "not-started",
-    "commitSha": null,
-    "evidence": []
-  },
-  "release": {
-    "status": "not-authorized",
-    "releaseId": null
-  },
-  "rollback": {
-    "status": "not-applicable",
-    "rollbackId": null
-  },
+  "certification": {"status":"not-required","commitSha":null,"evidence":[]},
+  "release": {"status":"not-authorized","releaseId":null},
+  "rollback": {"status":"not-applicable","rollbackId":null},
   "postRelease": {
-    "status": "not-started",
-    "reviewAt": null,
-    "expectedOutcome": null,
-    "metrics": []
+    "status":"not-applicable",
+    "reviewAt":null,
+    "expectedOutcome":"Select a stable OSS discovery stack based on reproducible source-class tests rather than popularity alone.",
+    "metrics":[
+      "source fetch success",
+      "structured extraction coverage",
+      "browser fallback rate",
+      "robots/policy denials",
+      "adapter failure isolation"
+    ]
   },
   "links": {
-    "specification": null,
-    "implementationPr": null,
-    "evidence": []
+    "specification":"research/oss-qualification/README.md",
+    "implementationPr":null,
+    "evidence":[]
   },
   "maxAttempts": 3
 }
