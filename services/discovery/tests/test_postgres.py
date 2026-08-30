@@ -32,6 +32,23 @@ def test_migration_and_monotonic_source_state() -> None:
         new_id = uuid4()
         now = datetime(2026, 8, 31, 12, 0, tzinfo=timezone.utc)
 
+        with pytest.raises(psycopg.errors.ForeignKeyViolation):
+            connection.execute(
+                """
+                INSERT INTO source_observation(id, source_key, source_url, observed_at, content_hash, extracted)
+                VALUES (%s, %s, %s, %s, %s, '{}'::jsonb)
+                """,
+                (uuid4(), source_key, "https://example.com", now, "denied"),
+            )
+
+        connection.execute(
+            """
+            INSERT INTO source_policy(source_key, access_mode, reason)
+            VALUES (%s, 'allow', 'Fixture policy approved for integration test')
+            """,
+            (source_key,),
+        )
+
         for observation_id, observed_at in (
             (first_id, now),
             (old_id, now - timedelta(minutes=1)),
