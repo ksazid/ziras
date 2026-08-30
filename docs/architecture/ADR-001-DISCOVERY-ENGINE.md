@@ -1,8 +1,11 @@
 # ADR-001 — Ziras Discovery Engine Architecture
 
-Status: **PROPOSED — awaiting explicit architecture approval**
+Status: **APPROVED**
 
 Date: 2026-08-31
+Approved by: `ksazid`
+Approved at: `2026-08-31T01:40:06+02:00`
+Decision record: `DEC-01`
 
 Research branch: `research/oss-qualification`
 Qualification head used for final queue gate: `8c522118eaeaf606a07aa0483228e5de67f536b2`
@@ -13,9 +16,9 @@ Ziras needs a durable discovery engine that can continuously discover local offe
 
 The qualification spike tested multiple acquisition frameworks and the supporting discovery operations across a broad Malta-oriented vendor/source matrix. The goal was to minimize infrastructure and framework overlap while preserving replaceable external boundaries.
 
-The current PRD and TRD are still Draft skeletons, so this ADR does not override an already-approved product or technical requirement. It must remain Proposed until explicitly approved.
+The current PRD and TRD remain Draft until separately approved. This ADR is the approved discovery-engine architecture baseline and must be reflected in the TRD before production runtime implementation begins.
 
-## Decision candidate
+## Decision
 
 Adopt a **Python modular-monolith discovery kernel** with static-first acquisition, browser rendering only as fallback, deterministic extraction before AI, and PostgreSQL as the primary operational/data backbone.
 
@@ -201,6 +204,6 @@ Trade-offs:
 - source-specific adapters remain necessary for high-quality extraction;
 - collaborative recommendation is intentionally deferred until enough data exists.
 
-## Approval required
+## Approval record
 
-This ADR becomes `APPROVED` only after an explicit architecture approval. Approval should then be reflected in the TRD and governed delivery records before production runtime implementation begins.
+Architecture approval was explicitly granted by the product owner on 2026-08-31 and is recorded as `DEC-01` in `delivery/decisions.json`.
