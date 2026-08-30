@@ -1,1 +1,23 @@
-{"schemaVersion":1,"decisions":[]}
+{
+  "schemaVersion": 1,
+  "decisions": [
+    {
+      "id": "DEC-01",
+      "sliceId": "R-OSS-01",
+      "question": "Which open-source architecture should Ziras adopt for the discovery engine core?",
+      "status": "approved",
+      "options": [
+        "Scrapy static acquisition with Scrapy+Playwright browser fallback and PostgreSQL/PostGIS/pgvector/PostgresHuey",
+        "Crawl4AI-centered acquisition stack",
+        "Crawlee-centered acquisition stack",
+        "Build a custom crawler/discovery infrastructure stack"
+      ],
+      "decision": "Adopt ADR-001: Scrapy 2.18.0 with scrapy-playwright 0.0.48 fallback; deterministic extraction with Extruct/Trafilatura/price-parser/Dateparser; PostgreSQL 16 with PostGIS and pgvector; PostgresHuey 3.3.4; Photon behind a Geocoder port; deterministic MVP ranking with implicit deferred until sufficient behavioral data.",
+      "ownerRole": "product-owner",
+      "rationale": "The selected stack passed the broad Malta-oriented OSS qualification while minimizing overlapping frameworks and infrastructure. It preserves source-policy controls and narrow replacement boundaries instead of building generic crawler, GIS, vector, queue or recommendation infrastructure from scratch.",
+      "decidedBy": "ksazid",
+      "decidedAt": "2026-08-31T01:40:06+02:00",
+      "blocks": []
+    }
+  ]
+}
