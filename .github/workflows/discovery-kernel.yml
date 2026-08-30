@@ -1,0 +1,62 @@
+name: Discovery Kernel
+
+on:
+  push:
+    branches:
+      - feat/vs02-discovery-kernel-impl
+    paths:
+      - 'services/discovery/**'
+      - 'docs/slices/VS-02.md'
+      - 'product/TRD.md'
+      - 'delivery/current-slice.json'
+      - '.github/workflows/discovery-kernel.yml'
+  pull_request:
+    paths:
+      - 'services/discovery/**'
+      - 'docs/slices/VS-02.md'
+      - 'product/TRD.md'
+      - 'delivery/current-slice.json'
+      - '.github/workflows/discovery-kernel.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  kernel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install discovery kernel
+        run: python -m pip install -e './services/discovery[dev]'
+      - name: Unit tests
+        run: pytest services/discovery/tests/test_kernel.py
+      - name: Build PostgreSQL 16 with PostGIS and pgvector
+        run: docker build -t ziras-discovery-postgres services/discovery/tests/postgres
+      - name: Start PostgreSQL
+        run: |
+          docker run --rm -d --name ziras-discovery-postgres \
+            -e POSTGRES_USER=postgres \
+            -e POSTGRES_PASSWORD=postgres \
+            -e POSTGRES_DB=ziras \
+            -p 5432:5432 \
+            ziras-discovery-postgres
+          for i in {1..30}; do
+            if docker exec ziras-discovery-postgres pg_isready -U postgres -d ziras; then
+              exit 0
+            fi
+            sleep 1
+          done
+          docker logs ziras-discovery-postgres
+          exit 1
+      - name: PostgreSQL integration tests
+        env:
+          TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ziras
+        run: pytest services/discovery/tests/test_postgres.py
+      - name: Stop PostgreSQL
+        if: always()
+        run: docker stop ziras-discovery-postgres || true
