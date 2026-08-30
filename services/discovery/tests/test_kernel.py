@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
+from decimal import Decimal
 from uuid import uuid4
 
 from ziras_discovery.adapters.structured_html import StructuredHtmlAdapter
@@ -84,7 +85,6 @@ def test_same_restaurant_with_geo_and_category_can_merge() -> None:
 
 
 def test_deterministic_next_weekday_date() -> None:
-    # 2026-08-31 is Monday; next Sunday is 2026-09-06.
     parsed = parse_discovery_date("next Sunday", observed_at=NOW)
     assert parsed == datetime(2026, 9, 6, 0, 0, tzinfo=UTC)
 
@@ -118,6 +118,6 @@ def test_structured_html_adapter_extracts_product_offer_without_ai() -> None:
     assert len(result.discoveries) == 1
     discovery = result.discoveries[0]
     assert discovery.title == "Noise Cancelling Headphones"
-    assert discovery.current_price == "149.99"
+    assert discovery.current_price == Decimal("149.99")
     assert discovery.currency == "EUR"
     assert discovery.expires_at == datetime(2026, 9, 10, 0, 0, tzinfo=UTC)
