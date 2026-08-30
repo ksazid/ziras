@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from datetime import timedelta
 
 from crawlee import ConcurrencySettings
 from crawlee.crawlers import ParselCrawler, PlaywrightCrawler
@@ -54,7 +55,7 @@ async def fetch_browser(source: dict) -> dict:
         respect_robots_txt_file=True,
         retry_on_blocked=False,
         concurrency_settings=ConcurrencySettings(max_concurrency=1, desired_concurrency=1),
-        request_handler_timeout=45,
+        request_handler_timeout=timedelta(seconds=45),
     )
 
     @crawler.router.default_handler
