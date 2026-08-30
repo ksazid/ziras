@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS source_policy (
 
 CREATE TABLE IF NOT EXISTS source_observation (
     id uuid PRIMARY KEY,
-    source_key text NOT NULL,
+    source_key text NOT NULL REFERENCES source_policy(source_key),
     source_url text NOT NULL,
     observed_at timestamptz NOT NULL,
     content_hash text NOT NULL,
@@ -32,7 +32,7 @@ CREATE INDEX IF NOT EXISTS idx_source_observation_hash
 
 -- Current state is updated only when the incoming observation is newer.
 CREATE TABLE IF NOT EXISTS source_state (
-    source_key text PRIMARY KEY,
+    source_key text PRIMARY KEY REFERENCES source_policy(source_key),
     observation_id uuid NOT NULL REFERENCES source_observation(id),
     last_observed_at timestamptz NOT NULL,
     updated_at timestamptz NOT NULL DEFAULT now()
@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS discovery (
     id uuid PRIMARY KEY,
     discovery_type text NOT NULL CHECK (discovery_type IN ('deal','opening','event','price_drop','new_product','new_menu','happy_hour','trending')),
     entity_id uuid REFERENCES canonical_entity(id),
-    source_key text NOT NULL,
+    source_key text NOT NULL REFERENCES source_policy(source_key),
     source_url text NOT NULL,
     title text NOT NULL,
     observed_at timestamptz NOT NULL,
