@@ -19,7 +19,7 @@ concurrency:
 jobs:
   http-baseline:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -28,6 +28,7 @@ jobs:
       - run: pip install -r research/oss-qualification/requirements-base.txt
       - run: python research/oss-qualification/run_http.py
       - run: python research/oss-qualification/run_core_ops.py
+      - run: python research/oss-qualification/run_photon.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -49,6 +50,24 @@ jobs:
         if: always()
         with:
           name: oss-scrapy-results
+          path: research/oss-qualification/results/*.json
+          if-no-files-found: warn
+
+  scrapy-playwright:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r research/oss-qualification/requirements-base.txt 'scrapy==2.18.0' 'scrapy-playwright==0.0.48'
+      - run: python -m playwright install --with-deps chromium
+      - run: python research/oss-qualification/run_scrapy_playwright.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: oss-scrapy-playwright-results
           path: research/oss-qualification/results/*.json
           if-no-files-found: warn
 
