@@ -1,20 +1,12 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from datetime import datetime
-from decimal import Decimal
 from typing import Any
-from urllib.parse import urlparse
 from uuid import uuid4
 
 from ..domain import Discovery, DiscoveryType, FreshnessState, SourceObservation
 from ..extraction import extract_structured_items, first_value, parse_discovery_date, parse_money
-
-
-@dataclass(frozen=True, slots=True)
-class StructuredHtmlResult:
-    observation: SourceObservation
-    discoveries: tuple[Discovery, ...]
+from ..ports import SourceAdapterResult
 
 
 class StructuredHtmlAdapter:
@@ -28,7 +20,7 @@ class StructuredHtmlAdapter:
         html: str,
         observed_at: datetime,
         content_hash: str,
-    ) -> StructuredHtmlResult:
+    ) -> SourceAdapterResult:
         items = extract_structured_items(html, base_url=source_url)
         observation = SourceObservation(
             id=uuid4(),
@@ -46,7 +38,7 @@ class StructuredHtmlAdapter:
             if discovery is not None:
                 discoveries.append(discovery)
 
-        return StructuredHtmlResult(observation=observation, discoveries=tuple(discoveries))
+        return SourceAdapterResult(observation=observation, discoveries=tuple(discoveries))
 
     def _to_discovery(
         self,
