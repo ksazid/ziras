@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
+from decimal import Decimal
 from typing import Any, Iterable
 
 import dateparser
@@ -20,12 +21,11 @@ def extract_structured_items(html: str, *, base_url: str) -> list[dict[str, Any]
     return [item for item in items if isinstance(item, dict)]
 
 
-def parse_money(value: object) -> tuple[str | None, str | None]:
+def parse_money(value: object) -> tuple[Decimal | None, str | None]:
     if value is None:
         return None, None
     parsed = Price.fromstring(str(value))
-    amount = str(parsed.amount) if parsed.amount is not None else None
-    return amount, parsed.currency
+    return parsed.amount, parsed.currency
 
 
 def parse_discovery_date(value: object, *, observed_at: datetime) -> datetime | None:
