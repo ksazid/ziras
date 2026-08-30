@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 2,
+  "sliceId": null,
+  "title": null,
+  "status": "inactive",
+  "lifecycle": "proposed",
+  "riskLevel": "low",
+  "implementationMode": "specification-only",
+  "requirements": [],
+  "owners": {
+    "product": null,
+    "engineering": null,
+    "operations": null,
+    "security": null
+  },
+  "dependencies": [],
+  "blockers": [],
+  "allowedPaths": [],
+  "protectedPaths": [".github/workflows/release.yml"],
+  "impact": {
+    "areas": [],
+    "notes": []
+  },
+  "approvals": [
+    {"type": "scope", "status": "pending", "version": null, "commitSha": null, "by": null, "at": null, "rationale": null},
+    {"type": "policy", "status": "pending", "version": null, "commitSha": null, "by": null, "at": null, "rationale": null},
+    {"type": "implementation", "status": "pending", "version": null, "commitSha": null, "by": null, "at": null, "rationale": null},
+    {"type": "certification", "status": "pending", "version": null, "commitSha": null, "by": null, "at": null, "rationale": null},
+    {"type": "release", "status": "pending", "version": null, "commitSha": null, "by": null, "at": null, "rationale": null},
+    {"type": "production-enable", "status": "pending", "version": null, "commitSha": null, "by": null, "at": null, "rationale": null}
+  ],
+  "decisionIds": [],
+  "progress": {
+    "discovery": 0,
+    "decisions": 0,
+    "implementation": 0,
+    "testing": 0,
+    "certification": 0,
+    "release": 0,
+    "validation": 0
+  },
+  "certification": {
+    "status": "not-started",
+    "commitSha": null,
+    "evidence": []
+  },
+  "release": {
+    "status": "not-authorized",
+    "releaseId": null
+  },
+  "rollback": {
+    "status": "not-applicable",
+    "rollbackId": null
+  },
+  "postRelease": {
+    "status": "not-started",
+    "reviewAt": null,
+    "expectedOutcome": null,
+    "metrics": []
+  },
+  "links": {
+    "specification": null,
+    "implementationPr": null,
+    "evidence": []
+  },
+  "maxAttempts": 3
+}

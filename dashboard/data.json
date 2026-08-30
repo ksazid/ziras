@@ -1,0 +1,39 @@
+{
+  "generatedAt": "2026-08-03T20:25:07.159Z",
+  "schemaVersion": 1,
+  "summary": {
+    "slices": 0,
+    "completed": 0,
+    "active": 0,
+    "blocked": 0,
+    "pendingDecisions": 0,
+    "pendingApprovals": 0,
+    "rolledBack": 0,
+    "progress": 0
+  },
+  "lifecycleCounts": {
+    "proposed": 0,
+    "discovery": 0,
+    "decision-pending": 0,
+    "approved": 0,
+    "ready-for-implementation": 0,
+    "implementing": 0,
+    "testing": 0,
+    "certification": 0,
+    "certified": 0,
+    "release-pending": 0,
+    "released": 0,
+    "observed": 0,
+    "validated": 0,
+    "blocked": 0,
+    "rejected": 0,
+    "deferred": 0,
+    "superseded": 0,
+    "rolled-back": 0
+  },
+  "slices": [],
+  "decisions": [],
+  "releases": [],
+  "rollbacks": [],
+  "notifications": []
+}

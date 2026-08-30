@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Read-only Product Engineering Starter delivery dashboard">
+  <title>PES Delivery Dashboard</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to dashboard</a>
+  <header class="site-header">
+    <div>
+      <p class="eyebrow">Product Engineering Starter</p>
+      <h1>Delivery dashboard</h1>
+      <p class="subtitle">A read-only view of slices, decisions, approvals, certification, releases and rollbacks.</p>
+    </div>
+    <div class="header-actions">
+      <button id="notification-button" class="notification-button" type="button" aria-controls="notifications" aria-expanded="false">
+        <span aria-hidden="true">🔔</span>
+        <span>Notifications</span>
+        <span id="notification-count" class="count-badge">0</span>
+      </button>
+      <p id="generated-at" class="generated-at">Loading…</p>
+    </div>
+  </header>
+
+  <main id="main" class="layout">
+    <section aria-labelledby="overview-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Portfolio</p>
+          <h2 id="overview-title">Development overview</h2>
+        </div>
+      </div>
+      <div id="summary-cards" class="summary-grid" aria-live="polite"></div>
+      <div class="panel progress-panel">
+        <div class="progress-heading">
+          <div>
+            <h3>Overall governed progress</h3>
+            <p>Average of discovery, decisions, implementation, testing, certification, release and validation gates.</p>
+          </div>
+          <strong id="overall-progress-value">0%</strong>
+        </div>
+        <div class="progress-track" role="progressbar" aria-label="Overall governed progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <span id="overall-progress-bar" style="width:0%"></span>
+        </div>
+      </div>
+    </section>
+
+    <section id="notifications" class="panel notification-panel" aria-labelledby="notifications-title" hidden>
+      <div class="section-heading compact">
+        <div>
+          <p class="eyebrow">Attention</p>
+          <h2 id="notifications-title">Notifications</h2>
+        </div>
+        <button id="close-notifications" class="text-button" type="button">Close</button>
+      </div>
+      <div id="notification-list" class="notification-list"></div>
+    </section>
+
+    <section aria-labelledby="slices-title">
+      <div class="section-heading responsive-heading">
+        <div>
+          <p class="eyebrow">Delivery</p>
+          <h2 id="slices-title">Slices</h2>
+        </div>
+        <div class="filters" aria-label="Slice filters">
+          <label>
+            <span>Search</span>
+            <input id="slice-search" type="search" placeholder="Slice ID or title">
+          </label>
+          <label>
+            <span>Lifecycle</span>
+            <select id="lifecycle-filter">
+              <option value="all">All lifecycle states</option>
+            </select>
+          </label>
+          <label>
+            <span>Risk</span>
+            <select id="risk-filter">
+              <option value="all">All risk levels</option>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <div id="slice-list" class="slice-list" aria-live="polite"></div>
+      <p id="empty-slices" class="empty-state" hidden>No slices match the selected filters.</p>
+    </section>
+
+    <div class="two-column">
+      <section class="panel" aria-labelledby="decisions-title">
+        <div class="section-heading compact">
+          <div>
+            <p class="eyebrow">Governance</p>
+            <h2 id="decisions-title">Decisions</h2>
+          </div>
+        </div>
+        <div id="decision-list" class="record-list"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="release-title">
+        <div class="section-heading compact">
+          <div>
+            <p class="eyebrow">Operations</p>
+            <h2 id="release-title">Releases and rollbacks</h2>
+          </div>
+        </div>
+        <div id="release-list" class="record-list"></div>
+      </section>
+    </div>
+  </main>
+
+  <template id="summary-card-template">
+    <article class="summary-card">
+      <span class="summary-label"></span>
+      <strong class="summary-value"></strong>
+      <span class="summary-detail"></span>
+    </article>
+  </template>
+
+  <template id="slice-template">
+    <article class="slice-card">
+      <header class="slice-card-header">
+        <div>
+          <div class="slice-title-row">
+            <span class="slice-id"></span>
+            <span class="status-badge"></span>
+            <span class="risk-badge"></span>
+          </div>
+          <h3 class="slice-title"></h3>
+        </div>
+        <strong class="slice-progress-value"></strong>
+      </header>
+      <div class="lifecycle-rail" aria-label="Slice lifecycle"></div>
+      <div class="slice-progress-grid"></div>
+      <div class="slice-meta"></div>
+      <div class="slice-alerts"></div>
+      <footer class="slice-links"></footer>
+    </article>
+  </template>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

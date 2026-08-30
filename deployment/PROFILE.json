@@ -1,0 +1,52 @@
+{
+  "stage": "pilot",
+  "commercialUse": false,
+  "deploymentMode": "advisor-recommended",
+  "approvedSelection": false,
+  "singleProvider": null,
+  "splitProviders": {
+    "mobile": "eas",
+    "api": null,
+    "database": null
+  },
+  "frontend": "expo-react-native",
+  "backend": "aspnet-container",
+  "database": "postgresql",
+  "databaseRequirements": {
+    "connectionPooling": true,
+    "sameProviderPreferred": false,
+    "dataResidencyRequired": false,
+    "backupsRequired": true,
+    "pointInTimeRecoveryRequired": false
+  },
+  "traffic": "low",
+  "bandwidth": "low",
+  "coldStartsAccepted": true,
+  "previewDeploymentsRequired": true,
+  "edgeExecutionRequired": false,
+  "backgroundJobsRequired": false,
+  "regionRequirements": [],
+  "monthlyBudgetUsd": 0,
+  "releasePolicy": {
+    "sameCertifiedSha": true,
+    "apiFirst": true,
+    "requireApiHealthCheck": true,
+    "requireEndToEndSmokeTest": true,
+    "requireRollbackPlan": true,
+    "requireMobileBuild": true,
+    "requireStoreMetadataReview": true,
+    "requireRuntimeVersionCompatibility": true
+  },
+  "notes": "Mobile product deployment uses EAS Build/Submit for Android and iOS. API and database remain independently selectable. Human approval and exact-SHA certification are required before store submission or production update.",
+  "platform": "mobile",
+  "mobile": {
+    "buildProvider": "eas",
+    "targets": [
+      "android",
+      "ios"
+    ],
+    "previewDistribution": "internal",
+    "storeSubmissionRequired": true,
+    "overTheAirUpdates": true
+  }
+}

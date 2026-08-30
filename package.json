@@ -1,0 +1,49 @@
+{
+  "name": "product-engineering-starter-mobile",
+  "version": "0.3.0",
+  "private": false,
+  "description": "Governed open-source starter for building secure mobile products from an approved PRD and TRD.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "product:intake": "node scripts/intake.mjs",
+    "planning:generate": "node scripts/planning.mjs",
+    "planning:validate": "node scripts/validate-json.mjs",
+    "governance:validate": "node scripts/governance.mjs",
+    "slice:activate": "node scripts/slice.mjs activate",
+    "slice:transition": "node scripts/slice.mjs transition",
+    "slice:status": "node scripts/slice.mjs status",
+    "slice:validate": "node scripts/slice.mjs validate",
+    "delivery:status": "node scripts/status.mjs",
+    "dashboard:build": "node scripts/dashboard.mjs",
+    "dashboard:check": "node scripts/dashboard.mjs --check",
+    "dashboard:serve": "node scripts/dashboard-server.mjs",
+    "delivery-graph:check": "node scripts/delivery-graph.mjs",
+    "deployment:advise": "node scripts/deployment-advisor.mjs",
+    "security:classify": "node scripts/security-classify.mjs",
+    "knowledge:export": "node scripts/knowledge-export.mjs",
+    "optimize:context": "node scripts/optimize-context.mjs",
+    "memory:doctor": "node scripts/memory-doctor.mjs",
+    "preflight": "npm run planning:validate && npm run governance:validate && npm run dashboard:check && npm run platform:validate && npm run mobile:validate && node --check scripts/*.mjs && node --check dashboard/app.js",
+    "certify": "npm run preflight",
+    "engineering:advise": "node scripts/advisor.mjs",
+    "profile:show": "node scripts/show-profile.mjs",
+    "platform:validate": "node scripts/platform.mjs && node tests/platform/mobile-platform.test.mjs",
+    "mobile:start": "npm run start --workspace @pes/mobile",
+    "mobile:android": "npm run android --workspace @pes/mobile",
+    "mobile:ios": "npm run ios --workspace @pes/mobile",
+    "mobile:typecheck": "npm run typecheck --workspace @pes/mobile",
+    "mobile:lint": "npm run lint --workspace @pes/mobile",
+    "mobile:test": "node --test tests/mobile/*.test.mjs",
+    "mobile:doctor": "npm run doctor --workspace @pes/mobile",
+    "mobile:validate": "npm run mobile:dependencies && npm run mobile:typecheck && npm run mobile:lint && npm run mobile:test",
+    "mobile:dependencies": "node scripts/mobile-dependencies.mjs",
+    "preflight:structure": "npm run planning:validate && npm run governance:validate && npm run dashboard:check && npm run platform:validate && npm run mobile:test && node --check scripts/*.mjs && node --check dashboard/app.js"
+  },
+  "workspaces": [
+    "apps/mobile"
+  ]
+}

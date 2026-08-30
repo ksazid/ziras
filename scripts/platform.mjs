@@ -1,0 +1,12 @@
+import fs from 'node:fs';
+import {json,fail} from './lib.mjs';
+const profile=json('.engineering/PLATFORM.json');
+if(profile.schemaVersion!==1) fail('PLATFORM schemaVersion must be 1');
+if(profile.platform!=='mobile') fail('This repository requires platform=mobile');
+for(const file of ['apps/mobile/package.json','apps/mobile/app.json','apps/mobile/eas.json','apps/mobile/app/_layout.tsx']) if(!fs.existsSync(file)) fail(`Missing mobile platform file: ${file}`);
+if(fs.existsSync('apps/web')) fail('apps/web must not exist in the mobile-only starter');
+const pkg=json('apps/mobile/package.json');
+for(const dep of ['expo','react-native','expo-router','expo-secure-store','expo-notifications','expo-updates']) if(!pkg.dependencies?.[dep]) fail(`Missing required mobile dependency: ${dep}`);
+const app=json('apps/mobile/app.json').expo;
+if(!app?.ios?.bundleIdentifier || !app?.android?.package) fail('Mobile app identifiers are required');
+console.log(`Platform validation passed (${profile.platform}, Expo SDK ${profile.mobile.sdk})`);
