@@ -19,7 +19,7 @@ concurrency:
 jobs:
   http-baseline:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -27,16 +27,17 @@ jobs:
           python-version: '3.12'
       - run: pip install -r research/oss-qualification/requirements-base.txt
       - run: python research/oss-qualification/run_http.py
+      - run: python research/oss-qualification/run_core_ops.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: oss-http-results
+          name: oss-http-core-results
           path: research/oss-qualification/results/*.json
           if-no-files-found: warn
 
   scrapy:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -53,7 +54,7 @@ jobs:
 
   crawlee:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -71,7 +72,7 @@ jobs:
 
   crawl4ai:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -101,5 +102,91 @@ jobs:
         if: always()
         with:
           name: oss-scrapling-results
+          path: research/oss-qualification/results/*.json
+          if-no-files-found: warn
+
+  postgis:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgis/postgis:16-3.5
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ziras
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ziras
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r research/oss-qualification/requirements-base.txt 'psycopg[binary]==3.3.4'
+      - run: python research/oss-qualification/run_postgis.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: oss-postgis-results
+          path: research/oss-qualification/results/*.json
+          if-no-files-found: warn
+
+  pgvector:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ziras
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ziras
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r research/oss-qualification/requirements-base.txt 'psycopg[binary]==3.3.4'
+      - run: python research/oss-qualification/run_pgvector.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: oss-pgvector-results
+          path: research/oss-qualification/results/*.json
+          if-no-files-found: warn
+
+  implicit-recommender:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r research/oss-qualification/requirements-base.txt 'implicit==0.7.3'
+      - run: python research/oss-qualification/run_implicit.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: oss-implicit-results
           path: research/oss-qualification/results/*.json
           if-no-files-found: warn
