@@ -190,6 +190,39 @@ jobs:
           path: research/oss-qualification/results/*.json
           if-no-files-found: warn
 
+  postgres-huey:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ziras
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ziras
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r research/oss-qualification/requirements-base.txt 'huey[postgres]==3.3.4'
+      - run: python research/oss-qualification/run_huey.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: oss-huey-postgres-results
+          path: research/oss-qualification/results/*.json
+          if-no-files-found: warn
+
   implicit-recommender:
     runs-on: ubuntu-latest
     timeout-minutes: 10
