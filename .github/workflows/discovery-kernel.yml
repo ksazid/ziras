@@ -6,6 +6,7 @@ on:
       - feat/vs02-discovery-kernel-impl
     paths:
       - 'services/discovery/**'
+      - '.engineering/**'
       - 'docs/slices/VS-02.md'
       - 'product/TRD.md'
       - 'delivery/current-slice.json'
@@ -14,6 +15,7 @@ on:
   pull_request:
     paths:
       - 'services/discovery/**'
+      - '.engineering/**'
       - 'docs/slices/VS-02.md'
       - 'product/TRD.md'
       - 'delivery/current-slice.json'
