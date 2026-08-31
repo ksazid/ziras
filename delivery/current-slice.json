@@ -118,9 +118,7 @@
       "rationale": null
     }
   ],
-  "decisionIds": [
-    "DEC-01"
-  ],
+  "decisionIds": ["DEC-01"],
   "progress": {
     "discovery": 100,
     "decisions": 100,
@@ -135,9 +133,11 @@
     "commitSha": "ac3a166bbaf511335fe2a205d940f98c84919dc0",
     "evidence": [
       "https://github.com/ksazid/ziras/actions/runs/33347061940",
+      "https://github.com/ksazid/ziras/actions/runs/33365625606",
       "source-pack: kernel, Meta regressions, source-policy scope/path tests and deterministic promotion/event fixture tests passed",
       "database: PostgreSQL 16/PostGIS/pgvector + source-policy migration passed",
-      "pes-preflight: full repository governance/platform/mobile/script validation passed"
+      "pes-preflight: full repository governance/platform/mobile/script validation passed",
+      "post-certification governance head 89ed0a3882be123e6602d2b1c1c0f5a9965d6886 passed kernel/database and PES validation"
     ]
   },
   "release": {
@@ -170,6 +170,7 @@
       "research/oss-qualification/sources.json",
       "docs/integrations/MALTA-SOURCE-PACK.md",
       "https://github.com/ksazid/ziras/actions/runs/33347061940",
+      "https://github.com/ksazid/ziras/actions/runs/33365625606",
       "certified-sha:ac3a166bbaf511335fe2a205d940f98c84919dc0"
     ]
   },
