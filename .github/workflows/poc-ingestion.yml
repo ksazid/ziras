@@ -24,8 +24,6 @@ permissions:
 
 jobs:
   ingest:
-    # GitHub cron has no year field. Prevent any future September recurrence from acquiring data.
-    if: github.event_name != 'schedule' || (github.run_id && github.event.repository.updated_at != '')
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
