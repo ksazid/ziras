@@ -55,6 +55,10 @@ def default_malta_catalog_path() -> Path:
     return Path(__file__).resolve().parents[2] / "config" / "malta-source-policy.json"
 
 
+def default_malta_poc_extension_path() -> Path:
+    return Path(__file__).resolve().parents[2] / "config" / "malta-source-vs06-poc.json"
+
+
 def default_malta_hardening_path() -> Path:
     return Path(__file__).resolve().parents[2] / "config" / "malta-source-hardening.json"
 
@@ -62,12 +66,26 @@ def default_malta_hardening_path() -> Path:
 def load_source_catalog(
     path: str | Path | None = None,
     *,
+    extension_path: str | Path | None = None,
     hardening_path: str | Path | None = None,
 ) -> tuple[SourceCatalogEntry, ...]:
     catalog_path = Path(path) if path is not None else default_malta_catalog_path()
     payload = _read_json(catalog_path)
     if not isinstance(payload, list):
         raise ValueError("source catalog must be a JSON array")
+
+    resolved_extension: Path | None = None
+    if path is None or extension_path is not None:
+        resolved_extension = (
+            Path(extension_path)
+            if extension_path is not None
+            else default_malta_poc_extension_path()
+        )
+    if resolved_extension is not None and resolved_extension.exists():
+        extension = _read_json(resolved_extension)
+        if not isinstance(extension, list):
+            raise ValueError("source catalog extension must be a JSON array")
+        payload = [*payload, *extension]
 
     overrides: Mapping[str, object] = {}
     resolved_hardening: Path | None = None
