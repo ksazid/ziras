@@ -68,6 +68,7 @@ class ScrapyPlaywrightAcquirer:
         try:
             import scrapy
             from scrapy.crawler import CrawlerProcess
+            from scrapy_playwright.page import PageMethod
         except ImportError as exc:  # pragma: no cover - exercised only without optional deps
             raise RuntimeError(
                 "POC acquisition dependencies are missing; install ziras-discovery[acquisition]."
@@ -124,6 +125,9 @@ class ScrapyPlaywrightAcquirer:
                     }
                     if request.fetch_mode is FetchMode.BROWSER:
                         meta["playwright"] = True
+                        meta["playwright_page_methods"] = [
+                            PageMethod("wait_for_timeout", 2000),
+                        ]
                     yield scrapy.Request(
                         request.url,
                         headers={"Accept": "text/html,application/xhtml+xml"},

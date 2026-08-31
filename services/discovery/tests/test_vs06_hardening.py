@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from decimal import Decimal
 from uuid import UUID
 
 from ziras_discovery.acquisition import AcquiredPage, AcquisitionOutcome, AcquisitionRequest
+from ziras_discovery.adapters.public_web import PublicWebSignalAdapter, TextSignalConfig
 from ziras_discovery.domain import SourceAccessMode, SourcePolicy, SourcePolicyScope
 from ziras_discovery.persistence import PersistenceDelta, SourceRunResult
 from ziras_discovery.pipeline import PocIngestionPipeline
@@ -219,3 +221,83 @@ def test_browser_source_with_rendered_event_passes_health_check() -> None:
     assert summary.metrics["browser_request_count"] == 1
     assert len(summary.ranked) == 1
     assert summary.ranked[0].discovery_type.value == "event"
+
+
+def test_visitmalta_numeric_date_range_uses_following_event_title() -> None:
+    adapter = PublicWebSignalAdapter(TextSignalConfig(event_mode=True))
+    result = adapter.extract(
+        source_key="visitmalta_events",
+        source_url="https://www.visitmalta.com/en/events-in-malta-and-gozo/",
+        html="""
+        <html><body>
+          <div>03/09/2026 - 06/09/2026</div>
+          <h3>Breaking Borders</h3>
+          <p>World's Biggest Desi destination festival</p>
+        </body></html>
+        """,
+        observed_at=NOW,
+    )
+
+    assert len(result.discoveries) == 1
+    assert result.discoveries[0].title == "Breaking Borders"
+    assert result.discoveries[0].starts_at == datetime(2026, 9, 3, tzinfo=timezone.utc)
+    assert result.discoveries[0].expires_at == datetime(2026, 9, 6, 23, 59, 59, tzinfo=timezone.utc)
+
+
+def test_sale_listing_accepts_current_price_before_original_price() -> None:
+    adapter = PublicWebSignalAdapter(TextSignalConfig(event_mode=False))
+    result = adapter.extract(
+        source_key="eurosport_malta_sale",
+        source_url="https://www.eurosport.com.mt/sale",
+        html="""
+        <html><body>
+          <h3>Treadmove Running Shoes</h3>
+          <div>€25.00 €50.00</div>
+        </body></html>
+        """,
+        observed_at=NOW,
+    )
+
+    assert len(result.discoveries) == 1
+    assert result.discoveries[0].title == "Treadmove Running Shoes"
+    assert result.discoveries[0].current_price == Decimal("25.00")
+    assert result.discoveries[0].original_price == Decimal("50.00")
+
+
+def test_special_offers_can_emit_qualitative_offer_titles_without_fake_prices() -> None:
+    adapter = PublicWebSignalAdapter(TextSignalConfig(event_mode=False))
+    result = adapter.extract(
+        source_key="eden_cinemas",
+        source_url="https://www.edencinemas.com.mt/special-offers",
+        html="""
+        <html><body>
+          <h1>SPECIAL OFFERS</h1>
+          <h2>FAMILY DEAL</h2>
+          <p>Family cinema package.</p>
+          <h2>YOUTH OFFER</h2>
+          <p>Weekday offer for younger moviegoers.</p>
+        </body></html>
+        """,
+        observed_at=NOW,
+    )
+
+    assert {item.title for item in result.discoveries} == {"FAMILY DEAL", "YOUTH OFFER"}
+    assert all(item.current_price is None for item in result.discoveries)
+
+
+def test_whats_on_listing_can_emit_current_ticketed_titles_without_dates() -> None:
+    adapter = PublicWebSignalAdapter(TextSignalConfig(event_mode=True))
+    result = adapter.extract(
+        source_key="eden_cinemas",
+        source_url="https://www.edencinemas.com.mt/whats-on",
+        html="""
+        <html><body>
+          <h1>WHAT’S ON</h1>
+          <div><a href='/movie/moana'>Moana</a> <a href='/movie/moana'>Buy Tickets</a></div>
+          <div><a href='/movie/odyssey'>The Odyssey</a> <a href='/movie/odyssey'>Buy Tickets</a></div>
+        </body></html>
+        """,
+        observed_at=NOW,
+    )
+
+    assert {item.title for item in result.discoveries} == {"Moana", "The Odyssey"}
