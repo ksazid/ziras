@@ -141,6 +141,16 @@ def test_search_uses_official_api_filters_and_does_not_put_token_in_url() -> Non
     assert "secret-token" not in str(observation.extracted)
 
 
+def test_meta_api_error_is_propagated_explicitly() -> None:
+    def transport(url: str, headers: dict[str, str], timeout: float) -> dict[str, object]:
+        assert "secret-token" not in url
+        return {"error": {"message": "temporary upstream failure", "code": 1}}
+
+    client = MetaAdLibraryClient(_ready_config(), transport=transport)
+    with pytest.raises(MetaAdLibraryError, match="temporary upstream failure"):
+        client.search(search_terms="offer")
+
+
 def test_source_policy_cannot_be_created_without_explicit_policy_approval() -> None:
     config = _ready_config(source_policy_approved=False)
     with pytest.raises(MetaAdLibraryError):
