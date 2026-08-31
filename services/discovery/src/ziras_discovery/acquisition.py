@@ -116,7 +116,7 @@ class ScrapyPlaywrightAcquirer:
         class PocSpider(scrapy.Spider):
             name = "ziras_poc_ingestion"
 
-            def start_requests(self):
+            def _initial_requests(self):
                 for token, request in requested_by_token.items():
                     meta = {
                         "ziras_token": token,
@@ -132,6 +132,19 @@ class ScrapyPlaywrightAcquirer:
                         errback=self.parse_error,
                         dont_filter=True,
                     )
+
+            async def start(self):
+                """Yield initial requests through the Scrapy 2.13+ start API.
+
+                Scrapy 2.18 removed Spider.start_requests() from the execution lifecycle, so
+                overriding only start_requests() causes a crawl to finish without scheduling any
+                requests. Keep start_requests() below solely for compatibility with older Scrapy.
+                """
+                for request in self._initial_requests():
+                    yield request
+
+            def start_requests(self):  # pragma: no cover - compatibility for Scrapy <2.13
+                yield from self._initial_requests()
 
             def parse_page(self, response):
                 token = response.meta["ziras_token"]
