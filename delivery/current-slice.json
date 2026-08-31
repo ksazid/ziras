@@ -1,38 +1,118 @@
 {
   "schemaVersion": 2,
-  "sliceId": null,
-  "title": null,
-  "status": "inactive",
-  "lifecycle": "proposed",
-  "riskLevel": "low",
+  "sliceId": "VS-01",
+  "title": "Ziras launch and two-screen onboarding foundation",
+  "status": "active",
+  "lifecycle": "approved",
+  "riskLevel": "medium",
   "implementationMode": "specification-only",
-  "requirements": [],
+  "requirements": [
+    "REQ-BRD-001",
+    "REQ-BRD-002",
+    "REQ-BRD-003",
+    "REQ-BRD-004",
+    "REQ-ONB-001",
+    "REQ-ONB-002",
+    "REQ-ONB-003",
+    "REQ-ONB-004",
+    "REQ-ONB-005",
+    "REQ-ONB-006"
+  ],
   "owners": {
-    "product": null,
-    "engineering": null,
+    "product": "ksazid",
+    "engineering": "ksazid",
     "operations": null,
     "security": null
   },
-  "dependencies": [],
-  "blockers": [],
-  "allowedPaths": [],
-  "protectedPaths": [".github/workflows/release.yml"],
+  "dependencies": [
+    "product/PRD.md product scope baseline v0.1",
+    "product/DESIGN.md design baseline v0.1",
+    "existing apps/mobile Expo template"
+  ],
+  "blockers": [
+    "Explicit implementation approval is still required before runtime code changes."
+  ],
+  "allowedPaths": [
+    "product/PRD.md",
+    "product/TRD.md",
+    "product/DESIGN.md",
+    "delivery/current-slice.json"
+  ],
+  "protectedPaths": [
+    ".github/workflows/release.yml"
+  ],
   "impact": {
-    "areas": [],
-    "notes": []
+    "areas": [
+      "customer-flow",
+      "legal-privacy",
+      "sensitive-data"
+    ],
+    "notes": [
+      "Location permission must have a manual-location fallback.",
+      "Initial onboarding is limited to two required screens.",
+      "Reduced-motion accessibility applies to splash/tagline transitions."
+    ]
   },
   "approvals": [
-    {"type": "scope", "status": "pending", "version": null, "commitSha": null, "by": null, "at": null, "rationale": null},
-    {"type": "policy", "status": "pending", "version": null, "commitSha": null, "by": null, "at": null, "rationale": null},
-    {"type": "implementation", "status": "pending", "version": null, "commitSha": null, "by": null, "at": null, "rationale": null},
-    {"type": "certification", "status": "pending", "version": null, "commitSha": null, "by": null, "at": null, "rationale": null},
-    {"type": "release", "status": "pending", "version": null, "commitSha": null, "by": null, "at": null, "rationale": null},
-    {"type": "production-enable", "status": "pending", "version": null, "commitSha": null, "by": null, "at": null, "rationale": null}
+    {
+      "type": "scope",
+      "status": "approved",
+      "version": "PRD/DESIGN v0.1",
+      "commitSha": null,
+      "by": "ksazid",
+      "at": "2026-08-31T00:46:15+02:00",
+      "rationale": "Product owner explicitly approved the Ziras product direction, animated-logo/tagline launch sequence and simplified two-screen onboarding."
+    },
+    {
+      "type": "policy",
+      "status": "not-required",
+      "version": "VS-01",
+      "commitSha": null,
+      "by": "ksazid",
+      "at": "2026-08-31T00:46:15+02:00",
+      "rationale": "VS-01 does not introduce merchant, payment, source-scraping or production data-access policy."
+    },
+    {
+      "type": "implementation",
+      "status": "pending",
+      "version": "VS-01",
+      "commitSha": null,
+      "by": null,
+      "at": null,
+      "rationale": null
+    },
+    {
+      "type": "certification",
+      "status": "pending",
+      "version": null,
+      "commitSha": null,
+      "by": null,
+      "at": null,
+      "rationale": null
+    },
+    {
+      "type": "release",
+      "status": "pending",
+      "version": null,
+      "commitSha": null,
+      "by": null,
+      "at": null,
+      "rationale": null
+    },
+    {
+      "type": "production-enable",
+      "status": "pending",
+      "version": null,
+      "commitSha": null,
+      "by": null,
+      "at": null,
+      "rationale": null
+    }
   ],
   "decisionIds": [],
   "progress": {
-    "discovery": 0,
-    "decisions": 0,
+    "discovery": 100,
+    "decisions": 100,
     "implementation": 0,
     "testing": 0,
     "certification": 0,
@@ -55,11 +135,15 @@
   "postRelease": {
     "status": "not-started",
     "reviewAt": null,
-    "expectedOutcome": null,
-    "metrics": []
+    "expectedOutcome": "A first-time user reaches a useful Ziras feed after a short brand transition and no more than two required onboarding screens.",
+    "metrics": [
+      "onboarding completion rate",
+      "time to first feed",
+      "location-permission fallback success"
+    ]
   },
   "links": {
-    "specification": null,
+    "specification": "product/PRD.md#brand-and-launch",
     "implementationPr": null,
     "evidence": []
   },
