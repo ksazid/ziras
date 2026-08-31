@@ -87,9 +87,50 @@ All external acquisition, geocoding and source-family dependencies must remain b
 
 VS-02 includes only a generic structured-HTML normalization adapter and fixture-based tests. It does **not** enable vendor-specific production crawling.
 
+### Meta Ad Library
+
+VS-03 adds a Meta Ad Library source adapter for public Facebook/Instagram advertising evidence using the official Meta API only.
+
+Architecture rules:
+
+- source key: `meta_ad_library`;
+- endpoint family: Meta Graph API `/ads_archive`;
+- Malta-first reached-country default: `MT`;
+- publisher platforms default to `FACEBOOK` + `INSTAGRAM`;
+- ad type defaults to `ALL` and active status to `ACTIVE`;
+- results enter Ziras as `SourceObservation` evidence, not as automatically trusted `Discovery` objects;
+- no Facebook/Instagram HTML scraping is permitted by this integration;
+- production collection remains disabled until SourcePolicy and runtime credentials are explicitly approved/configured.
+
+The adapter tracks these enablement dependencies and fails closed when any are missing:
+
+- Meta/Facebook identity-location onboarding complete;
+- Meta for Developers account ready;
+- Meta Platform Policy accepted;
+- Meta app ID configured;
+- Ad Library API access confirmed;
+- access token available only from secret storage;
+- supported Graph API version explicitly pinned;
+- `meta_ad_library` SourcePolicy approved;
+- reached-country list configured;
+- publisher-platform list configured;
+- feature enable flag set.
+
+Security rules for the Meta adapter:
+
+- real access tokens must never be committed;
+- access tokens are sent using the Authorization header rather than persisted request URLs;
+- any `access_token` query parameter returned inside an ad snapshot URL is removed before storing evidence;
+- raw Meta `paging.next` URLs are not persisted; only the pagination cursor is retained;
+- API errors are explicit failures and must not silently produce empty/verified discovery state.
+
+Operational setup is documented in `docs/integrations/META-AD-LIBRARY.md` and environment names are listed in `services/discovery/config/meta-ad-library.env.example`.
+
 ## Deployment
 
 To be completed. Photon production deployment/provider choice remains open and must not rely on the public demo endpoint for production workload.
+
+Meta Ad Library deployment must use deployment secret storage for the access token and must not enable `META_AD_LIBRARY_ENABLED` until the configuration readiness state is `ready` and the source-policy gate is approved.
 
 ## Observability
 
@@ -101,7 +142,10 @@ Before production acquisition is enabled, Ziras must expose at minimum:
 - latest accepted observation time and stale-observation rejection count;
 - freshness decisions and explicit-expiry rejection count;
 - entity-resolution merge/review outcomes;
-- queue failures/retries and task age.
+- queue failures/retries and task age;
+- Meta Ad Library readiness state and missing dependency names;
+- Meta API success/error/rate-limit outcomes without recording secrets;
+- Meta record counts by publisher platform and reached-country query.
 
 ## Security
 
@@ -111,6 +155,7 @@ Before production acquisition is enabled, Ziras must expose at minimum:
 - No stealth, proxy rotation, CAPTCHA bypass or anti-bot bypass is approved.
 - Raw evidence/provenance must be retained for any AI-assisted normalization.
 - URLs and fetched content must be treated as untrusted input; SSRF/network-boundary controls are required before live acquisition is enabled.
+- Meta access tokens and other provider credentials must be held only in deployment secret storage and redacted from URLs, evidence, logs and metrics.
 
 ## Performance and reliability
 
@@ -119,6 +164,7 @@ Before production acquisition is enabled, Ziras must expose at minimum:
 - Explicit expiry always overrides relevance/value ranking.
 - PostgresHuey throughput and browser-rendering cost must be measured before scale assumptions are accepted.
 - pgvector is sufficient for MVP semantic retrieval; a separate vector database requires a new architecture decision.
+- Meta pagination uses cursors and must be retry/idempotency safe before scheduled production collection is enabled.
 
 ## Testing strategy
 
@@ -137,6 +183,18 @@ VS-02 adds deterministic tests for:
 - real PostgreSQL migration execution with PostGIS + pgvector;
 - atomic monotonic `source_state` promotion.
 
+VS-03 adds deterministic tests for:
+
+- Meta capability disabled by default;
+- complete missing-dependency reporting;
+- Malta `MT` + Facebook/Instagram configuration;
+- official `/ads_archive` query parameter construction;
+- access token absence from request URLs and persisted observations;
+- snapshot URL credential stripping;
+- cursor-only pagination persistence;
+- SourcePolicy approval requirement before creating an allow policy;
+- Meta API error propagation without live credentials.
+
 ## Operational constraints
 
 - Browser rendering is fallback-only.
@@ -145,6 +203,8 @@ VS-02 adds deterministic tests for:
 - AI normalization must retain original evidence and confidence/provenance.
 - Production source permissions are separate from technical fetch capability.
 - No vendor-specific production crawling is enabled by VS-02.
+- Meta Ad Library collection is disabled by default and is not production-enabled by VS-03.
+- Facebook/Instagram scraping is not an approved fallback for Meta API failure.
 
 ## Open decisions
 
@@ -153,3 +213,5 @@ VS-02 adds deterministic tests for:
 - Observation/evidence retention periods and deletion/privacy policy.
 - Authentication/authorization model for user-facing product services.
 - Embedding model and fixed pgvector dimension before ANN indexing is introduced.
+- Production Meta app/account ownership and token-rotation process.
+- Production Meta collection cadence and query strategy after API access is configured.
