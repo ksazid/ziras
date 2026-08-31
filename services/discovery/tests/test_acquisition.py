@@ -137,6 +137,17 @@ def test_promotion_adapter_keeps_named_offer_without_numeric_discount() -> None:
     assert any(item.title == "FAMILY DEAL" for item in result.discoveries)
 
 
+def test_promotion_adapter_rejects_policy_heading_false_positive() -> None:
+    result = PublicWebSignalAdapter(TextSignalConfig(event_mode=False)).extract(
+        source_key="sports-sale",
+        source_url="https://example.com/sale",
+        html="<html><body><h2>Online Offers Terms & Conditions</h2></body></html>",
+        observed_at=NOW,
+    )
+
+    assert result.discoveries == ()
+
+
 def test_event_adapter_recovers_undated_buy_ticket_listing() -> None:
     result = PublicWebSignalAdapter(TextSignalConfig(event_mode=True)).extract(
         source_key="cinema-events",
@@ -153,3 +164,39 @@ def test_event_adapter_recovers_undated_buy_ticket_listing() -> None:
     discovery = next(item for item in result.discoveries if item.title == "Moana")
     assert discovery.discovery_type.value == "event"
     assert discovery.source_url == "https://example.com/movie/moana"
+
+
+def test_event_adapter_recovers_ticket_text_when_links_are_not_grouped() -> None:
+    result = PublicWebSignalAdapter(TextSignalConfig(event_mode=True)).extract(
+        source_key="cinema-events",
+        source_url="https://example.com/whats-on",
+        html="""
+        <html><body>
+          <h3>Moana</h3>
+          <button>Buy Tickets</button>
+        </body></html>
+        """,
+        observed_at=NOW,
+    )
+
+    assert any(item.title == "Moana" for item in result.discoveries)
+
+
+def test_event_adapter_keeps_event_detail_link_but_rejects_language_listing_link() -> None:
+    result = PublicWebSignalAdapter(TextSignalConfig(event_mode=True)).extract(
+        source_key="visitmalta-events",
+        source_url="https://www.visitmalta.com/en/events-in-malta-and-gozo/",
+        html="""
+        <html><body>
+          <a href="/en/events-in-malta-and-gozo/event/malta-pride-march">Malta Pride March</a>
+          <a href="/de/events-in-malta-and-gozo/">Deutsch</a>
+          <a href="#jupiterx-main">Skip to content</a>
+        </body></html>
+        """,
+        observed_at=NOW,
+    )
+
+    titles = {item.title for item in result.discoveries}
+    assert "Malta Pride March" in titles
+    assert "Deutsch" not in titles
+    assert "Skip to content" not in titles
