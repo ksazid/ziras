@@ -4,8 +4,10 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from hashlib import sha256
+from html.parser import HTMLParser
 import re
 from typing import Iterable
+from urllib.parse import urljoin, urlsplit
 from uuid import uuid4
 
 import trafilatura
@@ -28,6 +30,29 @@ _EVENT_DATE_RE = re.compile(
     r"(?:\s+\d{1,2})?(?:,?\s+\d{4})?\b",
     re.IGNORECASE,
 )
+_PROMOTION_WORDS = ("offer", "deal", "discount", "loyalty", "combo", "saving", "sale")
+_GENERIC_PROMOTION_TITLES = {
+    "offer",
+    "offers",
+    "special offer",
+    "special offers",
+    "deal",
+    "deals",
+    "sale",
+}
+_GENERIC_EVENT_TITLES = {
+    "event",
+    "events",
+    "what's on",
+    "what’s on",
+    "coming soon",
+    "buy tickets",
+    "tickets",
+    "more info",
+    "view all events",
+    "view all",
+}
+_ACTION_NOISE = ("add to cart", "add to wishlist", "add to compare", "sort by", "display", "search")
 
 
 @dataclass(frozen=True, slots=True)
@@ -72,12 +97,21 @@ class PublicWebSignalAdapter:
             include_images=False,
             favor_precision=True,
         ) or ""
-        lines = tuple(_clean_lines(text.splitlines()))
-        discoveries = (
-            self._event_discoveries(lines, source_key, source_url, observed_at)
-            if self.config.event_mode
-            else self._promotion_discoveries(lines, source_key, source_url, observed_at)
-        )
+        precision_lines = tuple(_clean_lines(text.splitlines()))
+        raw_lines = tuple(_clean_lines(_raw_text_nodes(html)))
+
+        if self.config.event_mode:
+            discoveries = _merge_discoveries(
+                self._event_discoveries(precision_lines, source_key, source_url, observed_at),
+                self._event_discoveries(raw_lines, source_key, source_url, observed_at),
+                self._event_link_discoveries(html, source_key, source_url, observed_at),
+            )
+        else:
+            discoveries = _merge_discoveries(
+                self._promotion_discoveries(precision_lines, source_key, source_url, observed_at),
+                self._promotion_discoveries(raw_lines, source_key, source_url, observed_at),
+                self._promotion_heading_discoveries(raw_lines, source_key, source_url, observed_at),
+            )
 
         observation = SourceObservation(
             id=uuid4(),
@@ -86,7 +120,8 @@ class PublicWebSignalAdapter:
             observed_at=observed_at,
             content_hash=digest,
             extracted={
-                "text_line_count": len(lines),
+                "text_line_count": len(precision_lines),
+                "raw_text_line_count": len(raw_lines),
                 "candidate_count": len(discoveries),
                 "mode": "event" if self.config.event_mode else "promotion",
             },
@@ -124,8 +159,11 @@ class PublicWebSignalAdapter:
 
             original: Decimal | None = None
             current: Decimal | None = None
-            if len(amounts) >= 2 and amounts[-1] < amounts[0]:
-                original, current = amounts[0], amounts[-1]
+            if len(amounts) >= 2 and amounts[0] != amounts[-1]:
+                if "weekday" in line.casefold() or "weekend" in line.casefold():
+                    continue
+                current = min(amounts[0], amounts[-1])
+                original = max(amounts[0], amounts[-1])
             elif len(amounts) == 1 and percent:
                 current = amounts[0]
             elif not percent:
@@ -148,6 +186,38 @@ class PublicWebSignalAdapter:
                     original_price=original,
                     current_price=current,
                     currency="EUR" if amounts else None,
+                    freshness=FreshnessState.UNVERIFIED,
+                )
+            )
+        return result
+
+    def _promotion_heading_discoveries(
+        self,
+        lines: tuple[str, ...],
+        source_key: str,
+        source_url: str,
+        observed_at: datetime,
+    ) -> list[Discovery]:
+        result: list[Discovery] = []
+        seen: set[str] = set()
+        for line in lines:
+            folded = line.casefold()
+            if not any(word in folded for word in _PROMOTION_WORDS):
+                continue
+            if folded in _GENERIC_PROMOTION_TITLES or not _looks_like_title(line):
+                continue
+            if folded in seen:
+                continue
+            seen.add(folded)
+            result.append(
+                Discovery(
+                    id=uuid4(),
+                    discovery_type=DiscoveryType.DEAL,
+                    entity_id=None,
+                    title=line[:180],
+                    source_key=source_key,
+                    source_url=source_url,
+                    observed_at=observed_at,
                     freshness=FreshnessState.UNVERIFIED,
                 )
             )
@@ -188,6 +258,54 @@ class PublicWebSignalAdapter:
             )
         return result
 
+    def _event_link_discoveries(
+        self,
+        html: str,
+        source_key: str,
+        source_url: str,
+        observed_at: datetime,
+    ) -> list[Discovery]:
+        parser = _AnchorParser()
+        parser.feed(html)
+        grouped: dict[str, list[str]] = {}
+        for href, text in parser.anchors:
+            if not href or not text:
+                continue
+            grouped.setdefault(urljoin(source_url, href), []).append(text)
+
+        result: list[Discovery] = []
+        seen: set[str] = set()
+        for href, texts in grouped.items():
+            href_path = urlsplit(href).path.casefold()
+            has_ticket_signal = any("ticket" in item.casefold() or item.casefold() == "more info" for item in texts)
+            has_event_path = "/event" in href_path
+            if not has_ticket_signal and not has_event_path:
+                continue
+            title = next(
+                (
+                    item
+                    for item in texts
+                    if item.casefold() not in _GENERIC_EVENT_TITLES and _looks_like_title(item)
+                ),
+                None,
+            )
+            if not title or title.casefold() in seen:
+                continue
+            seen.add(title.casefold())
+            result.append(
+                Discovery(
+                    id=uuid4(),
+                    discovery_type=DiscoveryType.EVENT,
+                    entity_id=None,
+                    title=title[:180],
+                    source_key=source_key,
+                    source_url=href,
+                    observed_at=observed_at,
+                    freshness=FreshnessState.UNVERIFIED,
+                )
+            )
+        return result
+
 
 def _clean_lines(lines: Iterable[str]) -> Iterable[str]:
     for raw in lines:
@@ -210,14 +328,17 @@ def _money_values(line: str) -> list[Decimal]:
 
 
 def _nearest_title(lines: tuple[str, ...], index: int) -> str | None:
-    for offset in range(1, 5):
+    for offset in range(1, 6):
         candidate_index = index - offset
         if candidate_index < 0:
             break
         candidate = lines[candidate_index]
+        folded = candidate.casefold()
         if _DATE_RANGE_RE.fullmatch(candidate):
             continue
         if _money_values(candidate) or _PERCENT_RE.search(candidate):
+            continue
+        if any(noise in folded for noise in _ACTION_NOISE):
             continue
         if len(candidate) < 3:
             continue
@@ -244,3 +365,84 @@ def _range_end(match: re.Match[str], observed_at: datetime) -> datetime | None:
         )
     except ValueError:
         return None
+
+
+def _looks_like_title(value: str) -> bool:
+    folded = value.casefold().strip()
+    if len(value) > 100 or len(value.split()) > 14:
+        return False
+    if any(noise in folded for noise in _ACTION_NOISE):
+        return False
+    if value.rstrip().endswith((".", ";")):
+        return False
+    return len(value) >= 3
+
+
+def _merge_discoveries(*groups: Iterable[Discovery]) -> list[Discovery]:
+    result: list[Discovery] = []
+    seen: set[tuple[object, ...]] = set()
+    for group in groups:
+        for item in group:
+            key = (
+                item.discovery_type.value,
+                item.title.casefold(),
+                item.current_price,
+                item.starts_at,
+            )
+            if key in seen:
+                continue
+            seen.add(key)
+            result.append(item)
+    return result
+
+
+def _raw_text_nodes(html: str) -> tuple[str, ...]:
+    parser = _TextNodeParser()
+    parser.feed(html)
+    return tuple(parser.values)
+
+
+class _TextNodeParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.values: list[str] = []
+        self._skip_depth = 0
+
+    def handle_starttag(self, tag: str, attrs) -> None:
+        if tag.casefold() in {"script", "style", "noscript", "svg"}:
+            self._skip_depth += 1
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag.casefold() in {"script", "style", "noscript", "svg"} and self._skip_depth:
+            self._skip_depth -= 1
+
+    def handle_data(self, data: str) -> None:
+        if not self._skip_depth and data.strip():
+            self.values.append(data)
+
+
+class _AnchorParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.anchors: list[tuple[str, str]] = []
+        self._href: str | None = None
+        self._parts: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs) -> None:
+        if tag.casefold() != "a":
+            return
+        self._href = next((value for key, value in attrs if key.casefold() == "href"), None)
+        self._parts = []
+
+    def handle_data(self, data: str) -> None:
+        if self._href is not None and data.strip():
+            self._parts.append(data.strip())
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag.casefold() != "a" or self._href is None:
+            return
+        text = re.sub(r"\s+", " ", " ".join(self._parts)).strip()
+        if text:
+            self.anchors.append((self._href, text))
+        self._href = None
+        self._parts = []
