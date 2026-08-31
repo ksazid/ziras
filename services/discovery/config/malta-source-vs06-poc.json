@@ -26,7 +26,7 @@
     "display_name": "Eurosport Malta Sale",
     "source_class": "sports-retail",
     "start_urls": ["https://www.eurosport.com.mt/sale"],
-    "fetch_mode": "static",
+    "fetch_mode": "browser",
     "adapter_kind": "promotion",
     "terms_url": "https://www.eurosport.com.mt/conditions-of-use",
     "policy": {
