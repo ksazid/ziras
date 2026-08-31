@@ -155,6 +155,14 @@ SOURCE_PROFILES: Mapping[str, SourceProfile] = {
 }
 
 
+_ALLOWED_DISCOVERY_TYPES: Mapping[SourceKind, frozenset[DiscoveryType]] = {
+    SourceKind.EVENTS: frozenset({DiscoveryType.EVENT}),
+    SourceKind.DEALS: frozenset({DiscoveryType.DEAL}),
+    SourceKind.RETAIL: frozenset({DiscoveryType.DEAL, DiscoveryType.PRICE_DROP, DiscoveryType.NEW_PRODUCT}),
+    SourceKind.RESTAURANT: frozenset({DiscoveryType.DEAL, DiscoveryType.NEW_MENU, DiscoveryType.NEW_PRODUCT}),
+}
+
+
 class SourcePackAdapter:
     """Policy-gated, declarative adapter for the first Malta source pack.
 
@@ -228,33 +236,30 @@ class SourcePackAdapter:
                 "source_profile": profile.source_key,
                 "source_kind": profile.kind.value,
                 "policy_mode": decision.mode.value,
+                "normalized_discovery_count": len(discoveries),
             },
         )
         return SourceAdapterResult(observation=observation, discoveries=discoveries)
 
     def _normalize(self, profile: SourceProfile, discoveries: tuple[Discovery, ...]) -> tuple[Discovery, ...]:
+        allowed_types = _ALLOWED_DISCOVERY_TYPES[profile.kind]
         normalized: list[Discovery] = []
         seen: set[tuple[object, ...]] = set()
         for discovery in discoveries:
-            discovery_type = discovery.discovery_type
-            if profile.kind is SourceKind.EVENTS:
-                discovery_type = DiscoveryType.EVENT
-            elif profile.kind is SourceKind.DEALS:
-                discovery_type = DiscoveryType.DEAL
-
-            current = replace(discovery, discovery_type=discovery_type)
+            if discovery.discovery_type not in allowed_types:
+                continue
             key = (
-                current.discovery_type,
-                current.title.casefold().strip(),
-                current.current_price,
-                current.currency,
-                current.starts_at,
-                current.expires_at,
+                discovery.discovery_type,
+                discovery.title.casefold().strip(),
+                discovery.current_price,
+                discovery.currency,
+                discovery.starts_at,
+                discovery.expires_at,
             )
             if key in seen:
                 continue
             seen.add(key)
-            normalized.append(current)
+            normalized.append(discovery)
         return tuple(normalized)
 
 

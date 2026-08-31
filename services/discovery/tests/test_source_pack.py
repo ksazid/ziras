@@ -60,7 +60,17 @@ DEAL_HTML = """
 """
 
 
-def test_pack_has_broad_malta_source_classes() -> None:
+def _allow(source_key: str) -> SourcePolicy:
+    return SourcePolicy(
+        source_key=source_key,
+        mode=SourceAccessMode.ALLOW,
+        reason="Test-only explicit policy approval.",
+        robots_required=True,
+        reviewed_at=NOW,
+    )
+
+
+def test_pack_has_broad_malta_source_classes_and_validated_domains() -> None:
     assert set(SOURCE_PROFILES) == {
         "visitmalta_events",
         "deal_mt",
@@ -74,6 +84,9 @@ def test_pack_has_broad_malta_source_classes() -> None:
     assert SOURCE_PROFILES["visitmalta_events"].policy_stage is PolicyStage.REVIEW_REQUIRED
     assert SOURCE_PROFILES["deal_mt"].policy_stage is PolicyStage.PARTNER_REQUIRED
     assert SOURCE_PROFILES["shows_happening"].policy_stage is PolicyStage.PARTNER_REQUIRED
+    assert SOURCE_PROFILES["atrium_malta"].domains == ("theatrium.com.mt",)
+    assert SOURCE_PROFILES["atrium_malta"].accepts_url("https://www.theatrium.com.mt/")
+    assert not SOURCE_PROFILES["atrium_malta"].accepts_url("https://www.atrium.com.mt/")
 
 
 def test_candidate_registry_denies_review_and_partner_candidates() -> None:
@@ -155,23 +168,30 @@ def test_explicit_policy_approval_enables_visitmalta_fixture() -> None:
     )
     assert result.observation.adapter == "source-pack-v1"
     assert result.observation.extracted["source_profile"] == "visitmalta_events"
+    assert result.observation.extracted["normalized_discovery_count"] == 1
     assert len(result.discoveries) == 1
     assert result.discoveries[0].discovery_type is DiscoveryType.EVENT
 
 
-def test_explicit_retail_policy_uses_shared_structured_extractor() -> None:
-    registry = SourcePolicyRegistry(
-        {
-            "scan_malta": SourcePolicy(
-                source_key="scan_malta",
-                mode=SourceAccessMode.ALLOW,
-                reason="Test-only explicit policy approval.",
-                robots_required=True,
-                reviewed_at=NOW,
-            )
-        }
+def test_event_profile_filters_unrelated_product_metadata_instead_of_relabeling_it() -> None:
+    event_payload = EVENT_HTML.split("<head>", 1)[1].split("</head>", 1)[0]
+    product_payload = PRODUCT_HTML.split("<head>", 1)[1].split("</head>", 1)[0]
+    mixed_html = f"<html><head>{event_payload}{product_payload}</head><body></body></html>"
+    pack = SourcePackAdapter(SourcePolicyRegistry({"visitmalta_events": _allow("visitmalta_events")}))
+    result = pack.extract(
+        source_key="visitmalta_events",
+        source_url="https://www.visitmalta.com/en/events-in-malta-and-gozo/",
+        html=mixed_html,
+        observed_at=NOW,
+        content_hash="mixed-hash",
     )
-    pack = SourcePackAdapter(registry)
+    assert len(result.discoveries) == 1
+    assert result.discoveries[0].title == "Harbour Nights Malta"
+    assert result.discoveries[0].discovery_type is DiscoveryType.EVENT
+
+
+def test_explicit_retail_policy_uses_shared_structured_extractor() -> None:
+    pack = SourcePackAdapter(SourcePolicyRegistry({"scan_malta": _allow("scan_malta")}))
     result = pack.extract(
         source_key="scan_malta",
         source_url="https://www.scanmalta.com/shop/example-headphones.html",
@@ -186,16 +206,7 @@ def test_explicit_retail_policy_uses_shared_structured_extractor() -> None:
 
 
 def test_foreign_host_and_non_https_are_rejected_even_with_policy() -> None:
-    registry = SourcePolicyRegistry(
-        {
-            "visitmalta_events": SourcePolicy(
-                source_key="visitmalta_events",
-                mode=SourceAccessMode.ALLOW,
-                reason="Test-only explicit policy approval.",
-            )
-        }
-    )
-    pack = SourcePackAdapter(registry)
+    pack = SourcePackAdapter(SourcePolicyRegistry({"visitmalta_events": _allow("visitmalta_events")}))
     for bad_url in (
         "https://example.com/en/events-in-malta-and-gozo/",
         "http://www.visitmalta.com/en/events-in-malta-and-gozo/",
@@ -219,17 +230,7 @@ def test_unknown_source_is_fail_closed() -> None:
 def test_duplicate_structured_items_are_removed() -> None:
     inner_head = PRODUCT_HTML.split("<head>", 1)[1].split("</head>", 1)[0]
     duplicate_html = PRODUCT_HTML.replace("</head>", inner_head + "</head>", 1)
-    registry = SourcePolicyRegistry(
-        {
-            "greens_malta": SourcePolicy(
-                source_key="greens_malta",
-                mode=SourceAccessMode.ALLOW,
-                reason="Test-only explicit policy approval.",
-                robots_required=True,
-            )
-        }
-    )
-    pack = SourcePackAdapter(registry)
+    pack = SourcePackAdapter(SourcePolicyRegistry({"greens_malta": _allow("greens_malta")}))
     result = pack.extract(
         source_key="greens_malta",
         source_url="https://www.greens.com.mt/product/example",
