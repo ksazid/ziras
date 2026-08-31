@@ -30,7 +30,10 @@
     "VS-05 Malta POC conditional-pass test report",
     "ADR-001 approved discovery-engine architecture"
   ],
-  "blockers": [],
+  "blockers": [
+    "Two additional independent source classes are required for the PRD five-source POC gate and require explicit source-policy approval before they can be added to POC scope.",
+    "Formal POC ingestion metrics remain unmeasured until the manual workflow is dispatched in an environment that can create workflow_dispatch runs."
+  ],
   "allowedPaths": [
     "services/discovery/**",
     ".github/workflows/discovery-kernel.yml",
@@ -53,7 +56,7 @@
     "notes": [
       "Eden route semantics become configuration-driven rather than vendor-specific pipeline logic.",
       "VisitMalta browser ingestion fails health validation when rendered inventory produces no candidates.",
-      "Spazju Kreattiv and Eurosport Malta are POC-only factual-metadata additions with robots, path, attribution, rate and retention controls.",
+      "VS-06 may qualify additional source candidates, but no candidate is promoted into POC scope without a separate explicit source-policy approval.",
       "No production source permission, scheduler or production-enable flag is introduced."
     ]
   },
@@ -64,17 +67,17 @@
       "version": "VS-06",
       "commitSha": null,
       "by": "ksazid",
-      "at": "2026-08-31T15:05:00+02:00",
+      "at": "2026-08-31T15:07:00+02:00",
       "rationale": "Product owner explicitly approved VS-06 POC Coverage & Extraction Hardening after the VS-05 Malta POC conditional-pass report."
     },
     {
       "type": "policy",
       "status": "approved",
-      "version": "VS-06-poc-policy-amendment",
-      "commitSha": null,
+      "version": "VS-04-poc-policy-matrix",
+      "commitSha": "ac3a166bbaf511335fe2a205d940f98c84919dc0",
       "by": "ksazid",
-      "at": "2026-08-31T15:05:00+02:00",
-      "rationale": "Approval is scoped only to qualifying and implementing POC-safe source-policy amendments within VS-06. It grants no production collection permission."
+      "at": "2026-08-31T08:46:00+02:00",
+      "rationale": "VS-06 may harden extraction for already-approved VS-04 POC sources only. This approval does not authorize any newly qualified source or production access."
     },
     {
       "type": "implementation",
@@ -82,8 +85,8 @@
       "version": "VS-06",
       "commitSha": null,
       "by": "ksazid",
-      "at": "2026-08-31T15:05:00+02:00",
-      "rationale": "Product owner approved implementing the extraction-hardening and source-coverage work."
+      "at": "2026-08-31T15:07:00+02:00",
+      "rationale": "Product owner approved implementing the extraction-hardening and source-qualification work; source-policy promotion remains a separate gate."
     },
     {
       "type": "certification",
@@ -117,8 +120,8 @@
   "progress": {
     "discovery": 100,
     "decisions": 100,
-    "implementation": 60,
-    "testing": 25,
+    "implementation": 70,
+    "testing": 35,
     "certification": 0,
     "release": 0,
     "validation": 0
@@ -153,8 +156,8 @@
     "specification": "docs/slices/VS-06.md",
     "implementationPr": null,
     "evidence": [
-      "docs/testing/VS-05-MALTA-POC-TEST-REPORT-2026-08-31.md",
-      "https://github.com/ksazid/ziras/actions/runs/33395917139"
+      "https://github.com/ksazid/ziras/pull/7",
+      "VS-05 conditional POC report: technical pipeline green, product gates not yet passed"
     ]
   },
   "maxAttempts": 3
