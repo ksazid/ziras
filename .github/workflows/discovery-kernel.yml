@@ -17,6 +17,7 @@ on:
       - 'docs/slices/VS-04.md'
       - 'docs/slices/VS-05.md'
       - 'docs/slices/VS-06.md'
+      - 'docs/slices/VS-07.md'
       - 'docs/integrations/**'
       - 'product/TRD.md'
       - 'delivery/current-slice.json'
@@ -32,6 +33,7 @@ on:
       - 'docs/slices/VS-04.md'
       - 'docs/slices/VS-05.md'
       - 'docs/slices/VS-06.md'
+      - 'docs/slices/VS-07.md'
       - 'docs/integrations/**'
       - 'product/TRD.md'
       - 'delivery/current-slice.json'
@@ -81,6 +83,8 @@ jobs:
           services/discovery/tests/test_acquisition.py
           services/discovery/tests/test_vs06_hardening.py
           services/discovery/tests/test_vs06_catalog.py
+          services/discovery/tests/test_poc_metrics.py
+          services/discovery/tests/test_vs07_household_sources.py
       - name: Build PostgreSQL 16 with PostGIS and pgvector
         run: docker build -t ziras-discovery-postgres services/discovery/tests/postgres
       - name: Start PostgreSQL
