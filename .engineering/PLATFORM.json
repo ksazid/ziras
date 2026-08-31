@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "platform": "mobile",
+  "mobile": {
+    "framework": "Expo",
+    "sdk": "57.0.1",
+    "reactNative": "0.86.0",
+    "react": "19.2.3",
+    "router": "expo-router"
+  }
+}
