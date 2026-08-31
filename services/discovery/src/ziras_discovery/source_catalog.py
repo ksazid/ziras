@@ -59,15 +59,10 @@ def default_malta_hardening_path() -> Path:
     return Path(__file__).resolve().parents[2] / "config" / "malta-source-hardening.json"
 
 
-def default_malta_poc_additions_path() -> Path:
-    return Path(__file__).resolve().parents[2] / "config" / "malta-source-poc-additions.json"
-
-
 def load_source_catalog(
     path: str | Path | None = None,
     *,
     hardening_path: str | Path | None = None,
-    additions_path: str | Path | None = None,
 ) -> tuple[SourceCatalogEntry, ...]:
     catalog_path = Path(path) if path is not None else default_malta_catalog_path()
     payload = _read_json(catalog_path)
@@ -76,13 +71,9 @@ def load_source_catalog(
 
     overrides: Mapping[str, object] = {}
     resolved_hardening: Path | None = None
-    resolved_additions: Path | None = None
-    if path is None or hardening_path is not None or additions_path is not None:
+    if path is None or hardening_path is not None:
         resolved_hardening = (
             Path(hardening_path) if hardening_path is not None else default_malta_hardening_path()
-        )
-        resolved_additions = (
-            Path(additions_path) if additions_path is not None else default_malta_poc_additions_path()
         )
 
     if resolved_hardening is not None and resolved_hardening.exists():
@@ -103,17 +94,6 @@ def load_source_catalog(
     unknown_overrides = sorted(set(overrides) - seen)
     if unknown_overrides:
         raise ValueError(f"source hardening references unknown source: {unknown_overrides[0]}")
-
-    if resolved_additions is not None and resolved_additions.exists():
-        additions = _read_json(resolved_additions)
-        if not isinstance(additions, list):
-            raise ValueError("POC source additions must be a JSON array")
-        for raw in additions:
-            entry = _entry_from_raw(raw, overrides={})
-            if entry.source_key in seen:
-                raise ValueError(f"duplicate source_key: {entry.source_key}")
-            seen.add(entry.source_key)
-            entries.append(entry)
 
     return tuple(entries)
 
