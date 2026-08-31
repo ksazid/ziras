@@ -3,7 +3,7 @@
   "sliceId": "VS-06",
   "title": "POC Coverage & Extraction Hardening",
   "status": "closed",
-  "lifecycle": "closed",
+  "lifecycle": "certified",
   "riskLevel": "high",
   "implementationMode": "runtime-enabled",
   "requirements": [
@@ -58,7 +58,8 @@
       "The certified VS-04 baseline remains unchanged; VS-06 source permissions are additive and auditable.",
       "Formal POC metrics remain a post-merge validation activity rather than an implementation blocker.",
       "No production source permission, scheduler or production-enable flag is introduced.",
-      "Post-merge main certification completed successfully on cccdf6e241982a3784aba06b0054eb1c4a83c4d4 via Discovery Kernel run 33432915705."
+      "Post-merge main certification completed successfully on cccdf6e241982a3784aba06b0054eb1c4a83c4d4 via Discovery Kernel run 33432915705.",
+      "VS-06 is administratively closed while lifecycle remains certified because release is intentionally not authorized."
     ]
   },
   "approvals": [
@@ -117,9 +118,7 @@
       "rationale": null
     }
   ],
-  "decisionIds": [
-    "DEC-01"
-  ],
+  "decisionIds": ["DEC-01"],
   "progress": {
     "discovery": 100,
     "decisions": 100,
@@ -153,8 +152,8 @@
     "rollbackId": null
   },
   "postRelease": {
-    "status": "completed",
-    "reviewAt": "2026-08-31T21:53:21+02:00",
+    "status": "not-started",
+    "reviewAt": null,
     "expectedOutcome": "Reach five policy-governed Malta POC source classes with correct route semantics and reliable browser-source health validation.",
     "metrics": [
       "POC-approved independent source classes",
@@ -182,7 +181,7 @@
       "https://github.com/ksazid/ziras/pull/10",
       "post-merge-main-sha:cccdf6e241982a3784aba06b0054eb1c4a83c4d4",
       "post-merge-main-run:https://github.com/ksazid/ziras/actions/runs/33432915705",
-      "VS-06 closed after post-merge certification; release remains not-authorized and production-enable remains pending"
+      "VS-06 administratively closed at certified lifecycle; release remains not-authorized and production-enable remains pending"
     ]
   },
   "maxAttempts": 3
