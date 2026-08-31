@@ -1,22 +1,22 @@
 {
   "schemaVersion": 2,
-  "sliceId": "VS-02",
-  "title": "Discovery Kernel Foundation",
+  "sliceId": "VS-03",
+  "title": "Meta Ad Library Source Adapter",
   "status": "active",
-  "lifecycle": "testing",
+  "lifecycle": "implementing",
   "riskLevel": "medium",
   "implementationMode": "runtime-enabled",
   "requirements": [
-    "REQ-DK-001",
-    "REQ-DK-002",
-    "REQ-DK-003",
-    "REQ-DK-004",
-    "REQ-DK-005",
-    "REQ-DK-006",
-    "REQ-DK-007",
-    "REQ-DK-008",
-    "REQ-DK-009",
-    "REQ-DK-010"
+    "REQ-META-001",
+    "REQ-META-002",
+    "REQ-META-003",
+    "REQ-META-004",
+    "REQ-META-005",
+    "REQ-META-006",
+    "REQ-META-007",
+    "REQ-META-008",
+    "REQ-META-009",
+    "REQ-META-010"
   ],
   "owners": {
     "product": "ksazid",
@@ -25,20 +25,24 @@
     "security": null
   },
   "dependencies": [
+    "VS-02 Discovery Kernel Foundation",
     "ADR-001 approved discovery-engine architecture",
-    "DEC-01 approved architecture decision",
-    "PostgreSQL 16 with PostGIS and pgvector for integration tests",
-    "No production source collection in this slice"
+    "Official Meta Ad Library API access",
+    "Facebook account and Meta identity/location onboarding",
+    "Meta for Developers account and app",
+    "Meta Platform Policy acceptance",
+    "Valid access token stored outside source control",
+    "Supported Meta Graph API version pinned at deployment time",
+    "Explicit meta_ad_library SourcePolicy approval before production enablement"
   ],
   "blockers": [],
   "allowedPaths": [
     "services/discovery/**",
     ".github/workflows/discovery-kernel.yml",
-    ".engineering/**",
-    "docs/slices/VS-02.md",
+    "docs/slices/VS-03.md",
+    "docs/integrations/META-AD-LIBRARY.md",
     "product/TRD.md",
-    "delivery/current-slice.json",
-    "delivery/decisions.json"
+    "delivery/current-slice.json"
   ],
   "protectedPaths": [
     ".github/workflows/release.yml"
@@ -47,44 +51,44 @@
     "areas": [
       "architecture",
       "api",
-      "database",
       "legal-privacy",
+      "security",
       "operations-support"
     ],
     "notes": [
-      "This slice establishes the discovery-domain contracts and persistence model but does not enable production crawling.",
-      "Source policy is fail-closed and vendor-specific production permissions remain separate decisions.",
-      "External infrastructure remains behind ADR-001 boundaries so adapters can be replaced without changing domain logic.",
-      "The PES template .engineering governance assets may be restored byte-for-byte from the authoritative template because they were missing from the generated Ziras repository and are required by preflight."
+      "The adapter uses the official Meta Ad Library API only and does not authorize Facebook or Instagram scraping.",
+      "The feature is disabled by default and fails closed when any runtime/governance prerequisite is missing.",
+      "Production source-policy approval and production credentials remain separate gates.",
+      "Meta ads enter Ziras as source observations; an ad is not automatically classified as a deal or other discovery."
     ]
   },
   "approvals": [
     {
       "type": "scope",
       "status": "approved",
-      "version": "VS-02",
+      "version": "VS-03",
       "commitSha": null,
       "by": "ksazid",
-      "at": "2026-08-31T01:42:00+02:00",
-      "rationale": "Product owner explicitly approved the Discovery Kernel implementation slice after approving ADR-001."
+      "at": "2026-08-31T02:10:37+02:00",
+      "rationale": "Product owner explicitly asked to add Facebook/Instagram Ad Library support and track every dependency required to enable it."
     },
     {
       "type": "policy",
-      "status": "not-required",
-      "version": "VS-02",
+      "status": "pending",
+      "version": "VS-03",
       "commitSha": null,
       "by": null,
       "at": null,
-      "rationale": "No vendor-specific production source permission is enabled by this slice; source policy defaults fail closed."
+      "rationale": "Implementation may proceed, but production Meta Ad Library source-policy approval is intentionally separate from adapter implementation."
     },
     {
       "type": "implementation",
       "status": "approved",
-      "version": "VS-02",
+      "version": "VS-03",
       "commitSha": null,
       "by": "ksazid",
-      "at": "2026-08-31T01:42:00+02:00",
-      "rationale": "Product owner explicitly approved implementation of the Discovery Kernel slice."
+      "at": "2026-08-31T02:10:37+02:00",
+      "rationale": "Product owner explicitly requested implementation of the adapter and enablement dependency tracking."
     },
     {
       "type": "certification",
@@ -118,8 +122,8 @@
   "progress": {
     "discovery": 100,
     "decisions": 100,
-    "implementation": 100,
-    "testing": 100,
+    "implementation": 90,
+    "testing": 0,
     "certification": 0,
     "release": 0,
     "validation": 0
@@ -140,23 +144,22 @@
   "postRelease": {
     "status": "not-started",
     "reviewAt": null,
-    "expectedOutcome": "Establish a stable discovery kernel whose source, data and ranking infrastructure can evolve without rewriting Ziras domain logic.",
+    "expectedOutcome": "Allow Ziras to ingest Meta Ad Library evidence for Malta through official API access while keeping Facebook/Instagram collection disabled until every dependency and policy gate is satisfied.",
     "metrics": [
-      "kernel unit-test pass rate",
-      "policy-denial correctness",
-      "stale-observation rejection",
-      "entity collision false-merge count",
-      "explicit-expiry leakage count"
+      "Meta readiness dependency completeness",
+      "Meta API request success rate",
+      "Facebook/Instagram platform coverage",
+      "credential leakage incidents",
+      "Meta source-policy bypass count",
+      "Meta observation normalization pass rate"
     ]
   },
   "links": {
-    "specification": "docs/slices/VS-02.md",
-    "implementationPr": "https://github.com/ksazid/ziras/pull/2",
+    "specification": "docs/slices/VS-03.md",
+    "implementationPr": null,
     "evidence": [
-      "docs/architecture/ADR-001-DISCOVERY-ENGINE.md",
-      "research/oss-qualification/README.md",
-      "https://github.com/ksazid/ziras/actions/runs/33342957975/job/99341773634",
-      "tested-sha:4b3a2379d5c9c3e0829e7abf4fe422404d58c415"
+      "docs/integrations/META-AD-LIBRARY.md",
+      "https://www.facebook.com/ads/library/api/"
     ]
   },
   "maxAttempts": 3
