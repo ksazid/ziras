@@ -45,16 +45,9 @@
     "docs/integrations/MALTA-SOURCE-PACK.md",
     "delivery/current-slice.json"
   ],
-  "protectedPaths": [
-    ".github/workflows/release.yml"
-  ],
+  "protectedPaths": [".github/workflows/release.yml"],
   "impact": {
-    "areas": [
-      "architecture",
-      "api",
-      "legal-privacy",
-      "operations-support"
-    ],
+    "areas": ["architecture", "api", "legal-privacy", "operations-support"],
     "notes": [
       "Every vendor is represented by an explicit fail-closed policy record with research/POC/production scope.",
       "Sources with explicit automated/commercial-use restrictions are blocked or partner-only.",
@@ -99,24 +92,8 @@
       "at": "2026-08-31T08:46:00+02:00",
       "rationale": "Product owner approved VS-04 certification after exact-head source-pack/kernel/database and PES preflight gates passed."
     },
-    {
-      "type": "release",
-      "status": "pending",
-      "version": null,
-      "commitSha": null,
-      "by": null,
-      "at": null,
-      "rationale": null
-    },
-    {
-      "type": "production-enable",
-      "status": "pending",
-      "version": null,
-      "commitSha": null,
-      "by": null,
-      "at": null,
-      "rationale": null
-    }
+    {"type": "release", "status": "pending", "version": null, "commitSha": null, "by": null, "at": null, "rationale": null},
+    {"type": "production-enable", "status": "pending", "version": null, "commitSha": null, "by": null, "at": null, "rationale": null}
   ],
   "decisionIds": ["DEC-01"],
   "progress": {
@@ -134,20 +111,12 @@
     "evidence": [
       "https://github.com/ksazid/ziras/actions/runs/33347061940",
       "https://github.com/ksazid/ziras/actions/runs/33365625606",
-      "source-pack: kernel, Meta regressions, source-policy scope/path tests and deterministic promotion/event fixture tests passed",
-      "database: PostgreSQL 16/PostGIS/pgvector + source-policy migration passed",
-      "pes-preflight: full repository governance/platform/mobile/script validation passed",
-      "post-certification governance head 89ed0a3882be123e6602d2b1c1c0f5a9965d6886 passed kernel/database and PES validation"
+      "https://github.com/ksazid/ziras/actions/runs/33365720646",
+      "source-pack/kernel/database and PES preflight passed before certification and after certification governance updates"
     ]
   },
-  "release": {
-    "status": "not-authorized",
-    "releaseId": null
-  },
-  "rollback": {
-    "status": "not-applicable",
-    "rollbackId": null
-  },
+  "release": {"status": "not-authorized", "releaseId": null},
+  "rollback": {"status": "not-applicable", "rollbackId": null},
   "postRelease": {
     "status": "not-started",
     "reviewAt": null,
@@ -171,6 +140,7 @@
       "docs/integrations/MALTA-SOURCE-PACK.md",
       "https://github.com/ksazid/ziras/actions/runs/33347061940",
       "https://github.com/ksazid/ziras/actions/runs/33365625606",
+      "https://github.com/ksazid/ziras/actions/runs/33365720646",
       "certified-sha:ac3a166bbaf511335fe2a205d940f98c84919dc0"
     ]
   },
