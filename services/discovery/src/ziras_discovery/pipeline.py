@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from typing import Mapping, Sequence
 from uuid import UUID
 
-from .acquisition import AcquisitionBackend, AcquisitionOutcome, AcquisitionRequest
+from .acquisition import AcquisitionBackend, AcquisitionRequest
 from .adapters.public_web import PublicWebSignalAdapter, TextSignalConfig
 from .adapters.structured_html import StructuredHtmlAdapter
 from .domain import Discovery, FreshnessState, SourceAccessMode, SourcePolicyScope
@@ -206,7 +206,7 @@ class PocIngestionPipeline:
                 continue
 
             page = outcome.page
-            adapter = _adapter_for(entry)
+            adapter = _adapter_for(entry, page.final_url)
             normalized = adapter.extract(
                 source_key=entry.source_key,
                 source_url=page.final_url,
@@ -230,6 +230,28 @@ class PocIngestionPipeline:
                 discoveries=discoveries,
             )
             _add_delta(metrics, delta, candidate_count=len(discoveries))
+
+            if len(discoveries) < entry.minimum_candidates:
+                metrics["failed_count"] = int(metrics["failed_count"]) + 1
+                self.store.record_source_result(
+                    run_id,
+                    SourceRunResult(
+                        source_key=entry.source_key,
+                        source_url=page.final_url,
+                        fetch_mode=entry.fetch_mode.value,
+                        status="error",
+                        observed_at=page.observed_at,
+                        http_status=page.http_status,
+                        candidate_count=len(discoveries),
+                        inserted_count=delta.inserted_count,
+                        updated_count=delta.updated_count,
+                        duplicate_count=delta.duplicate_count,
+                        expired_count=delta.expired_count,
+                        error_code="insufficient_candidates",
+                        detail=f"minimum_candidates={entry.minimum_candidates}",
+                    ),
+                )
+                continue
 
             for discovery in discoveries:
                 fingerprint = discovery_fingerprint(discovery)
@@ -286,14 +308,15 @@ class PocIngestionPipeline:
         )
 
 
-def _adapter_for(entry: SourceCatalogEntry) -> SourceAdapter:
-    if entry.adapter_kind is AdapterKind.STRUCTURED:
+def _adapter_for(entry: SourceCatalogEntry, source_url: str) -> SourceAdapter:
+    adapter_kind = entry.adapter_kind_for(source_url)
+    if adapter_kind is AdapterKind.STRUCTURED:
         return StructuredHtmlAdapter()
-    if entry.adapter_kind is AdapterKind.EVENT:
+    if adapter_kind is AdapterKind.EVENT:
         return PublicWebSignalAdapter(TextSignalConfig(event_mode=True))
-    if entry.adapter_kind is AdapterKind.PROMOTION:
+    if adapter_kind is AdapterKind.PROMOTION:
         return PublicWebSignalAdapter(TextSignalConfig(event_mode=False))
-    raise ValueError(f"Adapter kind {entry.adapter_kind.value} is not supported by web POC ingestion")
+    raise ValueError(f"Adapter kind {adapter_kind.value} is not supported by web POC ingestion")
 
 
 def _with_freshness(discovery: Discovery, *, now: datetime) -> Discovery:

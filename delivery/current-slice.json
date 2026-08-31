@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
-  "sliceId": "VS-05",
-  "title": "POC Ingestion Pipeline",
+  "sliceId": "VS-06",
+  "title": "POC Coverage & Extraction Hardening",
   "status": "active",
   "lifecycle": "certified",
   "riskLevel": "high",
@@ -15,11 +15,8 @@
     "REQ-DIS-005",
     "REQ-FRS-001",
     "REQ-FRS-002",
-    "REQ-FRS-003",
     "REQ-FRS-004",
-    "REQ-FRS-005",
-    "REQ-PER-001",
-    "REQ-PER-004"
+    "REQ-FRS-005"
   ],
   "owners": {
     "product": "ksazid",
@@ -28,17 +25,19 @@
     "security": "ksazid"
   },
   "dependencies": [
-    "VS-02 certified Discovery Kernel",
-    "VS-04 certified Malta source policy/adapter pack",
-    "ADR-001 approved discovery-engine architecture",
-    "VS-04 POC/research source-policy matrix"
+    "VS-05 certified and merged POC ingestion pipeline",
+    "VS-04 certified Malta source-policy baseline",
+    "VS-05 Malta POC conditional-pass test report",
+    "ADR-001 approved discovery-engine architecture"
   ],
   "blockers": [],
   "allowedPaths": [
     "services/discovery/**",
     ".github/workflows/discovery-kernel.yml",
     ".github/workflows/poc-ingestion.yml",
-    "docs/slices/VS-05.md",
+    "docs/slices/VS-06.md",
+    "docs/integrations/MALTA-SOURCE-PACK.md",
+    "docs/integrations/VS06-POC-SOURCE-QUALIFICATION.md",
     "product/TRD.md",
     "delivery/current-slice.json"
   ],
@@ -53,48 +52,50 @@
       "operations-support"
     ],
     "notes": [
-      "Pipeline acquisition is constrained to existing VS-04 research/POC policies and approved paths.",
-      "Technical browser capability does not grant production source permission.",
-      "Raw fetched page bodies remain transient; normalized facts/provenance only are persisted.",
-      "No scheduler or production-enable flag is introduced by this slice."
+      "Eden route semantics are configuration-driven rather than vendor-specific pipeline logic.",
+      "VisitMalta browser ingestion fails health validation when rendered inventory produces no candidates.",
+      "Spazju Kreattiv Events and Eurosport Malta Sale are explicitly approved for narrow low-rate POC factual metadata acquisition only.",
+      "The certified VS-04 baseline remains unchanged; VS-06 source permissions are additive and auditable.",
+      "Formal POC metrics remain a post-merge validation activity rather than an implementation blocker.",
+      "No production source permission, scheduler or production-enable flag is introduced."
     ]
   },
   "approvals": [
     {
       "type": "scope",
       "status": "approved",
-      "version": "VS-05",
+      "version": "VS-06",
       "commitSha": null,
       "by": "ksazid",
-      "at": "2026-08-31T08:46:00+02:00",
-      "rationale": "Product owner approved VS-05 POC Ingestion Pipeline after VS-04 certification and merge."
+      "at": "2026-08-31T15:07:00+02:00",
+      "rationale": "Product owner explicitly approved VS-06 POC Coverage & Extraction Hardening after the VS-05 Malta POC conditional-pass report."
     },
     {
       "type": "policy",
       "status": "approved",
-      "version": "VS-04-poc-policy-matrix",
-      "commitSha": "ac3a166bbaf511335fe2a205d940f98c84919dc0",
+      "version": "VS-06-poc-policy-state",
+      "commitSha": null,
       "by": "ksazid",
-      "at": "2026-08-31T08:46:00+02:00",
-      "rationale": "VS-05 reuses only the already certified VS-04 research/POC policy matrix; this does not approve production source access."
+      "at": "2026-08-31T15:05:00+02:00",
+      "rationale": "The certified VS-04 POC policy baseline remains authoritative for existing sources, and the product owner explicitly approved the additive VS-06 POC policies for Spazju Kreattiv Events and Eurosport Malta Sale under the documented narrow low-rate constraints. Production access remains unapproved."
     },
     {
       "type": "implementation",
       "status": "approved",
-      "version": "VS-05",
+      "version": "VS-06",
       "commitSha": null,
       "by": "ksazid",
-      "at": "2026-08-31T08:46:00+02:00",
-      "rationale": "Product owner approved implementing the POC ingestion pipeline."
+      "at": "2026-08-31T15:07:00+02:00",
+      "rationale": "Product owner approved implementing extraction hardening and the separately approved POC source extension."
     },
     {
       "type": "certification",
       "status": "approved",
-      "version": "VS-05",
-      "commitSha": "934f3c871232b44be29b026624b34f5868c3b34d",
+      "version": "VS-06",
+      "commitSha": "505695d01c1431c7fc63dd2f770228f432e1495f",
       "by": "ksazid",
-      "at": "2026-08-31T11:15:00+02:00",
-      "rationale": "Product owner approved VS-05 certification after exact-head ingestion/kernel/database and PES preflight gates passed."
+      "at": "2026-08-31T18:20:00+02:00",
+      "rationale": "Product owner approved VS-06 certification after exact-head PES preflight, kernel/unit, PostgreSQL 16 + PostGIS + pgvector, Eden route semantics, VisitMalta candidate-health, and five-source POC coverage gates passed."
     },
     {
       "type": "release",
@@ -115,9 +116,7 @@
       "rationale": null
     }
   ],
-  "decisionIds": [
-    "DEC-01"
-  ],
+  "decisionIds": ["DEC-01"],
   "progress": {
     "discovery": 100,
     "decisions": 100,
@@ -129,12 +128,14 @@
   },
   "certification": {
     "status": "passed",
-    "commitSha": "934f3c871232b44be29b026624b34f5868c3b34d",
+    "commitSha": "505695d01c1431c7fc63dd2f770228f432e1495f",
     "evidence": [
-      "https://github.com/ksazid/ziras/actions/runs/33367506170",
-      "https://github.com/ksazid/ziras/actions/runs/33367653523",
-      "kernel/meta/source-pack/VS-05 ingestion unit tests passed",
-      "PostgreSQL16/PostGIS/pgvector ingestion migration, dedupe and provenance passed",
+      "https://github.com/ksazid/ziras/actions/runs/33400602901",
+      "kernel/unit and VS-02/03/04/05 regression tests passed",
+      "PostgreSQL16/PostGIS/pgvector integration passed",
+      "Eden route-specific semantics passed",
+      "VisitMalta rendered-candidate health gate passed",
+      "five independent POC source classes confirmed",
       "full PES preflight passed"
     ]
   },
@@ -149,27 +150,29 @@
   "postRelease": {
     "status": "not-started",
     "reviewAt": null,
-    "expectedOutcome": "Measure repeatable policy-governed Malta discovery ingestion with dedupe, freshness and deterministic ranking before any user-facing feed work.",
+    "expectedOutcome": "Reach five policy-governed Malta POC source classes with correct route semantics and reliable browser-source health validation.",
     "metrics": [
-      "useful discovery candidates/day",
-      "unique discoveries/day",
-      "duplicate rate after processing",
-      "stale/expired rate",
+      "POC-approved independent source classes",
+      "candidate count by source/route",
+      "browser source candidate-health failures",
       "source success/failure/blocked rate",
-      "static versus browser acquisition rate",
-      "candidates per source and source class",
-      "ranked active discovery count"
+      "duplicate rate",
+      "stale/expired rate"
     ]
   },
   "links": {
-    "specification": "docs/slices/VS-05.md",
-    "implementationPr": "https://github.com/ksazid/ziras/pull/6",
+    "specification": "docs/slices/VS-06.md",
+    "implementationPr": "https://github.com/ksazid/ziras/pull/8",
     "evidence": [
-      "docs/slices/VS-05.md",
-      "docs/integrations/MALTA-SOURCE-PACK.md",
-      "https://github.com/ksazid/ziras/actions/runs/33367506170",
-      "https://github.com/ksazid/ziras/actions/runs/33367653523",
-      "certified-sha:934f3c871232b44be29b026624b34f5868c3b34d"
+      "https://github.com/ksazid/ziras/pull/7",
+      "https://github.com/ksazid/ziras/actions/runs/33396940823",
+      "https://github.com/ksazid/ziras/actions/runs/33400353705",
+      "https://github.com/ksazid/ziras/actions/runs/33400602901",
+      "tested-sha:30416cb09765130efdd93f438e837bc3a29a137b",
+      "certified-sha:505695d01c1431c7fc63dd2f770228f432e1495f",
+      "five-poc-source-classes: visitmalta_events, eden_cinemas, homemate_offers, spazju_kreattiv_events, eurosport_malta_sale",
+      "kernel/hardening/policy/PostgreSQL/PES: passed",
+      "VS-05 conditional POC report: formal product metrics remain post-merge validation"
     ]
   },
   "maxAttempts": 3

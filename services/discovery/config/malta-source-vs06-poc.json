@@ -1,0 +1,46 @@
+[
+  {
+    "source_key": "spazju_kreattiv_events",
+    "display_name": "Spazju Kreattiv Events",
+    "source_class": "cultural-venue-events",
+    "start_urls": ["https://spazjukreattiv.org/events/list/"],
+    "fetch_mode": "static",
+    "adapter_kind": "event",
+    "terms_url": "https://spazjukreattiv.org/privacy-policy/",
+    "policy": {
+      "mode": "allow",
+      "scope": "poc",
+      "reason": "Explicitly approved for low-rate POC factual event metadata only after VS-06 source qualification. No page body, long descriptions or images are retained; robots remains mandatory and production requires a fresh separate review.",
+      "policy_url": "https://spazjukreattiv.org/privacy-policy/",
+      "robots_required": true,
+      "reviewed_at": "2026-08-31T15:05:00+02:00",
+      "allowed_path_prefixes": ["/events/list/"],
+      "max_requests_per_hour": 1,
+      "attribution_required": true,
+      "content_storage_allowed": false
+    },
+    "notes": "POC approval applies only to public event facts and deep links. No account/private access or creative retention."
+  },
+  {
+    "source_key": "eurosport_malta_sale",
+    "display_name": "Eurosport Malta Sale",
+    "source_class": "sports-retail",
+    "start_urls": ["https://www.eurosport.com.mt/sale"],
+    "fetch_mode": "static",
+    "adapter_kind": "promotion",
+    "terms_url": "https://www.eurosport.com.mt/conditions-of-use",
+    "policy": {
+      "mode": "allow",
+      "scope": "poc",
+      "reason": "Explicitly approved for low-rate POC factual sale metadata only after VS-06 source qualification. Access is limited to the public sale path; no account/cart/wishlist/checkout access, page-body retention or image retention is permitted. Production requires a fresh separate review.",
+      "policy_url": "https://www.eurosport.com.mt/conditions-of-use",
+      "robots_required": true,
+      "reviewed_at": "2026-08-31T15:05:00+02:00",
+      "allowed_path_prefixes": ["/sale"],
+      "max_requests_per_hour": 1,
+      "attribution_required": true,
+      "content_storage_allowed": false
+    },
+    "notes": "POC approval applies only to product name, old/current price, source URL and provenance from the public sale listing."
+  }
+]
