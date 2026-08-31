@@ -70,10 +70,10 @@ Technical support never overrides policy.
 
 - Source: The Atrium Malta
 - Kind: retail
-- Entry: `https://www.atrium.com.mt/`
+- Entry: `https://www.theatrium.com.mt/`
 - Initial policy stage: `review_required`
 - Candidate registry: `DENY`
-- Candidate signals: sale, promotion, new product
+- Candidate signals: sale, promotion, new product, stock availability
 
 ### `pizza_hut_malta`
 

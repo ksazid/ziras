@@ -122,9 +122,9 @@ SOURCE_PROFILES: Mapping[str, SourceProfile] = {
     "atrium_malta": SourceProfile(
         source_key="atrium_malta",
         display_name="The Atrium Malta",
-        domains=("atrium.com.mt",),
+        domains=("theatrium.com.mt",),
         kind=SourceKind.RETAIL,
-        entry_urls=("https://www.atrium.com.mt/",),
+        entry_urls=("https://www.theatrium.com.mt/",),
         policy_stage=PolicyStage.REVIEW_REQUIRED,
         robots_required=True,
         browser_fallback_allowed=True,
