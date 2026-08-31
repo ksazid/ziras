@@ -47,12 +47,15 @@ _GENERIC_EVENT_TITLES = {
     "what’s on",
     "coming soon",
     "buy tickets",
+    "book tickets",
     "tickets",
     "more info",
     "view all events",
     "view all",
+    "skip to content",
 }
 _ACTION_NOISE = ("add to cart", "add to wishlist", "add to compare", "sort by", "display", "search")
+_POLICY_NOISE = ("terms", "conditions", "privacy", "policy")
 
 
 @dataclass(frozen=True, slots=True)
@@ -104,6 +107,7 @@ class PublicWebSignalAdapter:
             discoveries = _merge_discoveries(
                 self._event_discoveries(precision_lines, source_key, source_url, observed_at),
                 self._event_discoveries(raw_lines, source_key, source_url, observed_at),
+                self._event_ticket_line_discoveries(raw_lines, source_key, source_url, observed_at),
                 self._event_link_discoveries(html, source_key, source_url, observed_at),
             )
         else:
@@ -204,6 +208,8 @@ class PublicWebSignalAdapter:
             folded = line.casefold()
             if not any(word in folded for word in _PROMOTION_WORDS):
                 continue
+            if any(noise in folded for noise in _POLICY_NOISE):
+                continue
             if folded in _GENERIC_PROMOTION_TITLES or not _looks_like_title(line):
                 continue
             if folded in seen:
@@ -258,6 +264,39 @@ class PublicWebSignalAdapter:
             )
         return result
 
+    def _event_ticket_line_discoveries(
+        self,
+        lines: tuple[str, ...],
+        source_key: str,
+        source_url: str,
+        observed_at: datetime,
+    ) -> list[Discovery]:
+        result: list[Discovery] = []
+        seen: set[str] = set()
+        for index, line in enumerate(lines):
+            if "buy tickets" not in line.casefold():
+                continue
+            title = re.sub(r"\bbuy tickets\b", "", line, flags=re.IGNORECASE).strip(" -–|:")
+            if not _looks_like_title(title) or title.casefold() in _GENERIC_EVENT_TITLES:
+                title = _nearest_title(lines, index) or ""
+            folded = title.casefold()
+            if not title or folded in _GENERIC_EVENT_TITLES or folded in seen:
+                continue
+            seen.add(folded)
+            result.append(
+                Discovery(
+                    id=uuid4(),
+                    discovery_type=DiscoveryType.EVENT,
+                    entity_id=None,
+                    title=title[:180],
+                    source_key=source_key,
+                    source_url=source_url,
+                    observed_at=observed_at,
+                    freshness=FreshnessState.UNVERIFIED,
+                )
+            )
+        return result
+
     def _event_link_discoveries(
         self,
         html: str,
@@ -278,7 +317,7 @@ class PublicWebSignalAdapter:
         for href, texts in grouped.items():
             href_path = urlsplit(href).path.casefold()
             has_ticket_signal = any("ticket" in item.casefold() or item.casefold() == "more info" for item in texts)
-            has_event_path = "/event" in href_path
+            has_event_path = "/event/" in href_path
             if not has_ticket_signal and not has_event_path:
                 continue
             title = next(
