@@ -3,7 +3,7 @@
   "sliceId": "VS-05",
   "title": "POC Ingestion Pipeline",
   "status": "active",
-  "lifecycle": "approved",
+  "lifecycle": "testing",
   "riskLevel": "high",
   "implementationMode": "runtime-enabled",
   "requirements": [
@@ -121,8 +121,8 @@
   "progress": {
     "discovery": 100,
     "decisions": 100,
-    "implementation": 5,
-    "testing": 0,
+    "implementation": 100,
+    "testing": 100,
     "certification": 0,
     "release": 0,
     "validation": 0
@@ -157,11 +157,15 @@
   },
   "links": {
     "specification": "docs/slices/VS-05.md",
-    "implementationPr": null,
+    "implementationPr": "https://github.com/ksazid/ziras/pull/6",
     "evidence": [
       "docs/slices/VS-05.md",
       "docs/integrations/MALTA-SOURCE-PACK.md",
-      "certified-vs04-sha:ac3a166bbaf511335fe2a205d940f98c84919dc0"
+      "https://github.com/ksazid/ziras/actions/runs/33367506170",
+      "tested-sha:30fe659c371dc378513939cb95b652890cb358c3",
+      "unit: kernel/meta/source-pack/ingestion tests passed",
+      "database: PostgreSQL16/PostGIS/pgvector ingestion migration dedupe provenance passed",
+      "pes-preflight: full repository validation passed"
     ]
   },
   "maxAttempts": 3
