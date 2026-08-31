@@ -65,6 +65,7 @@ jobs:
           SOURCE_SCOPE: ${{ inputs.scope || 'poc' }}
           SOURCE_KEY: ${{ inputs.source || '' }}
         run: |
+          set -o pipefail
           if [ -n "$SOURCE_KEY" ]; then
             python services/discovery/scripts/run_poc_ingestion.py \
               --scope "$SOURCE_SCOPE" \
