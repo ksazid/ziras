@@ -15,6 +15,9 @@ on:
         description: Optional exact source_key
         required: false
         type: string
+  push:
+    branches:
+      - validation/vs06-post-merge
 
 permissions:
   contents: read
@@ -59,8 +62,8 @@ jobs:
       - name: Run governed POC ingestion
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ziras
-          SOURCE_SCOPE: ${{ inputs.scope }}
-          SOURCE_KEY: ${{ inputs.source }}
+          SOURCE_SCOPE: ${{ inputs.scope || 'poc' }}
+          SOURCE_KEY: ${{ inputs.source || '' }}
         run: |
           if [ -n "$SOURCE_KEY" ]; then
             python services/discovery/scripts/run_poc_ingestion.py \
