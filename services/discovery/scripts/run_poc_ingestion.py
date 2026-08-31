@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 import json
 import os
 from pathlib import Path
+from uuid import UUID
 
 import psycopg
 
@@ -47,12 +48,14 @@ def main() -> int:
             source_keys=tuple(args.source),
             now=datetime.now(timezone.utc),
         )
+        source_results = _load_source_results(connection, summary.run_id)
 
     payload = {
         "run_id": str(summary.run_id),
         "status": summary.status,
         "scope": scope.value,
         "metrics": dict(summary.metrics),
+        "source_results": source_results,
         "ranked": [
             {
                 "id": str(item.id),
@@ -72,6 +75,40 @@ def main() -> int:
     }
     print(json.dumps(payload, indent=2, sort_keys=True))
     return 0 if summary.status in {"completed", "partial"} else 1
+
+
+def _load_source_results(connection: psycopg.Connection, run_id: UUID) -> list[dict[str, object]]:
+    rows = connection.execute(
+        """
+        SELECT source_key, source_url, fetch_mode, status, observed_at, http_status,
+               candidate_count, inserted_count, updated_count, duplicate_count,
+               expired_count, error_code, detail
+        FROM ingestion_source_result
+        WHERE run_id = %s
+        ORDER BY id
+        """,
+        (run_id,),
+    ).fetchall()
+    results: list[dict[str, object]] = []
+    for row in rows:
+        results.append(
+            {
+                "source_key": row[0],
+                "source_url": row[1],
+                "fetch_mode": row[2],
+                "status": row[3],
+                "observed_at": row[4].isoformat() if row[4] else None,
+                "http_status": row[5],
+                "candidate_count": row[6],
+                "inserted_count": row[7],
+                "updated_count": row[8],
+                "duplicate_count": row[9],
+                "expired_count": row[10],
+                "error_code": row[11],
+                "detail": row[12],
+            }
+        )
+    return results
 
 
 def _apply_migrations(connection: psycopg.Connection) -> None:
