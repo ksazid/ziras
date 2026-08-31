@@ -1,0 +1,86 @@
+name: Malta POC Ingestion
+
+on:
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: Approved non-production policy scope
+        required: true
+        default: poc
+        type: choice
+        options:
+          - poc
+          - research
+      source:
+        description: Optional exact source_key
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install discovery acquisition stack
+        run: python -m pip install -e './services/discovery[dev,acquisition]'
+
+      - name: Install Chromium for browser fallback
+        run: python -m playwright install --with-deps chromium
+
+      - name: Build PostgreSQL 16 with PostGIS and pgvector
+        run: docker build -t ziras-discovery-postgres services/discovery/tests/postgres
+
+      - name: Start ephemeral POC PostgreSQL
+        run: |
+          docker run --rm -d --name ziras-poc-postgres \
+            -e POSTGRES_USER=postgres \
+            -e POSTGRES_PASSWORD=postgres \
+            -e POSTGRES_DB=ziras \
+            -p 5432:5432 \
+            ziras-discovery-postgres
+          for i in {1..30}; do
+            if docker exec ziras-poc-postgres pg_isready -U postgres -d ziras; then
+              exit 0
+            fi
+            sleep 1
+          done
+          docker logs ziras-poc-postgres
+          exit 1
+
+      - name: Run governed POC ingestion
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ziras
+          SOURCE_SCOPE: ${{ inputs.scope }}
+          SOURCE_KEY: ${{ inputs.source }}
+        run: |
+          if [ -n "$SOURCE_KEY" ]; then
+            python services/discovery/scripts/run_poc_ingestion.py \
+              --scope "$SOURCE_SCOPE" \
+              --source "$SOURCE_KEY" \
+              --apply-migrations | tee poc-ingestion.json
+          else
+            python services/discovery/scripts/run_poc_ingestion.py \
+              --scope "$SOURCE_SCOPE" \
+              --apply-migrations | tee poc-ingestion.json
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: poc-ingestion-${{ github.run_id }}
+          path: poc-ingestion.json
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Stop POC PostgreSQL
+        if: always()
+        run: docker stop ziras-poc-postgres || true
