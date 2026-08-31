@@ -3,6 +3,7 @@ name: Discovery Kernel
 on:
   push:
     branches:
+      - main
       - feat/vs02-discovery-kernel-impl
       - feat/vs03-meta-ad-library-adapter
       - feat/vs04-production-source-adapters
