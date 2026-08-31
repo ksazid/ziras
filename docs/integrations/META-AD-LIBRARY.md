@@ -14,6 +14,7 @@ Malta-first default:
 - publisher platforms: `FACEBOOK`, `INSTAGRAM`
 - active status: `ACTIVE`
 - ad type: `ALL`
+- media type: `ALL`
 
 ## External prerequisites
 
@@ -54,6 +55,9 @@ Optional query defaults:
 
 - `META_AD_LIBRARY_ACTIVE_STATUS=ACTIVE`
 - `META_AD_LIBRARY_AD_TYPE=ALL`
+- `META_AD_LIBRARY_MEDIA_TYPE=ALL`
+
+`MetaAdLibraryClient.search()` also accepts `delivery_date_min` and `delivery_date_max`, allowing the collector to query a bounded historical window without changing global configuration.
 
 ## Readiness states
 
@@ -85,13 +89,26 @@ The official endpoint is:
 
 `https://graph.facebook.com/<META_GRAPH_API_VERSION>/ads_archive`
 
-Ziras sends Malta/EU source filters through the official API parameters. Pagination stores only the `after` cursor; it does not persist Meta's raw `paging.next` URL because that URL may contain credentials.
+Ziras supports the core official filters needed for discovery collection:
+
+- reached country
+- Facebook/Instagram publisher platform
+- active/inactive/all delivery state
+- ad type
+- media type
+- delivery date min/max
+- search terms
+- cursor pagination
+
+Pagination stores only the `after` cursor; it does not persist Meta's raw `paging.next` URL because that URL may contain credentials.
 
 ## Operational checks before production enablement
 
 - readiness == `ready`
 - a smoke query for `MT` succeeds
 - returned records include expected Facebook/Instagram publisher platform values
+- current and bounded historical date queries work as expected
+- image/video media filtering works as expected when configured
 - no token appears in logs, source URLs, observation JSON, errors, or metrics
 - rate-limit/error telemetry is visible
 - token rotation procedure is documented for the deployment environment
