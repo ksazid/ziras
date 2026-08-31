@@ -54,7 +54,7 @@ def test_scope_and_path_controls_prevent_accidental_production_enablement() -> N
     assert wrong_path.allowed is False
 
     for source_key, source_url in (
-        ("spazju_kreattiv_events", "https://www.kreattivita.org/en/events/"),
+        ("spazju_kreattiv_events", "https://spazjukreattiv.org/events/list/"),
         ("eurosport_malta_sale", "https://www.eurosport.com.mt/sale"),
     ):
         assert registry.decide(
