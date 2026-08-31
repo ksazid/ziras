@@ -149,7 +149,7 @@ def _entry_from_raw(raw: object, *, overrides: Mapping[str, object]) -> SourceCa
     override = overrides.get(source_key, {})
     if not isinstance(override, dict):
         raise ValueError(f"source hardening override must be an object for {source_key}")
-    forbidden = set(override) - {"route_adapter_kinds", "minimum_candidates"}
+    forbidden = set(override) - {"route_adapter_kinds", "minimum_candidates", "fetch_mode"}
     if forbidden:
         raise ValueError(
             f"source hardening cannot mutate policy/catalog authority for {source_key}: {sorted(forbidden)}"
@@ -166,13 +166,14 @@ def _entry_from_raw(raw: object, *, overrides: Mapping[str, object]) -> SourceCa
     )
     if minimum_candidates < 0:
         raise ValueError(f"minimum_candidates must be >= 0 for {source_key}")
+    fetch_mode = FetchMode(override.get("fetch_mode", raw["fetch_mode"]))
 
     return SourceCatalogEntry(
         source_key=source_key,
         display_name=str(raw["display_name"]),
         source_class=str(raw["source_class"]),
         start_urls=tuple(str(url) for url in raw.get("start_urls", ())),
-        fetch_mode=FetchMode(raw["fetch_mode"]),
+        fetch_mode=fetch_mode,
         adapter_kind=AdapterKind(raw["adapter_kind"]),
         policy=policy,
         terms_url=raw.get("terms_url"),
