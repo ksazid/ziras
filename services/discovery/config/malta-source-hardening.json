@@ -3,9 +3,19 @@
     "minimum_candidates": 1
   },
   "eden_cinemas": {
+    "minimum_candidates": 1,
     "route_adapter_kinds": {
       "/special-offers": "promotion",
       "/whats-on": "event"
     }
+  },
+  "homemate_offers": {
+    "minimum_candidates": 1
+  },
+  "spazju_kreattiv_events": {
+    "minimum_candidates": 1
+  },
+  "eurosport_malta_sale": {
+    "minimum_candidates": 1
   }
 }

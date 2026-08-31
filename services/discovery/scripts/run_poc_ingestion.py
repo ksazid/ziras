@@ -47,12 +47,14 @@ def main() -> int:
             source_keys=tuple(args.source),
             now=datetime.now(timezone.utc),
         )
+        source_results = _source_results(connection, summary.run_id)
 
     payload = {
         "run_id": str(summary.run_id),
         "status": summary.status,
         "scope": scope.value,
         "metrics": dict(summary.metrics),
+        "source_results": source_results,
         "ranked": [
             {
                 "id": str(item.id),
@@ -72,6 +74,35 @@ def main() -> int:
     }
     print(json.dumps(payload, indent=2, sort_keys=True))
     return 0 if summary.status in {"completed", "partial"} else 1
+
+
+def _source_results(connection: psycopg.Connection, run_id: object) -> list[dict[str, object]]:
+    rows = connection.execute(
+        """
+        SELECT source_key, source_url, fetch_mode, status, http_status,
+               candidate_count, inserted_count, updated_count, duplicate_count,
+               expired_count, error_code, detail
+        FROM ingestion_source_result
+        WHERE run_id = %s
+        ORDER BY id
+        """,
+        (run_id,),
+    ).fetchall()
+    columns = (
+        "source_key",
+        "source_url",
+        "fetch_mode",
+        "status",
+        "http_status",
+        "candidate_count",
+        "inserted_count",
+        "updated_count",
+        "duplicate_count",
+        "expired_count",
+        "error_code",
+        "detail",
+    )
+    return [dict(zip(columns, row, strict=True)) for row in rows]
 
 
 def _apply_migrations(connection: psycopg.Connection) -> None:
