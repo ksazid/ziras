@@ -97,10 +97,10 @@ def load_source_catalog(
 
     overrides: Mapping[str, object] = {}
     resolved_hardening: Path | None = None
-    if path is None or hardening_path is not None:
-        resolved_hardening = (
-            Path(hardening_path) if hardening_path is not None else default_malta_hardening_path()
-        )
+    if hardening_path is not None:
+        resolved_hardening = Path(hardening_path)
+    elif path is None and extension_path is None:
+        resolved_hardening = default_malta_hardening_path()
 
     if resolved_hardening is not None and resolved_hardening.exists():
         raw_overrides = _read_json(resolved_hardening)
