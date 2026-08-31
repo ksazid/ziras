@@ -3,7 +3,7 @@
   "sliceId": "VS-05",
   "title": "POC Ingestion Pipeline",
   "status": "active",
-  "lifecycle": "testing",
+  "lifecycle": "certified",
   "riskLevel": "high",
   "implementationMode": "runtime-enabled",
   "requirements": [
@@ -89,12 +89,12 @@
     },
     {
       "type": "certification",
-      "status": "pending",
-      "version": null,
-      "commitSha": null,
-      "by": null,
-      "at": null,
-      "rationale": null
+      "status": "approved",
+      "version": "VS-05",
+      "commitSha": "934f3c871232b44be29b026624b34f5868c3b34d",
+      "by": "ksazid",
+      "at": "2026-08-31T11:15:00+02:00",
+      "rationale": "Product owner approved VS-05 certification after exact-head ingestion/kernel/database and PES preflight gates passed."
     },
     {
       "type": "release",
@@ -123,14 +123,20 @@
     "decisions": 100,
     "implementation": 100,
     "testing": 100,
-    "certification": 0,
+    "certification": 100,
     "release": 0,
     "validation": 0
   },
   "certification": {
-    "status": "not-started",
-    "commitSha": null,
-    "evidence": []
+    "status": "passed",
+    "commitSha": "934f3c871232b44be29b026624b34f5868c3b34d",
+    "evidence": [
+      "https://github.com/ksazid/ziras/actions/runs/33367506170",
+      "https://github.com/ksazid/ziras/actions/runs/33367653523",
+      "kernel/meta/source-pack/VS-05 ingestion unit tests passed",
+      "PostgreSQL16/PostGIS/pgvector ingestion migration, dedupe and provenance passed",
+      "full PES preflight passed"
+    ]
   },
   "release": {
     "status": "not-authorized",
@@ -162,10 +168,8 @@
       "docs/slices/VS-05.md",
       "docs/integrations/MALTA-SOURCE-PACK.md",
       "https://github.com/ksazid/ziras/actions/runs/33367506170",
-      "tested-sha:30fe659c371dc378513939cb95b652890cb358c3",
-      "unit: kernel/meta/source-pack/ingestion tests passed",
-      "database: PostgreSQL16/PostGIS/pgvector ingestion migration dedupe provenance passed",
-      "pes-preflight: full repository validation passed"
+      "https://github.com/ksazid/ziras/actions/runs/33367653523",
+      "certified-sha:934f3c871232b44be29b026624b34f5868c3b34d"
     ]
   },
   "maxAttempts": 3
