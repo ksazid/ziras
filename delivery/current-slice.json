@@ -3,7 +3,7 @@
   "sliceId": "VS-04",
   "title": "Malta Production Source Adapter Pack",
   "status": "active",
-  "lifecycle": "implementing",
+  "lifecycle": "testing",
   "riskLevel": "medium",
   "implementationMode": "runtime-enabled",
   "requirements": [
@@ -120,7 +120,7 @@
     "discovery": 100,
     "decisions": 100,
     "implementation": 100,
-    "testing": 0,
+    "testing": 100,
     "certification": 0,
     "release": 0,
     "validation": 0
@@ -159,6 +159,8 @@
     "evidence": [
       "docs/integrations/SOURCE-PACK.md",
       "docs/evidence/VS-04-LIVE-SOURCE-BASELINE-2026-08-31.md",
+      "https://github.com/ksazid/ziras/actions/runs/33345789518",
+      "tested-sha:56024d6314dd5dadbfe280b1c26db612ff06fff8",
       "https://www.visitmalta.com/en/events-in-malta-and-gozo/",
       "https://deal.com.mt/"
     ]
