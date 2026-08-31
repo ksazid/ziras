@@ -62,7 +62,7 @@
       "Every accepted daily record is bound to an exact repository SHA and GitHub Actions run ID.",
       "Existing certified POC source-policy boundaries remain authoritative; no new source permissions are introduced.",
       "Production source access remains OFF.",
-      "Scheduler remains OFF; POC measurements are manual/governed unless separately approved.",
+      "Product owner approved a bounded daily POC scheduler for 2026-09-01 through 2026-09-14 at 08:00 Europe/Malta; scheduled runs force scope=poc and cannot select production scope.",
       "Release and production enablement remain not authorized.",
       "Measurement framework certified at exact implementation SHA 3bc1341dae7991326d16bd10c5a6804585d1748e after Discovery Kernel, PES and PostgreSQL integration passed."
     ]
@@ -93,7 +93,7 @@
       "commitSha": null,
       "by": "ksazid",
       "at": "2026-08-31T21:59:00+02:00",
-      "rationale": "Go ahead authorizes implementation of deterministic measurement tooling and governed POC evidence collection only."
+      "rationale": "Go ahead authorizes implementation of deterministic measurement tooling and governed POC evidence collection only. The product owner additionally approved the bounded daily POC scheduler for the fourteen-day validation window."
     },
     {
       "type": "certification",
@@ -176,7 +176,7 @@
       "VS-07-certified-sha:3bc1341dae7991326d16bd10c5a6804585d1748e",
       "VS-07-certification-run:https://github.com/ksazid/ziras/actions/runs/33434341657",
       "production-source-access:OFF",
-      "scheduler:OFF"
+      "scheduler:POC-ONLY-2026-09-01..2026-09-14@08:00-Europe/Malta"
     ]
   },
   "maxAttempts": 3

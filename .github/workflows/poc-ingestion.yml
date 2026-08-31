@@ -1,6 +1,9 @@
 name: Malta POC Ingestion
 
 on:
+  schedule:
+    # 08:00 Europe/Malta during the approved 2026-09-01..2026-09-14 POC window.
+    - cron: '0 6 1-14 9 *'
   workflow_dispatch:
     inputs:
       scope:
@@ -23,23 +26,47 @@ jobs:
   ingest:
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    env:
+      SOURCE_SCOPE: ${{ github.event_name == 'schedule' && 'poc' || inputs.scope }}
+      SOURCE_KEY: ${{ github.event_name == 'schedule' && '' || inputs.source }}
     steps:
       - uses: actions/checkout@v4
 
+      - name: Enforce approved scheduler window
+        id: window
+        shell: bash
+        run: |
+          if [ "${GITHUB_EVENT_NAME}" != "schedule" ]; then
+            echo "active=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          today="$(date -u +%F)"
+          if [[ "$today" < "2026-09-01" || "$today" > "2026-09-14" ]]; then
+            echo "active=false" >> "$GITHUB_OUTPUT"
+            echo "Outside approved VS-07 scheduler window: $today"
+          else
+            echo "active=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/setup-python@v5
+        if: steps.window.outputs.active == 'true'
         with:
           python-version: '3.12'
 
       - name: Install discovery acquisition stack
+        if: steps.window.outputs.active == 'true'
         run: python -m pip install -e './services/discovery[dev,acquisition]'
 
       - name: Install Chromium for browser fallback
+        if: steps.window.outputs.active == 'true'
         run: python -m playwright install --with-deps chromium
 
       - name: Build PostgreSQL 16 with PostGIS and pgvector
+        if: steps.window.outputs.active == 'true'
         run: docker build -t ziras-discovery-postgres services/discovery/tests/postgres
 
       - name: Start ephemeral POC PostgreSQL
+        if: steps.window.outputs.active == 'true'
         run: |
           docker run --rm -d --name ziras-poc-postgres \
             -e POSTGRES_USER=postgres \
@@ -57,10 +84,9 @@ jobs:
           exit 1
 
       - name: Run governed POC ingestion
+        if: steps.window.outputs.active == 'true'
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ziras
-          SOURCE_SCOPE: ${{ inputs.scope }}
-          SOURCE_KEY: ${{ inputs.source }}
         run: |
           set -o pipefail
           if [ -n "$SOURCE_KEY" ]; then
@@ -75,10 +101,10 @@ jobs:
           fi
 
       - name: Record immutable run provenance
-        if: always()
+        if: always() && steps.window.outputs.active == 'true'
         env:
-          POC_SCOPE: ${{ inputs.scope }}
-          POC_SOURCE: ${{ inputs.source }}
+          POC_SCOPE: ${{ env.SOURCE_SCOPE }}
+          POC_SOURCE: ${{ env.SOURCE_KEY }}
         run: |
           python - <<'PY'
           import json, os
@@ -99,7 +125,7 @@ jobs:
           PY
 
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: always() && steps.window.outputs.active == 'true'
         with:
           name: poc-ingestion-${{ github.run_id }}
           path: |
@@ -109,5 +135,5 @@ jobs:
           retention-days: 30
 
       - name: Stop POC PostgreSQL
-        if: always()
+        if: always() && steps.window.outputs.active == 'true'
         run: docker stop ziras-poc-postgres || true
