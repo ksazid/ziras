@@ -6,6 +6,7 @@
     "start_urls": ["https://spazjukreattiv.org/events/list/"],
     "fetch_mode": "static",
     "adapter_kind": "event",
+    "minimum_candidates": 1,
     "terms_url": "https://spazjukreattiv.org/privacy-policy/",
     "policy": {
       "mode": "allow",
@@ -28,6 +29,7 @@
     "start_urls": ["https://www.eurosport.com.mt/sale"],
     "fetch_mode": "static",
     "adapter_kind": "promotion",
+    "minimum_candidates": 1,
     "terms_url": "https://www.eurosport.com.mt/conditions-of-use",
     "policy": {
       "mode": "allow",
