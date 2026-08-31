@@ -44,8 +44,8 @@
   "impact": {
     "areas": [
       "customer-flow",
-      "privacy",
-      "device-permissions"
+      "legal-privacy",
+      "sensitive-data"
     ],
     "notes": [
       "Location permission must have a manual-location fallback.",
