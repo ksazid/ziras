@@ -107,20 +107,11 @@
     {
       "type": "certification",
       "status": "approved",
-      "version": "VS-07-measurement-framework",
-      "commitSha": "3bc1341dae7991326d16bd10c5a6804585d1748e",
-      "by": "ksazid",
-      "at": "2026-08-31T22:10:00+02:00",
-      "rationale": "Product owner approved the original VS-07 measurement framework certification after exact-head Discovery Kernel, PES preflight, PostgreSQL/PostGIS/pgvector integration and POC metric regression tests passed. This certification remains historical framework evidence."
-    },
-    {
-      "type": "certification",
-      "status": "approved",
       "version": "VS-07-household-source-amendment",
       "commitSha": "472da5afd628e228ea7ac120c92258b2c3a885f2",
       "by": "ksazid",
       "at": "2026-08-31T23:21:00+02:00",
-      "rationale": "Product owner authorized the household-source amendment certification with 'Go' after exact-head run 33440089417 passed PES, unit/measurement/household regression tests, and PostgreSQL 16 + PostGIS + pgvector integration."
+      "rationale": "Product owner authorized the household-source amendment certification with 'Go' after exact-head run 33440089417 passed PES, unit/measurement/household regression tests, and PostgreSQL 16 + PostGIS + pgvector integration. Historical framework certification remains preserved in certification evidence rather than as a second active certification approval."
     },
     {
       "type": "release",
@@ -152,7 +143,7 @@
     "validation": 0
   },
   "certification": {
-    "status": "approved",
+    "status": "passed",
     "commitSha": "472da5afd628e228ea7ac120c92258b2c3a885f2",
     "evidence": [
       "historical measurement-framework certification: https://github.com/ksazid/ziras/actions/runs/33434341657",
