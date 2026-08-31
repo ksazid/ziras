@@ -69,7 +69,7 @@ class FixtureStore:
         return None
 
 
-def test_default_catalog_applies_hardening_and_reaches_five_poc_source_classes() -> None:
+def test_default_catalog_applies_hardening_but_does_not_promote_candidates() -> None:
     entries = load_source_catalog()
     by_key = {entry.source_key: entry for entry in entries}
 
@@ -81,14 +81,13 @@ def test_default_catalog_applies_hardening_and_reaches_five_poc_source_classes()
     ]
     classes = {entry.source_class for entry in poc}
 
-    assert {
+    assert classes == {
         "events-official",
         "entertainment-offers",
         "home-retail",
-        "cultural-venue-events",
-        "sports-retail",
-    }.issubset(classes)
-    assert len(classes) >= 5
+    }
+    assert "spazju_kreattiv_events" not in by_key
+    assert "eurosport_malta_sale" not in by_key
 
     eden = by_key["eden_cinemas"]
     assert eden.adapter_kind_for("https://www.edencinemas.com.mt/special-offers") is AdapterKind.PROMOTION
@@ -97,20 +96,6 @@ def test_default_catalog_applies_hardening_and_reaches_five_poc_source_classes()
     visitmalta = by_key["visitmalta_events"]
     assert visitmalta.fetch_mode is FetchMode.BROWSER
     assert visitmalta.minimum_candidates == 1
-
-    spazju = by_key["spazju_kreattiv_events"]
-    assert spazju.policy.scope is SourcePolicyScope.POC
-    assert spazju.policy.robots_required is True
-    assert spazju.policy.allowed_path_prefixes == ("/events/",)
-    assert spazju.policy.content_storage_allowed is False
-    assert spazju.minimum_candidates == 1
-
-    eurosport = by_key["eurosport_malta_sale"]
-    assert eurosport.policy.scope is SourcePolicyScope.POC
-    assert eurosport.policy.robots_required is True
-    assert eurosport.policy.allowed_path_prefixes == ("/sale",)
-    assert eurosport.policy.content_storage_allowed is False
-    assert eurosport.minimum_candidates == 1
 
 
 def test_configured_visitmalta_browser_entry_accepts_rendered_event_fixture() -> None:
@@ -162,7 +147,7 @@ def test_existing_restricted_sources_are_not_relaxed_by_vs06() -> None:
     assert by_key["eurospin_promotions"].policy.scope is SourcePolicyScope.RESEARCH
 
 
-def test_custom_catalog_does_not_implicitly_apply_default_vs06_policy_additions(tmp_path: Path) -> None:
+def test_custom_catalog_does_not_implicitly_apply_default_hardening(tmp_path: Path) -> None:
     custom = tmp_path / "catalog.json"
     custom.write_text("[]", encoding="utf-8")
 
