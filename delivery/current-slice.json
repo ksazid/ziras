@@ -2,8 +2,8 @@
   "schemaVersion": 2,
   "sliceId": "VS-07",
   "title": "14-Day POC Metrics Validation",
-  "status": "testing",
-  "lifecycle": "testing",
+  "status": "certification",
+  "lifecycle": "certification",
   "riskLevel": "high",
   "implementationMode": "runtime-enabled",
   "requirements": [
@@ -71,7 +71,8 @@
       "Production source access remains OFF.",
       "Product owner approved a bounded daily POC scheduler for 2026-09-01 through 2026-09-14 at 08:00 Europe/Malta; scheduled runs force scope=poc and cannot select production scope.",
       "Release and production enablement remain not authorized.",
-      "The measurement framework's prior certification remains historical evidence but is stale for this runtime source-policy/catalog amendment until the amendment exact head is re-certified."
+      "The measurement framework's prior certification remains historical evidence and does not certify this runtime amendment.",
+      "Household amendment exact implementation head ae0cd3f2835ad9de6ea42df397b68da667eb39a1 passed PES preflight, the full unit/measurement/household regression suite, and PostgreSQL 16 + PostGIS + pgvector in workflow run 33439835379; certification approval is now pending."
     ]
   },
   "approvals": [
@@ -135,7 +136,7 @@
     "discovery": 100,
     "decisions": 100,
     "implementation": 100,
-    "testing": 20,
+    "testing": 100,
     "certification": 0,
     "release": 0,
     "validation": 0
@@ -148,7 +149,12 @@
       "historical Discovery Kernel/unit tests: passed",
       "historical PostgreSQL16/PostGIS/pgvector integration: passed",
       "historical PES preflight: passed",
-      "household source amendment requires fresh exact-head certification"
+      "household amendment tested-sha:ae0cd3f2835ad9de6ea42df397b68da667eb39a1",
+      "household amendment exact-head run:https://github.com/ksazid/ziras/actions/runs/33439835379",
+      "household amendment PES preflight: passed",
+      "household amendment unit/POC-metrics/household-source regression: passed",
+      "household amendment PostgreSQL16/PostGIS/pgvector integration: passed",
+      "household source amendment requires explicit fresh certification approval"
     ]
   },
   "release": {
@@ -175,16 +181,18 @@
   },
   "links": {
     "specification": "docs/slices/VS-07.md",
-    "implementationPr": null,
+    "implementationPr": "https://github.com/ksazid/ziras/pull/14",
     "evidence": [
       "product/PRD.md#success-metrics",
       "docs/integrations/VS07-HOUSEHOLD-CATEGORY-QUALIFICATION.md",
       "VS-07-certified-measurement-sha:3bc1341dae7991326d16bd10c5a6804585d1748e",
       "VS-07-certification-run:https://github.com/ksazid/ziras/actions/runs/33434341657",
       "VS-07-scheduler-merge-sha:6b829a7a612befb002565bbcc859d895c1bb0575",
+      "household-amendment-tested-sha:ae0cd3f2835ad9de6ea42df397b68da667eb39a1",
+      "household-amendment-test-run:https://github.com/ksazid/ziras/actions/runs/33439835379",
       "production-source-access:OFF",
       "scheduler:POC-ONLY-2026-09-01..2026-09-14@08:00-Europe/Malta",
-      "household-source-expansion:TESTING-PENDING-CERTIFICATION"
+      "household-source-expansion:CERTIFICATION-PENDING"
     ]
   },
   "maxAttempts": 3
