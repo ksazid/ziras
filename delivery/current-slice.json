@@ -2,8 +2,8 @@
   "schemaVersion": 2,
   "sliceId": "VS-07",
   "title": "14-Day POC Metrics Validation",
-  "status": "certified",
-  "lifecycle": "certified",
+  "status": "testing",
+  "lifecycle": "testing",
   "riskLevel": "high",
   "implementationMode": "runtime-enabled",
   "requirements": [
@@ -32,6 +32,8 @@
     "PRD approved 14-day discovery-engine POC gates",
     "VS-04 certified Malta source-policy baseline",
     "VS-06 certified POC-only source extensions",
+    "VS-07 measurement framework certified at 3bc1341dae7991326d16bd10c5a6804585d1748e",
+    "VS-07 bounded POC scheduler merged through PR #13",
     "Discovery Kernel main push CI enabled"
   ],
   "blockers": [],
@@ -49,6 +51,7 @@
   ],
   "impact": {
     "areas": [
+      "product-policy",
       "architecture",
       "api",
       "database",
@@ -58,51 +61,55 @@
     ],
     "notes": [
       "VS-07 measures the approved PRD 14-day discovery-engine POC gates using reproducible daily evidence.",
-      "Missing or partial daily evidence fails closed and cannot silently count as a passing day.",
+      "Missing or partial daily evidence fails closed and cannot silently count as a passing day; complete failing days remain evidence.",
       "Every accepted daily record is bound to an exact repository SHA and GitHub Actions run ID.",
-      "Existing certified POC source-policy boundaries remain authoritative; no new source permissions are introduced.",
+      "Product owner approved seven additive household-value POC categories before Day 1: grocery/supermarket, restaurant/takeaway, family/kids, activities, senior discounts, pharmacy/personal care, and spa/wellness.",
+      "The new source pack is POC-only, robots-governed, low-rate, attribution-required and factual-metadata-only; raw page/image retention remains prohibited.",
+      "Each newly approved source has minimum_candidates=1 so HTTP success with zero extracted inventory fails closed.",
+      "Existing restrictions remain unchanged: McDonald's and Pizza Hut denied, Franks denied, Wolt partner-only, and the original Lidl source remains research-only; a separate explicit Lidl POC key carries the approved narrow POC permission.",
+      "Deal.mt remains reference/validation inventory only and Corinthia is not approved for automated acquisition because published terms prohibit automated monitoring without consent.",
       "Production source access remains OFF.",
       "Product owner approved a bounded daily POC scheduler for 2026-09-01 through 2026-09-14 at 08:00 Europe/Malta; scheduled runs force scope=poc and cannot select production scope.",
       "Release and production enablement remain not authorized.",
-      "Measurement framework certified at exact implementation SHA 3bc1341dae7991326d16bd10c5a6804585d1748e after Discovery Kernel, PES and PostgreSQL integration passed."
+      "The measurement framework's prior certification remains historical evidence but is stale for this runtime source-policy/catalog amendment until the amendment exact head is re-certified."
     ]
   },
   "approvals": [
     {
       "type": "scope",
       "status": "approved",
-      "version": "VS-07",
+      "version": "VS-07-household-expansion",
       "commitSha": null,
       "by": "ksazid",
-      "at": "2026-08-31T21:59:00+02:00",
-      "rationale": "Product owner explicitly said Go ahead after the proposed next step to start the formal POC validation/measurement slice."
+      "at": "2026-08-31T22:45:00+02:00",
+      "rationale": "Product owner approved VS-07 measurement, the bounded scheduler, and explicitly approved adding the seven household-value POC categories before Day 1 with 'Approved, lets add these'."
     },
     {
       "type": "policy",
       "status": "approved",
-      "version": "VS-06-poc-policy-state",
+      "version": "VS-07-household-poc-policy",
       "commitSha": null,
       "by": "ksazid",
-      "at": "2026-08-31T15:05:00+02:00",
-      "rationale": "VS-07 introduces no new source permissions and inherits the already approved certified POC policy state from VS-04/VS-06. Production access remains unapproved."
+      "at": "2026-08-31T22:45:00+02:00",
+      "rationale": "Product owner approved the additive POC-only source policies for grocery/supermarket, restaurant/takeaway, family/kids, activities, senior discounts, pharmacy/personal care and spa/wellness under the documented narrow public-path, robots, rate-cap, attribution and no-content-retention constraints. Existing VS-04/VS-06 restrictions and production denial remain authoritative."
     },
     {
       "type": "implementation",
       "status": "approved",
-      "version": "VS-07",
+      "version": "VS-07-household-expansion",
       "commitSha": null,
       "by": "ksazid",
-      "at": "2026-08-31T21:59:00+02:00",
-      "rationale": "Go ahead authorizes implementation of deterministic measurement tooling and governed POC evidence collection only. The product owner additionally approved the bounded daily POC scheduler for the fourteen-day validation window."
+      "at": "2026-08-31T22:45:00+02:00",
+      "rationale": "Product owner authorized implementation of the seven approved household-value POC categories and the extraction/catalog hardening required to test them before the formal Day 1 run."
     },
     {
       "type": "certification",
       "status": "approved",
-      "version": "VS-07",
+      "version": "VS-07-measurement-framework",
       "commitSha": "3bc1341dae7991326d16bd10c5a6804585d1748e",
       "by": "ksazid",
       "at": "2026-08-31T22:10:00+02:00",
-      "rationale": "Product owner explicitly approved VS-07 certification after exact-head Discovery Kernel, PES preflight, PostgreSQL/PostGIS/pgvector integration and POC metric regression tests passed."
+      "rationale": "Product owner approved the original VS-07 measurement framework certification after exact-head Discovery Kernel, PES preflight, PostgreSQL/PostGIS/pgvector integration and POC metric regression tests passed. This certification is historical evidence and does not certify the current household source amendment."
     },
     {
       "type": "release",
@@ -128,20 +135,20 @@
     "discovery": 100,
     "decisions": 100,
     "implementation": 100,
-    "testing": 100,
-    "certification": 100,
+    "testing": 20,
+    "certification": 0,
     "release": 0,
     "validation": 0
   },
   "certification": {
-    "status": "passed",
+    "status": "stale",
     "commitSha": "3bc1341dae7991326d16bd10c5a6804585d1748e",
     "evidence": [
-      "https://github.com/ksazid/ziras/actions/runs/33434341657",
-      "Discovery Kernel/unit tests: passed",
-      "PostgreSQL16/PostGIS/pgvector integration: passed",
-      "PES preflight: passed",
-      "POC metrics regression tests: passed"
+      "historical measurement-framework certification: https://github.com/ksazid/ziras/actions/runs/33434341657",
+      "historical Discovery Kernel/unit tests: passed",
+      "historical PostgreSQL16/PostGIS/pgvector integration: passed",
+      "historical PES preflight: passed",
+      "household source amendment requires fresh exact-head certification"
     ]
   },
   "release": {
@@ -155,7 +162,7 @@
   "postRelease": {
     "status": "not-started",
     "reviewAt": null,
-    "expectedOutcome": "Demonstrate over fourteen accepted measurement days that Ziras meets the approved Malta discovery-engine POC gates without merchant onboarding.",
+    "expectedOutcome": "Demonstrate over fourteen consecutive complete measurement days that Ziras meets the approved Malta discovery-engine POC gates without merchant onboarding.",
     "metrics": [
       "useful discoveries/day",
       "valid-when-opened rate",
@@ -168,15 +175,16 @@
   },
   "links": {
     "specification": "docs/slices/VS-07.md",
-    "implementationPr": "https://github.com/ksazid/ziras/pull/12",
+    "implementationPr": null,
     "evidence": [
       "product/PRD.md#success-metrics",
-      "VS-06-final-main-sha:9fac7f5987c0a6e206c33925d07e3d029a219665",
-      "VS-06-final-main-run:https://github.com/ksazid/ziras/actions/runs/33433500467",
-      "VS-07-certified-sha:3bc1341dae7991326d16bd10c5a6804585d1748e",
+      "docs/integrations/VS07-HOUSEHOLD-CATEGORY-QUALIFICATION.md",
+      "VS-07-certified-measurement-sha:3bc1341dae7991326d16bd10c5a6804585d1748e",
       "VS-07-certification-run:https://github.com/ksazid/ziras/actions/runs/33434341657",
+      "VS-07-scheduler-merge-sha:6b829a7a612befb002565bbcc859d895c1bb0575",
       "production-source-access:OFF",
-      "scheduler:POC-ONLY-2026-09-01..2026-09-14@08:00-Europe/Malta"
+      "scheduler:POC-ONLY-2026-09-01..2026-09-14@08:00-Europe/Malta",
+      "household-source-expansion:TESTING-PENDING-CERTIFICATION"
     ]
   },
   "maxAttempts": 3
