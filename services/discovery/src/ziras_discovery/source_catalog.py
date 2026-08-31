@@ -5,7 +5,7 @@ from datetime import datetime
 from enum import StrEnum
 import json
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Mapping
 from urllib.parse import urlsplit
 
 from .domain import SourceAccessMode, SourcePolicy, SourcePolicyScope
@@ -55,11 +55,28 @@ def default_malta_catalog_path() -> Path:
     return Path(__file__).resolve().parents[2] / "config" / "malta-source-policy.json"
 
 
-def load_source_catalog(path: str | Path | None = None) -> tuple[SourceCatalogEntry, ...]:
+def default_malta_hardening_path() -> Path:
+    return Path(__file__).resolve().parents[2] / "config" / "malta-source-hardening.json"
+
+
+def load_source_catalog(
+    path: str | Path | None = None,
+    *,
+    hardening_path: str | Path | None = None,
+) -> tuple[SourceCatalogEntry, ...]:
     catalog_path = Path(path) if path is not None else default_malta_catalog_path()
     payload = json.loads(catalog_path.read_text(encoding="utf-8"))
     if not isinstance(payload, list):
         raise ValueError("source catalog must be a JSON array")
+
+    overrides: Mapping[str, object] = {}
+    if path is None or hardening_path is not None:
+        candidate = Path(hardening_path) if hardening_path is not None else default_malta_hardening_path()
+        if candidate.exists():
+            raw_overrides = json.loads(candidate.read_text(encoding="utf-8"))
+            if not isinstance(raw_overrides, dict):
+                raise ValueError("source hardening file must be a JSON object keyed by source_key")
+            overrides = raw_overrides
 
     entries: list[SourceCatalogEntry] = []
     seen: set[str] = set()
@@ -88,13 +105,29 @@ def load_source_catalog(path: str | Path | None = None) -> tuple[SourceCatalogEn
             attribution_required=bool(policy_raw.get("attribution_required", True)),
             content_storage_allowed=bool(policy_raw.get("content_storage_allowed", False)),
         )
+
+        override = overrides.get(source_key, {})
+        if not isinstance(override, dict):
+            raise ValueError(f"source hardening override must be an object for {source_key}")
+        forbidden = set(override) - {"route_adapter_kinds", "minimum_candidates"}
+        if forbidden:
+            raise ValueError(
+                f"source hardening cannot mutate policy/catalog authority for {source_key}: {sorted(forbidden)}"
+            )
+
+        route_raw = override.get("route_adapter_kinds", raw.get("route_adapter_kinds", {}))
+        if not isinstance(route_raw, dict):
+            raise ValueError(f"route_adapter_kinds must be an object for {source_key}")
         route_adapter_kinds = tuple(
             (str(prefix), AdapterKind(kind))
-            for prefix, kind in raw.get("route_adapter_kinds", {}).items()
+            for prefix, kind in route_raw.items()
         )
-        minimum_candidates = int(raw.get("minimum_candidates", 0))
+        minimum_candidates = int(
+            override.get("minimum_candidates", raw.get("minimum_candidates", 0))
+        )
         if minimum_candidates < 0:
             raise ValueError(f"minimum_candidates must be >= 0 for {source_key}")
+
         entries.append(
             SourceCatalogEntry(
                 source_key=source_key,
