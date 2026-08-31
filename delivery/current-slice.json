@@ -3,7 +3,7 @@
   "sliceId": "VS-06",
   "title": "POC Coverage & Extraction Hardening",
   "status": "active",
-  "lifecycle": "implementing",
+  "lifecycle": "decision-pending",
   "riskLevel": "high",
   "implementationMode": "runtime-enabled",
   "requirements": [
@@ -31,7 +31,7 @@
     "ADR-001 approved discovery-engine architecture"
   ],
   "blockers": [
-    "Two additional independent source classes are required for the PRD five-source POC gate and require explicit source-policy approval before they can be added to POC scope.",
+    "Two additional independent source classes require explicit named SourcePolicy approval before they can be added to POC runtime scope.",
     "Formal POC ingestion metrics remain unmeasured until the manual workflow is dispatched in an environment that can create workflow_dispatch runs."
   ],
   "allowedPaths": [
@@ -40,6 +40,7 @@
     ".github/workflows/poc-ingestion.yml",
     "docs/slices/VS-06.md",
     "docs/integrations/MALTA-SOURCE-PACK.md",
+    "docs/integrations/VS06-POC-SOURCE-QUALIFICATION.md",
     "product/TRD.md",
     "delivery/current-slice.json"
   ],
@@ -54,9 +55,9 @@
       "operations-support"
     ],
     "notes": [
-      "Eden route semantics become configuration-driven rather than vendor-specific pipeline logic.",
+      "Eden route semantics are configuration-driven rather than vendor-specific pipeline logic.",
       "VisitMalta browser ingestion fails health validation when rendered inventory produces no candidates.",
-      "VS-06 may qualify additional source candidates, but no candidate is promoted into POC scope without a separate explicit source-policy approval.",
+      "Spazju Kreattiv Events and Eurosport Malta Sale are qualified candidates only and remain outside runtime authority pending explicit SourcePolicy approval.",
       "No production source permission, scheduler or production-enable flag is introduced."
     ]
   },
@@ -120,8 +121,8 @@
   "progress": {
     "discovery": 100,
     "decisions": 100,
-    "implementation": 70,
-    "testing": 35,
+    "implementation": 100,
+    "testing": 100,
     "certification": 0,
     "release": 0,
     "validation": 0
@@ -154,9 +155,11 @@
   },
   "links": {
     "specification": "docs/slices/VS-06.md",
-    "implementationPr": null,
+    "implementationPr": "https://github.com/ksazid/ziras/pull/8",
     "evidence": [
       "https://github.com/ksazid/ziras/pull/7",
+      "https://github.com/ksazid/ziras/actions/runs/33396940823",
+      "tested-policy-pending-sha:db6afef5482ee609557c68b614bc5206b94ee196",
       "VS-05 conditional POC report: technical pipeline green, product gates not yet passed"
     ]
   },
