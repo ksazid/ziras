@@ -116,7 +116,7 @@ class ScrapyPlaywrightAcquirer:
         class PocSpider(scrapy.Spider):
             name = "ziras_poc_ingestion"
 
-            def start_requests(self):
+            def _initial_requests(self):
                 for token, request in requested_by_token.items():
                     meta = {
                         "ziras_token": token,
@@ -132,6 +132,14 @@ class ScrapyPlaywrightAcquirer:
                         errback=self.parse_error,
                         dont_filter=True,
                     )
+
+            async def start(self):
+                for request in self._initial_requests():
+                    yield request
+
+            # Compatibility for Scrapy <2.13. Scrapy 2.18+ calls start().
+            def start_requests(self):
+                yield from self._initial_requests()
 
             def parse_page(self, response):
                 token = response.meta["ziras_token"]
