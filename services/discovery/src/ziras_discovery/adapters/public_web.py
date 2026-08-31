@@ -30,7 +30,20 @@ _EVENT_DATE_RE = re.compile(
     r"(?:\s+\d{1,2})?(?:,?\s+\d{4})?\b",
     re.IGNORECASE,
 )
-_PROMOTION_WORDS = ("offer", "deal", "discount", "loyalty", "combo", "saving", "sale")
+_PROMOTION_WORDS = (
+    "offer",
+    "deal",
+    "discount",
+    "loyalty",
+    "combo",
+    "saving",
+    "sale",
+    "promotion",
+    "package",
+    "voucher",
+    "day pass",
+    "retreat",
+)
 _GENERIC_PROMOTION_TITLES = {
     "offer",
     "offers",
@@ -39,6 +52,14 @@ _GENERIC_PROMOTION_TITLES = {
     "deal",
     "deals",
     "sale",
+    "promotion",
+    "promotions",
+    "package",
+    "packages",
+    "voucher",
+    "vouchers",
+    "gift voucher",
+    "gift vouchers",
 }
 _GENERIC_EVENT_TITLES = {
     "event",
