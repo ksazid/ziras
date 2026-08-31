@@ -17,5 +17,26 @@
   },
   "eurosport_malta_sale": {
     "minimum_candidates": 1
+  },
+  "lidl_malta_poc_offers": {
+    "minimum_candidates": 1
+  },
+  "ax_sliema_dining_offers": {
+    "minimum_candidates": 1
+  },
+  "esplora_family_promotions": {
+    "minimum_candidates": 1
+  },
+  "heritage_malta_activities": {
+    "minimum_candidates": 1
+  },
+  "active_ageing_discounts": {
+    "minimum_candidates": 1
+  },
+  "botika_personal_care_sale": {
+    "minimum_candidates": 1
+  },
+  "ax_verdala_wellness_offers": {
+    "minimum_candidates": 1
   }
 }
