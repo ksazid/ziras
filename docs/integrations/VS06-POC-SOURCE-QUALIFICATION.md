@@ -1,46 +1,82 @@
 # VS-06 Malta POC Source Qualification — 2026-08-31
 
-Scope: POC policy evidence only. This document does not grant production source access.
+Status: **QUALIFIED CANDIDATES — POLICY APPROVAL PENDING**
+
+This document records source-policy evidence and a recommendation. It does not itself authorize acquisition or change source access mode/scope.
 
 ## Decision rules
 
-Every source remains fail-closed. POC `allow` means only the approved public path, at the recorded request cap, with robots enforcement, attribution and no raw-content/image retention. Production always requires a separate current review and approval.
+- Every source remains fail-closed until an explicit policy approval is recorded.
+- POC approval, if granted, applies only to the named public path/API, request cap, attribution and retention constraints.
+- Production always requires a separate current review and approval.
+- No login/account/cart access, anti-bot bypass, proxy rotation, CAPTCHA bypass or raw creative/image retention is allowed.
 
-## Approved for POC
+## Recommended immediate POC candidates
 
-### Spazju Kreattiv Events
+### Candidate A — Spazju Kreattiv Events
 
-- source key: `spazju_kreattiv_events`
-- class: `cultural-venue-events`
-- public listing: `https://spazjukreattiv.org/events/list/`
-- current official inventory reviewed on 2026-08-31 includes Malta-local September/October 2026 events.
-- reviewed official pages expose dates and venue/location facts suitable for deterministic event normalization.
-- no blanket automated-access or non-commercial-use prohibition was located in the reviewed public policy material.
-- runtime robots compliance remains mandatory.
-- approved path: `/events/`
-- maximum: 1 request/hour
-- retained data: title/date/location/source URL/provenance only
-- page bodies, event descriptions and images: not retained
+- proposed source key: `spazju_kreattiv_events`
+- proposed class: `cultural-venue-events`
+- public event inventory: official Spazju Kreattiv site, Valletta
+- proposed acquisition: static web, robots mandatory
+- proposed path: `/events/`
+- proposed rate cap: 1 request/hour
+- proposed retained facts: event title, date/time, venue/location, source URL and provenance
+- page body, long descriptions and images: not retained
 
-Policy result: `allow`, scope `poc` only.
+Evidence reviewed on 2026-08-31:
 
-### Eurosport Malta Sale
+- official site exposes current Malta-local events and future dates;
+- event detail pages expose deterministic date/location facts;
+- no blanket automated-access prohibition was located in the reviewed public policy material;
+- absence of a prohibition is not treated as production permission, therefore this recommendation is POC-only and low-rate.
 
-- source key: `eurosport_malta_sale`
-- class: `sports-retail`
+**Policy confidence:** medium.  
+**Inventory confidence:** high.  
+**Recommendation:** approve for low-rate POC factual metadata only, or keep disabled if a stricter explicit-license standard is preferred.
+
+### Candidate B — Eurosport Malta Sale
+
+- proposed source key: `eurosport_malta_sale`
+- proposed class: `sports-retail`
 - public listing: `https://www.eurosport.com.mt/sale`
-- current Sale page reviewed on 2026-08-31 exposes deterministic old/new EUR prices across many products.
-- Terms & Conditions: `https://www.eurosport.com.mt/conditions-of-use`
-- Online Offers terms: `https://www.eurosport.com.mt/eurosport-online-offers-terms-and-conditions`
-- reviewed terms govern goods/orders/offers; no blanket automated-access/non-commercial-use prohibition was located.
-- runtime robots compliance remains mandatory.
-- approved path: `/sale`
-- maximum: 1 request/hour
-- retained data: product name/current price/original price/source URL/provenance only
+- proposed acquisition: static web, robots mandatory
+- proposed path: `/sale`
+- proposed rate cap: 1 request/hour
+- proposed retained facts: product name, current price, original price, source URL and provenance
 - no account, login, cart, wishlist or checkout access
-- page bodies and images: not retained
+- page body and images: not retained
 
-Policy result: `allow`, scope `poc` only.
+Evidence reviewed on 2026-08-31:
+
+- the public Sale page exposes many deterministic old/new EUR prices;
+- published Terms & Conditions primarily govern sale of goods;
+- Online Offers terms govern specific discounts/offers;
+- no blanket automated-access prohibition was located in the reviewed terms;
+- this is still not a production license, so the recommendation is intentionally narrow and POC-only.
+
+**Policy confidence:** medium.  
+**Inventory confidence:** high.  
+**Recommendation:** approve for low-rate POC factual sale metadata only, or keep disabled if a stricter explicit-license standard is preferred.
+
+## Stronger-license alternatives
+
+### MALRO open cultural-event API
+
+MALRO explicitly describes its event database as open, downloadable and API-queryable. Its public API is GET-only/no-auth, and its material is generally CC BY 4.0 with rate-limit obligations; images are excluded from that open-content treatment.
+
+**Policy confidence:** high.  
+**Malta inventory confidence:** not yet sufficient to count it toward the Malta five-source gate.  
+**Recommendation:** keep as a high-quality API candidate; do not count toward the gate until useful Malta inventory is demonstrated.
+
+### Ticketmaster Discovery API
+
+The official Discovery API supports country code `MT`, event search and structured event/venue data. It requires an API key. Ticketmaster's API terms restrict storage/caching, replication of the Ticketmaster experience and commercial use outside permitted cases.
+
+**Policy confidence:** high when used under the API terms.  
+**Inventory confidence:** requires credential-backed Malta smoke query.  
+**Operational dependency:** API key.  
+**Recommendation:** good later API source; not the fastest fifth POC source until credentials and a Malta inventory smoke test are available.
 
 ## Existing POC sources retained
 
@@ -48,23 +84,9 @@ Policy result: `allow`, scope `poc` only.
 2. `eden_cinemas` — `entertainment-offers`
 3. `homemate_offers` — `home-retail`
 
-Together with the two additions, VS-06 reaches five independent POC source classes.
+Current explicitly approved count remains **3 independent POC source classes**.
 
-## Explicitly not approved in this review
-
-### Plaza Shopping Centre
-
-Reviewed terms restrict content to personal/non-commercial use and restrict copying/storing without written consent. No automated POC source added.
-
-### University of Malta
-
-Reviewed authorized-use wording limits use to noncommercial/personal/educational purposes unless permission is obtained. No automated POC source added.
-
-### Aggregator / competitor inventories
-
-Cloudigo and similar third-party deal aggregators are not source inventory for scraping. Keep partner/licensed-feed only.
-
-## Unchanged restricted sources
+## Explicitly not promoted
 
 - McDonald's Malta — deny
 - Pizza Hut Malta — deny
@@ -75,8 +97,10 @@ Cloudigo and similar third-party deal aggregators are not source inventory for s
 - Lidl Malta — research-only
 - Eurospin Malta — research-only
 
-VS-06 must not relax these states.
+## Required approval before runtime addition
 
-## Re-review conditions
+A separate explicit source-policy approval must name the candidate(s) and approve the proposed POC constraints. Until then:
 
-Re-review any source before production, and immediately if terms, robots behavior, URL ownership, access controls or data presentation materially changes.
+- the runtime catalog remains at 3 approved POC source classes;
+- no request is sent to either candidate by Ziras;
+- the PRD `>=5 independent source types` gate remains unmet.
