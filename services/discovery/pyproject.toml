@@ -17,6 +17,11 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+acquisition = [
+  "Scrapy==2.18.0",
+  "scrapy-playwright==0.0.48",
+  "huey==3.3.4",
+]
 dev = [
   "pytest>=8.3,<9",
 ]

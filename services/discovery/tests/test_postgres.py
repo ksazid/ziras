@@ -12,11 +12,16 @@ import pytest
 DATABASE_URL = os.environ.get("TEST_DATABASE_URL")
 
 
+def _apply_migrations(connection: psycopg.Connection) -> None:
+    migration_dir = Path(__file__).parents[1] / "migrations"
+    for migration in sorted(migration_dir.glob("*.sql")):
+        connection.execute(migration.read_text())
+
+
 @pytest.mark.skipif(not DATABASE_URL, reason="TEST_DATABASE_URL is required for PostgreSQL integration tests")
 def test_migration_and_monotonic_source_state() -> None:
-    migration = Path(__file__).parents[1] / "migrations" / "001_discovery_kernel.sql"
     with psycopg.connect(DATABASE_URL, autocommit=True) as connection:
-        connection.execute(migration.read_text())
+        _apply_migrations(connection)
 
         extension_names = {
             row[0]
@@ -25,6 +30,24 @@ def test_migration_and_monotonic_source_state() -> None:
             ).fetchall()
         }
         assert extension_names == {"postgis", "vector"}
+
+        policy_columns = {
+            row[0]
+            for row in connection.execute(
+                """
+                SELECT column_name
+                FROM information_schema.columns
+                WHERE table_name = 'source_policy'
+                """
+            ).fetchall()
+        }
+        assert {
+            "policy_scope",
+            "allowed_path_prefixes",
+            "max_requests_per_hour",
+            "attribution_required",
+            "content_storage_allowed",
+        }.issubset(policy_columns)
 
         source_key = f"fixture-{uuid4()}"
         first_id = uuid4()
@@ -43,11 +66,24 @@ def test_migration_and_monotonic_source_state() -> None:
 
         connection.execute(
             """
-            INSERT INTO source_policy(source_key, access_mode, reason)
-            VALUES (%s, 'allow', 'Fixture policy approved for integration test')
+            INSERT INTO source_policy(
+                source_key, access_mode, reason, policy_scope, allowed_path_prefixes,
+                max_requests_per_hour, attribution_required, content_storage_allowed
+            )
+            VALUES (%s, 'allow', 'Fixture policy approved for integration test', 'poc', ARRAY['/offers'], 2, true, false)
             """,
             (source_key,),
         )
+
+        stored_policy = connection.execute(
+            """
+            SELECT policy_scope, allowed_path_prefixes, max_requests_per_hour,
+                   attribution_required, content_storage_allowed
+            FROM source_policy WHERE source_key = %s
+            """,
+            (source_key,),
+        ).fetchone()
+        assert stored_policy == ("poc", ["/offers"], 2, True, False)
 
         for observation_id, observed_at in (
             (first_id, now),
@@ -59,7 +95,7 @@ def test_migration_and_monotonic_source_state() -> None:
                 INSERT INTO source_observation(id, source_key, source_url, observed_at, content_hash, extracted)
                 VALUES (%s, %s, %s, %s, %s, '{}'::jsonb)
                 """,
-                (observation_id, source_key, "https://example.com", observed_at, str(observation_id)),
+                (observation_id, source_key, "https://example.com/offers", observed_at, str(observation_id)),
             )
 
         assert connection.execute(
@@ -86,6 +122,8 @@ def test_migration_and_monotonic_source_state() -> None:
 @pytest.mark.skipif(not DATABASE_URL, reason="TEST_DATABASE_URL is required for PostgreSQL integration tests")
 def test_postgis_and_pgvector_types_are_usable() -> None:
     with psycopg.connect(DATABASE_URL, autocommit=True) as connection:
+        _apply_migrations(connection)
+
         distance = connection.execute(
             """
             SELECT ST_Distance(

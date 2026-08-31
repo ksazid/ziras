@@ -1,122 +1,99 @@
 {
   "schemaVersion": 2,
-  "sliceId": "VS-03",
-  "title": "Meta Ad Library Source Adapter",
+  "sliceId": "VS-04",
+  "title": "Malta Production Source Adapter Pack",
   "status": "active",
   "lifecycle": "certified",
-  "riskLevel": "medium",
+  "riskLevel": "high",
   "implementationMode": "runtime-enabled",
   "requirements": [
-    "REQ-META-001",
-    "REQ-META-002",
-    "REQ-META-003",
-    "REQ-META-004",
-    "REQ-META-005",
-    "REQ-META-006",
-    "REQ-META-007",
-    "REQ-META-008",
-    "REQ-META-009",
-    "REQ-META-010"
+    "REQ-SRC-001",
+    "REQ-SRC-002",
+    "REQ-SRC-003",
+    "REQ-SRC-004",
+    "REQ-DIS-001",
+    "REQ-DIS-003",
+    "REQ-DIS-005",
+    "REQ-FRS-001",
+    "REQ-FRS-002",
+    "REQ-FRS-003",
+    "REQ-FRS-004",
+    "REQ-FRS-005"
   ],
   "owners": {
     "product": "ksazid",
     "engineering": "ksazid",
-    "operations": null,
-    "security": null
+    "operations": "ksazid",
+    "security": "ksazid"
   },
   "dependencies": [
-    "VS-02 Discovery Kernel Foundation",
+    "VS-02 certified Discovery Kernel",
+    "VS-03 certified Meta Ad Library adapter",
     "ADR-001 approved discovery-engine architecture",
-    "Official Meta Ad Library API access",
-    "Facebook account and Meta identity/location onboarding",
-    "Meta for Developers account and app",
-    "Meta Platform Policy acceptance",
-    "Valid access token stored outside source control",
-    "Supported Meta Graph API version pinned at deployment time",
-    "Explicit meta_ad_library SourcePolicy approval before production enablement"
+    "research/oss-qualification multi-vendor evidence",
+    "per-source terms/robots review"
   ],
-  "blockers": [],
+  "blockers": [
+    "Production source enablement remains prohibited until each source has production-scope policy approval.",
+    "Browser-mode live POC acquisition remains disabled until the Scrapy/Playwright runner is wired and policy-gated."
+  ],
   "allowedPaths": [
     "services/discovery/**",
     ".github/workflows/discovery-kernel.yml",
-    "docs/slices/VS-03.md",
-    "docs/integrations/META-AD-LIBRARY.md",
-    "product/TRD.md",
+    ".github/workflows/source-smoke.yml",
+    "docs/slices/VS-04.md",
+    "docs/integrations/MALTA-SOURCE-PACK.md",
     "delivery/current-slice.json"
   ],
-  "protectedPaths": [
-    ".github/workflows/release.yml"
-  ],
+  "protectedPaths": [".github/workflows/release.yml"],
   "impact": {
-    "areas": [
-      "architecture",
-      "api",
-      "legal-privacy",
-      "sensitive-data",
-      "operations-support"
-    ],
+    "areas": ["architecture", "api", "legal-privacy", "operations-support"],
     "notes": [
-      "The adapter uses the official Meta Ad Library API only and does not authorize Facebook or Instagram scraping.",
-      "The feature is disabled by default and fails closed when any runtime/governance prerequisite is missing.",
-      "Production source-policy approval and production credentials remain separate gates.",
-      "Meta ads enter Ziras as source observations; an ad is not automatically classified as a deal or other discovery."
+      "Every vendor is represented by an explicit fail-closed policy record with research/POC/production scope.",
+      "Sources with explicit automated/commercial-use restrictions are blocked or partner-only.",
+      "Live smoke tests are low-rate, robots-aware, fixed-URL, no-login and no anti-bot-bypass.",
+      "Only factual metadata/provenance is retained by default; page creative/assets are not stored."
     ]
   },
   "approvals": [
     {
       "type": "scope",
       "status": "approved",
-      "version": "VS-03",
+      "version": "VS-04",
       "commitSha": null,
       "by": "ksazid",
-      "at": "2026-08-31T02:10:37+02:00",
-      "rationale": "Product owner explicitly asked to add Facebook/Instagram Ad Library support and track every dependency required to enable it."
+      "at": "2026-08-31T03:01:26+02:00",
+      "rationale": "Product owner said Go to the proposed VS-04 Production Source Adapter Pack and real Malta volume/freshness validation."
     },
     {
       "type": "policy",
-      "status": "pending",
-      "version": "VS-03",
+      "status": "approved",
+      "version": "VS-04-poc-policy-matrix",
       "commitSha": null,
-      "by": null,
-      "at": null,
-      "rationale": "Implementation may proceed, but production Meta Ad Library source-policy approval is intentionally separate from adapter implementation."
+      "by": "ksazid",
+      "at": "2026-08-31T03:01:26+02:00",
+      "rationale": "Approval covers the fail-closed research/POC policy matrix and explicit deny/partner decisions only. It does not grant production source access."
     },
     {
       "type": "implementation",
       "status": "approved",
-      "version": "VS-03",
+      "version": "VS-04",
       "commitSha": null,
       "by": "ksazid",
-      "at": "2026-08-31T02:10:37+02:00",
-      "rationale": "Product owner explicitly requested implementation of the adapter and enablement dependency tracking."
+      "at": "2026-08-31T03:01:26+02:00",
+      "rationale": "Product owner approved proceeding with the source-adapter implementation and validation work."
     },
     {
       "type": "certification",
       "status": "approved",
-      "version": "VS-03",
-      "commitSha": "fb5923806203661f7dbc4b715fac4f9a7ccc9e1b",
+      "version": "VS-04",
+      "commitSha": "ac3a166bbaf511335fe2a205d940f98c84919dc0",
       "by": "ksazid",
-      "at": "2026-08-31T02:23:46+02:00",
-      "rationale": "Product owner approved VS-03 certification after exact-SHA Meta/kernel/database and PES preflight gates passed."
+      "at": "2026-08-31T08:46:00+02:00",
+      "rationale": "Product owner approved VS-04 certification after exact-head source-pack/kernel/database and PES preflight gates passed."
     },
-    {
-      "type": "release",
-      "status": "pending",
-      "version": null,
-      "commitSha": null,
-      "by": null,
-      "at": null,
-      "rationale": null
-    },
-    {
-      "type": "production-enable",
-      "status": "pending",
-      "version": null,
-      "commitSha": null,
-      "by": null,
-      "at": null,
-      "rationale": null
-    }
+    {"type": "release", "status": "pending", "version": null, "commitSha": null, "by": null, "at": null, "rationale": null},
+    {"type": "production-enable", "status": "pending", "version": null, "commitSha": null, "by": null, "at": null, "rationale": null}
   ],
   "decisionIds": ["DEC-01"],
   "progress": {
@@ -130,43 +107,41 @@
   },
   "certification": {
     "status": "passed",
-    "commitSha": "fb5923806203661f7dbc4b715fac4f9a7ccc9e1b",
+    "commitSha": "ac3a166bbaf511335fe2a205d940f98c84919dc0",
     "evidence": [
-      "https://github.com/ksazid/ziras/actions/runs/33344219448",
-      "meta: readiness, Malta/Facebook/Instagram filters, date/media filters, token-leak protection, pagination and API-error tests passed",
-      "kernel/database: PostgreSQL 16/PostGIS/pgvector regression suite passed",
-      "pes-preflight: planning/governance/dashboard/platform/mobile/script validation passed"
+      "https://github.com/ksazid/ziras/actions/runs/33347061940",
+      "https://github.com/ksazid/ziras/actions/runs/33365625606",
+      "https://github.com/ksazid/ziras/actions/runs/33365720646",
+      "source-pack/kernel/database and PES preflight passed before certification and after certification governance updates"
     ]
   },
-  "release": {
-    "status": "not-authorized",
-    "releaseId": null
-  },
-  "rollback": {
-    "status": "not-applicable",
-    "rollbackId": null
-  },
+  "release": {"status": "not-authorized", "releaseId": null},
+  "rollback": {"status": "not-applicable", "rollbackId": null},
   "postRelease": {
     "status": "not-started",
     "reviewAt": null,
-    "expectedOutcome": "Allow Ziras to ingest Meta Ad Library evidence for Malta through official API access while keeping Facebook/Instagram collection disabled until every dependency and policy gate is satisfied.",
+    "expectedOutcome": "Measure real Malta discovery density and freshness across multiple governed source classes without bypassing vendor policies.",
     "metrics": [
-      "Meta readiness dependency completeness",
-      "Meta API request success rate",
-      "Facebook/Instagram platform coverage",
-      "credential leakage incidents",
-      "Meta source-policy bypass count",
-      "Meta observation normalization pass rate"
+      "live source success rate",
+      "discovery candidates per source/day",
+      "valid when opened",
+      "stale/expired surfaced rate",
+      "duplicate rate",
+      "source-policy bypass count",
+      "static versus browser fallback rate",
+      "blocked/partner-only source count"
     ]
   },
   "links": {
-    "specification": "docs/slices/VS-03.md",
-    "implementationPr": "https://github.com/ksazid/ziras/pull/3",
+    "specification": "docs/slices/VS-04.md",
+    "implementationPr": "https://github.com/ksazid/ziras/pull/5",
     "evidence": [
-      "docs/integrations/META-AD-LIBRARY.md",
-      "https://www.facebook.com/ads/library/api/",
-      "https://github.com/ksazid/ziras/actions/runs/33344219448",
-      "tested-sha:fb5923806203661f7dbc4b715fac4f9a7ccc9e1b"
+      "research/oss-qualification/sources.json",
+      "docs/integrations/MALTA-SOURCE-PACK.md",
+      "https://github.com/ksazid/ziras/actions/runs/33347061940",
+      "https://github.com/ksazid/ziras/actions/runs/33365625606",
+      "https://github.com/ksazid/ziras/actions/runs/33365720646",
+      "certified-sha:ac3a166bbaf511335fe2a205d940f98c84919dc0"
     ]
   },
   "maxAttempts": 3
