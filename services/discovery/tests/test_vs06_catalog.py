@@ -12,7 +12,12 @@ from ziras_discovery.persistence import PersistenceDelta, SourceRunResult
 from ziras_discovery.pipeline import PocIngestionPipeline
 from ziras_discovery.policy import SourcePolicyRegistry
 from ziras_discovery.ranking import DeterministicRanker
-from ziras_discovery.source_catalog import AdapterKind, FetchMode, load_source_catalog
+from ziras_discovery.source_catalog import (
+    AdapterKind,
+    FetchMode,
+    default_malta_poc_extension_path,
+    load_source_catalog,
+)
 
 
 NOW = datetime(2026, 8, 31, 13, 30, tzinfo=timezone.utc)
@@ -69,8 +74,8 @@ class FixtureStore:
         return None
 
 
-def test_default_catalog_contains_exact_five_approved_poc_source_classes() -> None:
-    entries = load_source_catalog()
+def test_vs06_extension_contains_exact_five_certified_poc_source_classes() -> None:
+    entries = load_source_catalog(extension_path=default_malta_poc_extension_path())
     by_key = {entry.source_key: entry for entry in entries}
 
     poc = [
