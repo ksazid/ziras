@@ -3,7 +3,7 @@
   "sliceId": "VS-04",
   "title": "Malta Production Source Adapter Pack",
   "status": "active",
-  "lifecycle": "testing",
+  "lifecycle": "certified",
   "riskLevel": "high",
   "implementationMode": "runtime-enabled",
   "requirements": [
@@ -92,12 +92,12 @@
     },
     {
       "type": "certification",
-      "status": "pending",
-      "version": null,
-      "commitSha": null,
-      "by": null,
-      "at": null,
-      "rationale": null
+      "status": "approved",
+      "version": "VS-04",
+      "commitSha": "ac3a166bbaf511335fe2a205d940f98c84919dc0",
+      "by": "ksazid",
+      "at": "2026-08-31T08:46:00+02:00",
+      "rationale": "Product owner approved VS-04 certification after exact-head source-pack/kernel/database and PES preflight gates passed."
     },
     {
       "type": "release",
@@ -126,14 +126,19 @@
     "decisions": 100,
     "implementation": 100,
     "testing": 100,
-    "certification": 0,
+    "certification": 100,
     "release": 0,
     "validation": 0
   },
   "certification": {
-    "status": "not-started",
-    "commitSha": null,
-    "evidence": []
+    "status": "passed",
+    "commitSha": "ac3a166bbaf511335fe2a205d940f98c84919dc0",
+    "evidence": [
+      "https://github.com/ksazid/ziras/actions/runs/33347061940",
+      "source-pack: kernel, Meta regressions, source-policy scope/path tests and deterministic promotion/event fixture tests passed",
+      "database: PostgreSQL 16/PostGIS/pgvector + source-policy migration passed",
+      "pes-preflight: full repository governance/platform/mobile/script validation passed"
+    ]
   },
   "release": {
     "status": "not-authorized",
@@ -164,11 +169,8 @@
     "evidence": [
       "research/oss-qualification/sources.json",
       "docs/integrations/MALTA-SOURCE-PACK.md",
-      "https://github.com/ksazid/ziras/actions/runs/33346955619",
-      "tested-sha:36e87e33385a70422e147b826c7f84a247238098",
-      "source-pack: unit tests passed",
-      "database: PostgreSQL 16/PostGIS/pgvector + source-policy migration passed",
-      "pes-preflight: full repository validation passed"
+      "https://github.com/ksazid/ziras/actions/runs/33347061940",
+      "certified-sha:ac3a166bbaf511335fe2a205d940f98c84919dc0"
     ]
   },
   "maxAttempts": 3
