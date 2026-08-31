@@ -37,6 +37,7 @@
     ".github/workflows/discovery-kernel.yml",
     "docs/slices/VS-04.md",
     "docs/integrations/SOURCE-PACK.md",
+    "docs/evidence/VS-04-LIVE-SOURCE-BASELINE-2026-08-31.md",
     "product/TRD.md",
     "delivery/current-slice.json"
   ],
@@ -52,7 +53,8 @@
     ],
     "notes": [
       "Source technical support and source permission are intentionally separate states.",
-      "Review-required sources are denied by default and partner sources require explicit partner context.",
+      "Review-required sources are denied by default; partner-required sources are also denied until a reviewed PARTNER_ONLY policy exists.",
+      "An approved partner-only policy still requires explicit partner execution context.",
       "No adapter in VS-04 authorizes robots bypass, anti-bot bypass, proxy rotation or prohibited platform scraping.",
       "Live source usefulness evidence does not constitute production policy approval."
     ]
@@ -153,9 +155,10 @@
   },
   "links": {
     "specification": "docs/slices/VS-04.md",
-    "implementationPr": null,
+    "implementationPr": "https://github.com/ksazid/ziras/pull/4",
     "evidence": [
       "docs/integrations/SOURCE-PACK.md",
+      "docs/evidence/VS-04-LIVE-SOURCE-BASELINE-2026-08-31.md",
       "https://www.visitmalta.com/en/events-in-malta-and-gozo/",
       "https://deal.com.mt/"
     ]
