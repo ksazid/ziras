@@ -69,7 +69,7 @@ class FixtureStore:
         return None
 
 
-def test_default_catalog_applies_hardening_but_does_not_promote_candidates() -> None:
+def test_default_catalog_contains_exact_five_approved_poc_source_classes() -> None:
     entries = load_source_catalog()
     by_key = {entry.source_key: entry for entry in entries}
 
@@ -85,9 +85,15 @@ def test_default_catalog_applies_hardening_but_does_not_promote_candidates() -> 
         "events-official",
         "entertainment-offers",
         "home-retail",
+        "cultural-venue-events",
+        "sports-retail",
     }
-    assert "spazju_kreattiv_events" not in by_key
-    assert "eurosport_malta_sale" not in by_key
+    assert by_key["spazju_kreattiv_events"].policy.scope is SourcePolicyScope.POC
+    assert by_key["spazju_kreattiv_events"].policy.max_requests_per_hour == 1
+    assert by_key["eurosport_malta_sale"].policy.scope is SourcePolicyScope.POC
+    assert by_key["eurosport_malta_sale"].policy.max_requests_per_hour == 1
+    assert by_key["spazju_kreattiv_events"].policy.content_storage_allowed is False
+    assert by_key["eurosport_malta_sale"].policy.content_storage_allowed is False
 
     eden = by_key["eden_cinemas"]
     assert eden.adapter_kind_for("https://www.edencinemas.com.mt/special-offers") is AdapterKind.PROMOTION
@@ -147,11 +153,37 @@ def test_existing_restricted_sources_are_not_relaxed_by_vs06() -> None:
     assert by_key["eurospin_promotions"].policy.scope is SourcePolicyScope.RESEARCH
 
 
-def test_custom_catalog_does_not_implicitly_apply_default_hardening(tmp_path: Path) -> None:
+def test_custom_catalog_does_not_implicitly_apply_default_extension_or_hardening(tmp_path: Path) -> None:
     custom = tmp_path / "catalog.json"
     custom.write_text("[]", encoding="utf-8")
 
     assert load_source_catalog(custom) == ()
+
+
+def test_extension_duplicate_source_is_rejected(tmp_path: Path) -> None:
+    catalog = tmp_path / "catalog.json"
+    extension = tmp_path / "extension.json"
+    payload = """[
+      {
+        "source_key": "fixture",
+        "display_name": "Fixture",
+        "source_class": "fixture",
+        "start_urls": ["https://example.com/offers"],
+        "fetch_mode": "static",
+        "adapter_kind": "promotion",
+        "policy": {
+          "mode": "allow",
+          "scope": "poc",
+          "reason": "fixture",
+          "allowed_path_prefixes": ["/offers"]
+        }
+      }
+    ]"""
+    catalog.write_text(payload, encoding="utf-8")
+    extension.write_text(payload, encoding="utf-8")
+
+    with pytest.raises(ValueError, match="duplicate source_key"):
+        load_source_catalog(catalog, extension_path=extension)
 
 
 def test_hardening_overlay_cannot_change_policy_authority(tmp_path: Path) -> None:
