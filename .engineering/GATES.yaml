@@ -1,0 +1,14 @@
+autoMerge: false
+autoDeploy: false
+protectedPaths:
+  - .github/workflows/release.yml
+  - infrastructure/**
+  - '**/Migrations/**'
+  - '**/Identity/**'
+  - '**/Payments/**'
+  - '**/Uploads/**'
+requireHumanReview:
+  - architecture_decision
+  - security_high_or_critical
+  - product_policy
+  - production_release

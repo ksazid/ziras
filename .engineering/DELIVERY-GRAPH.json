@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "enabledModes": ["standard", "enterprise"],
+  "lite": {
+    "enabled": false,
+    "reason": "Routine and low-risk slices are cheaper and simpler with single-agent Superpowers execution."
+  },
+  "standard": {
+    "activation": "risk-triggered",
+    "graph": ["router", "implementer", "deterministic-checks", "reviewer", "human-checkpoint"],
+    "maxSpecialists": 1,
+    "maxReviewCycles": 1,
+    "parallelExecution": false
+  },
+  "enterprise": {
+    "activation": "risk-triggered",
+    "graph": ["router", "specialists", "integrator", "deterministic-checks", "independent-reviewer", "human-checkpoint"],
+    "availableSpecialists": ["researcher", "architect", "security", "data", "builder"],
+    "maxSpecialists": 3,
+    "maxReviewCycles": 2,
+    "parallelExecution": true
+  },
+  "triggers": [
+    "authentication-or-authorization",
+    "payments-or-financial-state",
+    "sensitive-data",
+    "database-migration",
+    "public-api-contract-change",
+    "major-architecture-change",
+    "cross-module-change",
+    "production-release-candidate",
+    "repeated-implementation-failure"
+  ],
+  "costControls": {
+    "reuseFocusedContextPack": true,
+    "deterministicChecksBeforeModelReview": true,
+    "skipUnchangedNodesByInputHash": true,
+    "singleIntegrator": true,
+    "capRetries": true,
+    "recordEstimatedTokenUsage": true,
+    "stopWhenBudgetExceeded": true
+  },
+  "authority": {
+    "graphCannotChangeApprovedScope": true,
+    "graphCannotApproveSecurityRisk": true,
+    "graphCannotMergeOrDeploy": true,
+    "humanApprovalRequired": true
+  }
+}

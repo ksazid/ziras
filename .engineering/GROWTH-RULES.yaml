@@ -1,0 +1,44 @@
+# Evidence-based recommendations. These rules only recommend; they never enable capabilities.
+rules:
+  - id: recommend-standard-for-scale
+    recommend: standard
+    when:
+      minimum_requirements: 40
+      minimum_slices: 8
+    reason: Larger delivery surfaces benefit from ADRs, evidence and formal certification.
+
+  - id: recommend-maker-checker
+    recommend_plugin: maker-checker
+    when:
+      failed_verification_runs: 3
+      or_high_risk_slices: 2
+    reason: Independent verification is justified after repeated failures or sustained high-risk work.
+
+  - id: recommend-worktrees
+    recommend_plugin: worktrees
+    when:
+      parallel_active_slices: 2
+      or_repair_attempts: 3
+    reason: Isolation becomes valuable when work is parallel or repeated repair attempts occur.
+
+  - id: recommend-codex-security
+    recommend_plugin: codex-security
+    when:
+      sensitive_paths_present: true
+      or_release_candidate: true
+    reason: AI-assisted security review is reserved for sensitive changes and releases.
+
+  - id: recommend-enterprise
+    recommend: enterprise
+    when:
+      contributors: 5
+      active_modules: 6
+      high_risk_slices: 3
+    reason: Larger teams and multiple high-risk domains justify stronger governance.
+
+  - id: recommend-ai-rag
+    recommend_plugin: ai-rag
+    when:
+      requirement_count: 150
+      context_pack_average_files: 12
+    reason: Retrieval becomes useful only when context volume is measurably large.

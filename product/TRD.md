@@ -1,267 +1,155 @@
 # Technical Requirements Document
 
-Status: Draft v0.1 — requires explicit technical approval before runtime implementation
+Status: Draft
 
 ## Architecture
 
-Ziras uses the PES Mobile template and follows a **modular monolith / vertical-slice** architecture.
+The Ziras discovery-engine architecture baseline is **approved** by `ADR-001 — Ziras Discovery Engine Architecture` and `DEC-01`.
 
-Initial system boundaries:
+Approved discovery-engine direction:
 
-1. **Mobile application** — Expo / React Native consumer experience.
-2. **Discovery application layer** — source registry, ingestion orchestration, extraction, entity resolution, freshness, ranking and watches.
-3. **Persistence** — canonical Ziras entities/discoveries/users/interests/source metadata.
-4. **External adapters** — permitted web sources, APIs/feeds, search providers and user-shared content.
+- Python 3.12 modular-monolith discovery kernel.
+- Static-first acquisition with Scrapy `2.18.0`.
+- `scrapy-playwright==0.0.48` only as browser-rendering fallback.
+- Deterministic extraction before AI using structured metadata, source adapters, Trafilatura, price-parser and Dateparser.
+- PostgreSQL 16 as the primary data backbone.
+- PostGIS for geospatial queries.
+- pgvector for semantic interest/discovery similarity.
+- PostgresHuey `3.3.4` for MVP background jobs/scheduling; Redis is not required for MVP.
+- Photon behind a replaceable `Geocoder` boundary.
+- Deterministic/explainable MVP ranking; `implicit` is deferred until sufficient behavioral data exists.
+- Source policy, robots restrictions and provenance preservation are mandatory acquisition invariants.
+- No proxy rotation, stealth, CAPTCHA bypass or anti-bot bypass is approved.
 
-Do not introduce microservices for the POC. Source collectors are adapters behind contracts and may run as scheduled/background jobs within the same deployable backend until scale or isolation requirements justify separation through an ADR.
+The full decision, qualification evidence, trade-offs and rejected alternatives are authoritative in `docs/architecture/ADR-001-DISCOVERY-ENGINE.md`.
 
 ## Technology stack
 
-### Mobile — existing template
-- Expo `~57`
-- React Native `0.86`
-- React `19.2`
-- Expo Router
-- TypeScript
-- React Native Reanimated for approved motion
-- Expo Secure Store for future sensitive local tokens
+Discovery-engine stack is governed by ADR-001. The VS-02 kernel package lives under `services/discovery` and uses direct PostgreSQL migrations rather than an ORM or generic repository layer.
 
-Exact mobile versions remain governed by `apps/mobile/package.json` and Expo-compatible install tooling.
-
-### Backend — proposed
-- TypeScript / Node.js runtime.
-- HTTP JSON API using the simplest framework already approved/introduced during implementation planning.
-- PostgreSQL for canonical relational persistence and geospatially-indexable coordinates.
-- Background job execution for discovery refresh/verification; keep implementation provider-neutral.
-
-Redis/queues are **not required initially** unless measured throughput/retry needs justify them.
-
-### AI/model boundary
-LLMs may assist structured extraction/classification and semantic tagging, but core freshness/expiry, source-policy enforcement, deduplication keys and safety gates must remain deterministic where possible.
-
-Model providers must be adapter-based and must not become the canonical source of truth.
+Mobile/application stack remains to be completed in this TRD.
 
 ## Modules and data ownership
 
-### `source-policy`
-Owns source registry and whether/how a source may be accessed.
+The discovery kernel owns these stable domain concepts:
 
-Core fields:
-- sourceId
-- domain/provider
-- accessMode (`PUBLIC_WEB`, `API`, `PARTNER`, `USER_SHARED`, `DEEPLINK_ONLY`, `DISABLED`)
-- policyStatus
-- crawlFrequency
-- reliabilityScore
-- lastSuccessAt
-- allowedContentTypes
+- `SourcePolicy` — approved acquisition mode and policy evidence.
+- `SourceObservation` — immutable source evidence captured at a specific observed time.
+- `CanonicalEntity` — Ziras-owned business/place/product entity identity.
+- `Discovery` — normalized deal, event, opening, product/menu or other local signal.
+- `Evidence` — field-level provenance linking normalized values to observations.
+- `Freshness` — live/likely/unverified/expired state.
+- `Interest`, `Interaction`, `Watch` — user-intelligence contracts; persistence/behavioral learning may evolve independently.
 
-No collector executes when policyStatus does not allow the configured access mode.
+Infrastructure volatility is limited to narrow ports:
 
-### `discovery-ingestion`
-Owns raw source observations and normalisation requests.
+- `BrowserRenderer`
+- `Geocoder`
+- `JobQueue`
+- `Ranker`
 
-Responsibilities:
-- collect permitted source observations;
-- retain provenance;
-- enqueue/process extraction;
-- avoid presenting raw observations directly to consumers.
-
-### `discovery`
-Owns canonical `Discovery` records.
-
-Minimum fields:
-- id
-- type
-- entityId/locationId
-- title/summary
-- originalPrice/currentPrice/discount when applicable
-- startsAt/expiresAt
-- source references
-- discoveredAt
-- lastVerifiedAt
-- freshnessState
-- confidence
-- interest tags
-
-### `entity`
-Owns canonical businesses, places, brands and locations.
-
-Third-party IDs (for example a place/provider ID) are cross-references only.
-
-### `freshness`
-Owns freshness state transitions:
-- `VERIFIED`
-- `LIKELY_ACTIVE`
-- `UNVERIFIED`
-- `EXPIRED`
-
-Rules use explicit expiry, source disappearance/change, verification age, source reliability and corroboration. Expired records are excluded from active recommendation queries.
-
-### `interest`
-Owns hierarchical interest taxonomy and user interest weights.
-
-Initial user interests come from onboarding. More specific weights are learned from behaviour without requiring deeper onboarding questions.
-
-### `ranking`
-Produces a deterministic base score from:
-- distance/location relevance
-- freshness
-- interest relevance
-- value/deal strength
-- novelty
-- urgency
-
-Behavioural learning may adjust weights, but the score inputs must remain inspectable for debugging.
-
-### `watch`
-Owns user monitors such as a brand/place/category/threshold and their notification eligibility.
-
-### `share`
-Owns shareable discovery representations and future user-shared ingestion.
+Source-family logic belongs in `SourceAdapter` implementations. Domain code must not import Photon, Huey or Playwright directly.
 
 ## Authentication
 
-POC decision remains open.
-
-Preferred sequence:
-- allow anonymous/local first-run discovery where practical;
-- introduce account authentication only when cross-device sync, persistent watches or abuse controls require it.
-
-Do not block the first-value experience behind mandatory account creation without a product decision.
+To be completed in a user/account slice. VS-02 uses no end-user authentication.
 
 ## Authorization
 
-- Consumers may modify only their own preferences, watches and saved items.
-- Internal ingestion/admin operations require server-side privileged authorization when introduced.
-- Source-policy changes are never writable from the consumer app.
+To be completed in a user/account slice. Production source authorization is independent of user authorization and remains governed by SourcePolicy.
 
 ## Persistence and migrations
 
-Proposed PostgreSQL tables/bounded aggregates:
-- `sources`
-- `source_observations`
-- `entities`
-- `entity_external_refs`
-- `locations`
-- `discoveries`
-- `discovery_sources`
-- `interest_taxonomy`
-- `user_interest_weights`
-- `user_actions`
-- `watches`
-- `saved_discoveries`
+Discovery persistence baseline: PostgreSQL 16 + PostGIS + pgvector.
 
-Use migrations; never mutate production schema manually.
+VS-02 migration `services/discovery/migrations/001_discovery_kernel.sql` establishes:
 
-Raw source payload retention must be minimised and governed by source/licensing/privacy requirements rather than retained indefinitely by default.
+- `source_policy`
+- append-only `source_observation`
+- `source_state` as the latest accepted observation per source
+- `canonical_entity` with PostGIS `geography(Point,4326)`
+- `discovery` with freshness, prices, validity window and optional pgvector embedding
+- `discovery_evidence` linking normalized fields back to immutable source observations
+
+`promote_source_state()` performs an atomic upsert with a timestamp guard: an incoming observation updates source state only when `incoming.observed_at > current.last_observed_at`. This is the database-level protection against out-of-order workers regressing source state.
+
+Migration rules:
+
+- migrations are forward-only and versioned;
+- production migration execution requires a later governed deployment/release slice;
+- observations remain append-only evidence;
+- canonical/current state may be updated only through monotonic or explicitly versioned rules;
+- no destructive retention policy is approved yet.
 
 ## External integrations
 
-Integration categories:
-- permitted official websites;
-- official APIs/feeds;
-- event feeds;
-- affiliate/partner APIs;
-- geocoding/entity-resolution providers;
-- user-shared URLs/content where allowed.
+All external acquisition, geocoding and source-family dependencies must remain behind ADR-001 boundaries and require explicit source/provider policy before production use.
 
-### Hard boundary
-Do not implement automated collection against sources whose terms prohibit it. Such providers must be `DEEPLINK_ONLY`, partner/API based or disabled until permitted access exists.
+VS-02 includes only a generic structured-HTML normalization adapter and fixture-based tests. It does **not** enable vendor-specific production crawling.
 
 ## Deployment
 
-Provider selection is deferred. Architecture remains provider-neutral.
-
-POC deployment requires:
-- backend API/job runtime;
-- PostgreSQL;
-- scheduled job capability;
-- secrets management;
-- HTTPS;
-- basic logs/metrics.
-
-No production provider decision is implied by this TRD.
+To be completed. Photon production deployment/provider choice remains open and must not rely on the public demo endpoint for production workload.
 
 ## Observability
 
-Minimum POC metrics:
-- observations collected/source/day;
-- successful/failed source checks;
-- extraction failures;
-- entity resolution ambiguity rate;
-- duplicates removed;
-- discoveries created/day;
-- verification success rate;
-- stale/expired surfaced rate;
-- source latency/error rate;
-- feed relevance feedback.
+Before production acquisition is enabled, Ziras must expose at minimum:
 
-Every surfaced discovery must retain provenance sufficient to explain why it exists and when it was last verified.
+- source acquisition outcome and policy denial reason;
+- static vs browser-fallback rate;
+- adapter failures by source family;
+- latest accepted observation time and stale-observation rejection count;
+- freshness decisions and explicit-expiry rejection count;
+- entity-resolution merge/review outcomes;
+- queue failures/retries and task age.
 
 ## Security
 
-- No credentials in mobile bundles or Git.
-- Server-side secrets only.
-- Validate/normalise untrusted external content before storage/rendering.
-- Prevent server-side request forgery in URL ingestion/collector infrastructure.
-- Apply rate limits and host allow/policy controls to collectors.
-- Do not follow arbitrary redirects into private/internal address ranges.
-- Sanitise generated/extracted text before rendering/share pages.
-- Treat precise location history as sensitive; retain only what is necessary for product function.
-- Permission-denied flows must remain usable via manual location.
-
-A dedicated security review is required before user-supplied URL ingestion or production web collection is enabled.
+- Source acquisition is fail-closed: unknown/unapproved sources are denied.
+- Production source permissions are separate from technical fetch capability.
+- Robots and source policy must be respected.
+- No stealth, proxy rotation, CAPTCHA bypass or anti-bot bypass is approved.
+- Raw evidence/provenance must be retained for any AI-assisted normalization.
+- URLs and fetched content must be treated as untrusted input; SSRF/network-boundary controls are required before live acquisition is enabled.
 
 ## Performance and reliability
 
-POC goals:
-- feed API should return cached/precomputed ranked results quickly enough for consumer mobile UX;
-- collector failures are isolated per source;
-- one failed source must not stop other discovery ingestion;
-- retries are bounded with backoff;
-- stale source data must degrade to labelled/unavailable rather than being silently presented as verified.
+- Static acquisition is preferred; browser rendering is fallback-only.
+- Older crawl results must never overwrite newer source state.
+- Explicit expiry always overrides relevance/value ranking.
+- PostgresHuey throughput and browser-rendering cost must be measured before scale assumptions are accepted.
+- pgvector is sufficient for MVP semantic retrieval; a separate vector database requires a new architecture decision.
 
 ## Testing strategy
 
-### Deterministic tests
-- source-policy gate tests;
-- expiry/freshness state-machine tests;
-- deduplication tests;
-- entity-resolution rules;
-- ranking rules;
-- onboarding state/navigation;
-- permission-denial/manual-location flow.
+The OSS qualification harness on `research/oss-qualification` is retained as architecture evidence.
 
-### Integration tests
-- source adapter fixture tests using stored fixtures rather than uncontrolled live sites in CI;
-- persistence/migration tests;
-- API contract tests.
+VS-02 adds deterministic tests for:
 
-### POC validation
-Live source tests run outside deterministic CI and record source, time, outcome and freshness evidence.
-
-### Mobile
-- typecheck/lint;
-- accessibility checks;
-- real-device splash/onboarding verification;
-- reduced-motion behaviour;
-- deep-link tests when introduced.
+- fail-closed source policy;
+- user-share-only policy enforcement;
+- explicit expiry;
+- stale/equal observation rejection;
+- entity collision (`Smart Supermarket` vs `Smart Mobility`);
+- corroborated same-entity matching;
+- deterministic relative-date parsing;
+- structured JSON-LD product/offer normalization without AI;
+- real PostgreSQL migration execution with PostGIS + pgvector;
+- atomic monotonic `source_state` promotion.
 
 ## Operational constraints
 
-- Source freshness is the primary operational quality target.
-- No merchant onboarding dependency.
-- No production crawling without approved source-policy entries.
-- No autonomous production enablement/deployment.
-- EAS build/submit/OTA actions remain human-approved PES gates.
+- Browser rendering is fallback-only.
+- Explicitly expired discoveries must not surface as active.
+- Older crawl results must not overwrite newer observations.
+- AI normalization must retain original evidence and confidence/provenance.
+- Production source permissions are separate from technical fetch capability.
+- No vendor-specific production crawling is enabled by VS-02.
 
 ## Open decisions
 
-1. Backend framework and workspace placement (`apps/api` or equivalent) after technical approval.
-2. PostgreSQL provider/deployment provider.
-3. Geocoding/entity-resolution provider and caching/licensing strategy.
-4. Model provider(s) for structured extraction/classification.
-5. Anonymous-first versus account-enabled POC persistence.
-6. Notification provider/strategy when Watch alerts enter scope.
-7. Exact production source inventory after per-source policy review.
+- Production hosting/provider for Photon or alternate geocoder implementation.
+- Final API/runtime deployment provider.
+- Observation/evidence retention periods and deletion/privacy policy.
+- Authentication/authorization model for user-facing product services.
+- Embedding model and fixed pgvector dimension before ANN indexing is introduced.
