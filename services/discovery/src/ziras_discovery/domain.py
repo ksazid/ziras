@@ -15,6 +15,12 @@ class SourceAccessMode(StrEnum):
     DENY = "deny"
 
 
+class SourcePolicyScope(StrEnum):
+    RESEARCH = "research"
+    POC = "poc"
+    PRODUCTION = "production"
+
+
 class FreshnessState(StrEnum):
     VERIFIED_LIVE = "verified_live"
     LIKELY_LIVE = "likely_live"
@@ -41,6 +47,11 @@ class SourcePolicy:
     policy_url: str | None = None
     robots_required: bool = True
     reviewed_at: datetime | None = None
+    scope: SourcePolicyScope = SourcePolicyScope.PRODUCTION
+    allowed_path_prefixes: tuple[str, ...] = ()
+    max_requests_per_hour: int = 1
+    attribution_required: bool = True
+    content_storage_allowed: bool = False
 
 
 @dataclass(frozen=True, slots=True)
