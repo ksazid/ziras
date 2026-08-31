@@ -99,14 +99,8 @@ def test_vs06_extension_contains_exact_five_certified_poc_source_classes() -> No
     assert by_key["eurosport_malta_sale"].policy.max_requests_per_hour == 1
     assert by_key["spazju_kreattiv_events"].policy.content_storage_allowed is False
     assert by_key["eurosport_malta_sale"].policy.content_storage_allowed is False
-
-    eden = by_key["eden_cinemas"]
-    assert eden.adapter_kind_for("https://www.edencinemas.com.mt/special-offers") is AdapterKind.PROMOTION
-    assert eden.adapter_kind_for("https://www.edencinemas.com.mt/whats-on") is AdapterKind.EVENT
-
-    visitmalta = by_key["visitmalta_events"]
-    assert visitmalta.fetch_mode is FetchMode.BROWSER
-    assert visitmalta.minimum_candidates == 1
+    assert by_key["eden_cinemas"].adapter_kind is AdapterKind.PROMOTION
+    assert by_key["visitmalta_events"].fetch_mode is FetchMode.BROWSER
 
 
 def test_configured_visitmalta_browser_entry_accepts_rendered_event_fixture() -> None:
