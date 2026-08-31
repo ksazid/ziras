@@ -3,7 +3,7 @@
   "sliceId": "VS-03",
   "title": "Meta Ad Library Source Adapter",
   "status": "active",
-  "lifecycle": "implementing",
+  "lifecycle": "testing",
   "riskLevel": "medium",
   "implementationMode": "runtime-enabled",
   "requirements": [
@@ -122,8 +122,8 @@
   "progress": {
     "discovery": 100,
     "decisions": 100,
-    "implementation": 90,
-    "testing": 0,
+    "implementation": 100,
+    "testing": 100,
     "certification": 0,
     "release": 0,
     "validation": 0
@@ -156,10 +156,12 @@
   },
   "links": {
     "specification": "docs/slices/VS-03.md",
-    "implementationPr": null,
+    "implementationPr": "https://github.com/ksazid/ziras/pull/3",
     "evidence": [
       "docs/integrations/META-AD-LIBRARY.md",
-      "https://www.facebook.com/ads/library/api/"
+      "https://www.facebook.com/ads/library/api/",
+      "https://github.com/ksazid/ziras/actions/runs/33344123109",
+      "tested-sha:9ae24caff4ca7b078e1137998469021febae2e4d"
     ]
   },
   "maxAttempts": 3
