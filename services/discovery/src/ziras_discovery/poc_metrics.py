@@ -28,6 +28,7 @@ class AuditCounts:
 @dataclass(frozen=True, slots=True)
 class DailyMeasurement:
     accepted: bool
+    passed: bool
     complete: bool
     gates: Mapping[str, bool | None]
     metrics: Mapping[str, int | float | None]
@@ -117,10 +118,12 @@ def evaluate_daily(
     }
 
     complete = not reasons and all(value is not None for value in gates.values())
-    accepted = complete and all(value is True for value in gates.values())
+    accepted = complete
+    passed = complete and all(value is True for value in gates.values())
 
     return DailyMeasurement(
         accepted=accepted,
+        passed=passed,
         complete=complete,
         gates=gates,
         metrics={
@@ -156,16 +159,18 @@ def evaluate_window(records: Iterable[Mapping[str, object]]) -> dict[str, object
     if len(unique_dates) != len(rows):
         reasons.append("measurement dates must be unique and non-empty")
 
-    incomplete = [item for item in rows if item.get("complete") is not True]
-    failed = [item for item in rows if item.get("accepted") is not True]
-    if incomplete:
-        reasons.append(f"{len(incomplete)} record(s) incomplete")
+    rejected = [item for item in rows if item.get("accepted") is not True]
+    failed = [item for item in rows if item.get("passed") is not True]
+    if rejected:
+        reasons.append(f"{len(rejected)} record(s) incomplete or invalid")
     if failed:
         reasons.append(f"{len(failed)} record(s) failed one or more POC gates")
 
+    complete = len(rows) == 14 and len(unique_dates) == 14 and not rejected
+    passed = complete and not failed
     return {
-        "complete": not reasons,
-        "passed": not reasons,
+        "complete": complete,
+        "passed": passed,
         "record_count": len(rows),
         "unique_day_count": len(unique_dates),
         "reasons": reasons,
