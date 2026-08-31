@@ -120,6 +120,7 @@ class ScrapyPlaywrightAcquirer:
 
         collected: list[AcquisitionOutcome] = []
         requested_by_token = {str(index): request for index, request in enumerate(safe_requests)}
+        browser_settle_ms = self.browser_settle_ms
 
         class PocSpider(scrapy.Spider):
             name = "ziras_poc_ingestion"
@@ -133,7 +134,7 @@ class ScrapyPlaywrightAcquirer:
                     if request.fetch_mode is FetchMode.BROWSER:
                         meta["playwright"] = True
                         meta["playwright_page_methods"] = [
-                            PageMethod("wait_for_timeout", self.browser_settle_ms)
+                            PageMethod("wait_for_timeout", browser_settle_ms)
                         ]
                     yield scrapy.Request(
                         request.url,
