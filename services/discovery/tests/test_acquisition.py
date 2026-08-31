@@ -1,12 +1,17 @@
 from __future__ import annotations
 
 import asyncio
+from datetime import datetime, timezone
 import sys
 from types import ModuleType
 
 from ziras_discovery import acquisition as acquisition_module
 from ziras_discovery.acquisition import AcquisitionRequest, ScrapyPlaywrightAcquirer
+from ziras_discovery.adapters.public_web import PublicWebSignalAdapter, TextSignalConfig
 from ziras_discovery.source_catalog import FetchMode
+
+
+NOW = datetime(2026, 8, 31, 18, 0, tzinfo=timezone.utc)
 
 
 def test_scrapy_218_start_schedules_static_and_browser_requests(monkeypatch) -> None:
@@ -32,6 +37,12 @@ def test_scrapy_218_start_schedules_static_and_browser_requests(monkeypatch) -> 
             self.callback = callback
             self.errback = errback
             self.dont_filter = dont_filter
+
+    class FakePageMethod:
+        def __init__(self, method, *args, **kwargs) -> None:
+            self.method = method
+            self.args = args
+            self.kwargs = kwargs
 
     class FakeResponse:
         def __init__(self, request: FakeRequest) -> None:
@@ -64,8 +75,14 @@ def test_scrapy_218_start_schedules_static_and_browser_requests(monkeypatch) -> 
     scrapy_module.Request = FakeRequest
     crawler_module = ModuleType("scrapy.crawler")
     crawler_module.CrawlerProcess = FakeCrawlerProcess
+    playwright_module = ModuleType("scrapy_playwright")
+    playwright_page_module = ModuleType("scrapy_playwright.page")
+    playwright_page_module.PageMethod = FakePageMethod
+
     monkeypatch.setitem(sys.modules, "scrapy", scrapy_module)
     monkeypatch.setitem(sys.modules, "scrapy.crawler", crawler_module)
+    monkeypatch.setitem(sys.modules, "scrapy_playwright", playwright_module)
+    monkeypatch.setitem(sys.modules, "scrapy_playwright.page", playwright_page_module)
     monkeypatch.setattr(acquisition_module, "_assert_public_host", lambda url: None)
 
     requests = (
@@ -73,10 +90,66 @@ def test_scrapy_218_start_schedules_static_and_browser_requests(monkeypatch) -> 
         AcquisitionRequest("browser", "https://browser.example/events", FetchMode.BROWSER),
     )
 
-    outcomes = ScrapyPlaywrightAcquirer().acquire(requests)
+    outcomes = ScrapyPlaywrightAcquirer(browser_settle_ms=2500).acquire(requests)
 
     assert len(scheduled) == 2
     assert scheduled[0].meta.get("playwright") is None
     assert scheduled[1].meta["playwright"] is True
+    page_method = scheduled[1].meta["playwright_page_methods"][0]
+    assert page_method.method == "wait_for_timeout"
+    assert page_method.args == (2500,)
     assert all(outcome.ok for outcome in outcomes)
     assert [outcome.request for outcome in outcomes] == list(requests)
+
+
+def test_promotion_adapter_accepts_sale_price_before_original_price() -> None:
+    result = PublicWebSignalAdapter(TextSignalConfig(event_mode=False)).extract(
+        source_key="sports-sale",
+        source_url="https://example.com/sale",
+        html="""
+        <html><body>
+          <div>Adidas Performance</div>
+          <h2>Predator League Boots</h2>
+          <div>€70.00 €100.00</div>
+        </body></html>
+        """,
+        observed_at=NOW,
+    )
+
+    discovery = next(item for item in result.discoveries if item.title == "Predator League Boots")
+    assert str(discovery.current_price) == "70.00"
+    assert str(discovery.original_price) == "100.00"
+
+
+def test_promotion_adapter_keeps_named_offer_without_numeric_discount() -> None:
+    result = PublicWebSignalAdapter(TextSignalConfig(event_mode=False)).extract(
+        source_key="cinema-offers",
+        source_url="https://example.com/special-offers",
+        html="""
+        <html><body>
+          <h2>FAMILY DEAL</h2>
+          <p>Includes cinema tickets, popcorn and drinks for families.</p>
+        </body></html>
+        """,
+        observed_at=NOW,
+    )
+
+    assert any(item.title == "FAMILY DEAL" for item in result.discoveries)
+
+
+def test_event_adapter_recovers_undated_buy_ticket_listing() -> None:
+    result = PublicWebSignalAdapter(TextSignalConfig(event_mode=True)).extract(
+        source_key="cinema-events",
+        source_url="https://example.com/whats-on",
+        html="""
+        <html><body>
+          <a href="/movie/moana">Moana</a>
+          <a href="/movie/moana">Buy Tickets</a>
+        </body></html>
+        """,
+        observed_at=NOW,
+    )
+
+    discovery = next(item for item in result.discoveries if item.title == "Moana")
+    assert discovery.discovery_type.value == "event"
+    assert discovery.source_url == "https://example.com/movie/moana"
