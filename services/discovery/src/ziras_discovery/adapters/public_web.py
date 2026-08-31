@@ -107,11 +107,12 @@ class PublicWebSignalAdapter:
             discoveries = _merge_discoveries(
                 self._event_discoveries(precision_lines, source_key, source_url, observed_at),
                 self._event_discoveries(raw_lines, source_key, source_url, observed_at),
-                self._event_ticket_line_discoveries(raw_lines, source_key, source_url, observed_at),
                 self._event_link_discoveries(html, source_key, source_url, observed_at),
+                self._event_ticket_line_discoveries(raw_lines, source_key, source_url, observed_at),
             )
         else:
             discoveries = _merge_discoveries(
+                self._promotion_product_block_discoveries(html, source_key, source_url, observed_at),
                 self._promotion_discoveries(precision_lines, source_key, source_url, observed_at),
                 self._promotion_discoveries(raw_lines, source_key, source_url, observed_at),
                 self._promotion_heading_discoveries(raw_lines, source_key, source_url, observed_at),
@@ -135,6 +136,64 @@ class PublicWebSignalAdapter:
             observation=observation,
             discoveries=tuple(discoveries[: self.config.maximum_discoveries]),
         )
+
+    def _promotion_product_block_discoveries(
+        self,
+        html: str,
+        source_key: str,
+        source_url: str,
+        observed_at: datetime,
+    ) -> list[Discovery]:
+        parser = _HeadingBlockParser()
+        parser.feed(html)
+        parser.finish()
+        sale_context = urlsplit(source_url).path.casefold().rstrip("/").endswith("/sale")
+        result: list[Discovery] = []
+        seen: set[str] = set()
+
+        for title, body in parser.blocks:
+            folded = title.casefold()
+            body_folded = body.casefold()
+            if folded in _GENERIC_PROMOTION_TITLES:
+                continue
+            if any(noise in folded for noise in _POLICY_NOISE):
+                continue
+            if not _looks_like_title(title) or "add to cart" not in body_folded:
+                continue
+            amounts = _money_values(body)
+            percent = _PERCENT_RE.search(f"{title} {body}")
+            if not amounts:
+                continue
+
+            current: Decimal | None = None
+            original: Decimal | None = None
+            if len(amounts) >= 2 and min(amounts) != max(amounts):
+                current = min(amounts)
+                original = max(amounts)
+            elif sale_context or percent:
+                current = amounts[0]
+            else:
+                continue
+
+            if folded in seen:
+                continue
+            seen.add(folded)
+            result.append(
+                Discovery(
+                    id=uuid4(),
+                    discovery_type=DiscoveryType.DEAL,
+                    entity_id=None,
+                    title=title[:180],
+                    source_key=source_key,
+                    source_url=source_url,
+                    observed_at=observed_at,
+                    original_price=original,
+                    current_price=current,
+                    currency="EUR",
+                    freshness=FreshnessState.UNVERIFIED,
+                )
+            )
+        return result
 
     def _promotion_discoveries(
         self,
@@ -209,6 +268,8 @@ class PublicWebSignalAdapter:
             if not any(word in folded for word in _PROMOTION_WORDS):
                 continue
             if any(noise in folded for noise in _POLICY_NOISE):
+                continue
+            if re.fullmatch(r"sale\s+\d{1,2}%", folded):
                 continue
             if folded in _GENERIC_PROMOTION_TITLES or not _looks_like_title(line):
                 continue
@@ -458,6 +519,57 @@ class _TextNodeParser(HTMLParser):
     def handle_data(self, data: str) -> None:
         if not self._skip_depth and data.strip():
             self.values.append(data)
+
+
+class _HeadingBlockParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.blocks: list[tuple[str, str]] = []
+        self._skip_depth = 0
+        self._heading_tag: str | None = None
+        self._heading_parts: list[str] = []
+        self._active_heading: str | None = None
+        self._body_parts: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs) -> None:
+        folded = tag.casefold()
+        if folded in {"script", "style", "noscript", "svg"}:
+            self._skip_depth += 1
+            return
+        if not self._skip_depth and folded in {"h1", "h2", "h3", "h4"}:
+            self._flush_block()
+            self._heading_tag = folded
+            self._heading_parts = []
+
+    def handle_endtag(self, tag: str) -> None:
+        folded = tag.casefold()
+        if folded in {"script", "style", "noscript", "svg"} and self._skip_depth:
+            self._skip_depth -= 1
+            return
+        if not self._skip_depth and self._heading_tag == folded:
+            title = re.sub(r"\s+", " ", " ".join(self._heading_parts)).strip()
+            self._active_heading = title or None
+            self._heading_tag = None
+            self._heading_parts = []
+            self._body_parts = []
+
+    def handle_data(self, data: str) -> None:
+        if self._skip_depth or not data.strip():
+            return
+        if self._heading_tag is not None:
+            self._heading_parts.append(data.strip())
+        elif self._active_heading is not None:
+            self._body_parts.append(data.strip())
+
+    def finish(self) -> None:
+        self._flush_block()
+
+    def _flush_block(self) -> None:
+        if self._active_heading:
+            body = re.sub(r"\s+", " ", " ".join(self._body_parts)).strip()
+            self.blocks.append((self._active_heading, body))
+        self._active_heading = None
+        self._body_parts = []
 
 
 class _AnchorParser(HTMLParser):
