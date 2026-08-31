@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from urllib.parse import parse_qs, urlsplit
 
 import pytest
@@ -77,6 +77,7 @@ def test_env_configuration_enables_facebook_and_instagram_for_malta() -> None:
             "META_AD_LIBRARY_SOURCE_POLICY_APPROVED": "true",
             "META_AD_LIBRARY_COUNTRIES": "MT",
             "META_AD_LIBRARY_PLATFORMS": "FACEBOOK,INSTAGRAM",
+            "META_AD_LIBRARY_MEDIA_TYPE": "VIDEO",
         }
     )
     assert config.readiness is MetaAdsReadiness.READY
@@ -85,6 +86,7 @@ def test_env_configuration_enables_facebook_and_instagram_for_malta() -> None:
         MetaPublisherPlatform.FACEBOOK,
         MetaPublisherPlatform.INSTAGRAM,
     )
+    assert config.media_type == "VIDEO"
     assert config.source_policy().source_key == META_SOURCE_KEY
 
 
@@ -112,7 +114,11 @@ def test_search_uses_official_api_filters_and_does_not_put_token_in_url() -> Non
         }
 
     client = MetaAdLibraryClient(_ready_config(), transport=transport)
-    page = client.search(search_terms="weekend offer")
+    page = client.search(
+        search_terms="weekend offer",
+        delivery_date_min=date(2026, 8, 1),
+        delivery_date_max=date(2026, 8, 31),
+    )
 
     url = str(captured["url"])
     assert "secret-token" not in url
@@ -121,6 +127,9 @@ def test_search_uses_official_api_filters_and_does_not_put_token_in_url() -> Non
     assert query["publisher_platforms"] == ['["FACEBOOK","INSTAGRAM"]']
     assert query["ad_type"] == ["ALL"]
     assert query["ad_active_status"] == ["ACTIVE"]
+    assert query["media_type"] == ["ALL"]
+    assert query["ad_delivery_date_min"] == ["2026-08-01"]
+    assert query["ad_delivery_date_max"] == ["2026-08-31"]
     assert query["search_terms"] == ["weekend offer"]
     assert captured["headers"] == {
         "Authorization": "Bearer secret-token",
@@ -139,6 +148,15 @@ def test_search_uses_official_api_filters_and_does_not_put_token_in_url() -> Non
     assert observation.adapter == "meta-ad-library-v1"
     assert "access_token" not in observation.source_url
     assert "secret-token" not in str(observation.extracted)
+
+
+def test_invalid_delivery_window_is_rejected_before_api_call() -> None:
+    client = MetaAdLibraryClient(_ready_config(), transport=lambda *_: {"data": []})
+    with pytest.raises(ValueError, match="delivery_date_min"):
+        client.search(
+            delivery_date_min=date(2026, 9, 1),
+            delivery_date_max=date(2026, 8, 31),
+        )
 
 
 def test_meta_api_error_is_propagated_explicitly() -> None:
