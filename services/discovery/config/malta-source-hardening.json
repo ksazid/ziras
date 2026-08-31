@@ -1,0 +1,11 @@
+{
+  "visitmalta_events": {
+    "minimum_candidates": 1
+  },
+  "eden_cinemas": {
+    "route_adapter_kinds": {
+      "/special-offers": "promotion",
+      "/whats-on": "event"
+    }
+  }
+}
