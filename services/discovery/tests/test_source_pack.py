@@ -53,6 +53,21 @@ def test_scope_and_path_controls_prevent_accidental_production_enablement() -> N
     )
     assert wrong_path.allowed is False
 
+    for source_key, source_url in (
+        ("spazju_kreattiv_events", "https://www.kreattivita.org/en/events/"),
+        ("eurosport_malta_sale", "https://www.eurosport.com.mt/sale"),
+    ):
+        assert registry.decide(
+            source_key,
+            scope=SourcePolicyScope.POC,
+            source_url=source_url,
+        ).allowed is True
+        assert registry.decide(
+            source_key,
+            scope=SourcePolicyScope.PRODUCTION,
+            source_url=source_url,
+        ).allowed is False
+
 
 def test_vs06_hardening_applies_route_semantics_without_changing_policy() -> None:
     entries = load_source_catalog()
@@ -151,7 +166,11 @@ def test_catalog_files_contain_no_secrets() -> None:
     config_dir = Path(__file__).parents[1] / "config"
     text = "\n".join(
         path.read_text(encoding="utf-8")
-        for path in (config_dir / "malta-source-policy.json", config_dir / "malta-source-hardening.json")
+        for path in (
+            config_dir / "malta-source-policy.json",
+            config_dir / "malta-source-vs06-poc.json",
+            config_dir / "malta-source-hardening.json",
+        )
     ).casefold()
     assert "access_token" not in text
     assert "password" not in text
