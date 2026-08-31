@@ -3,7 +3,7 @@
   "sliceId": "VS-04",
   "title": "Malta Production Source Adapter Pack",
   "status": "active",
-  "lifecycle": "approved",
+  "lifecycle": "testing",
   "riskLevel": "high",
   "implementationMode": "runtime-enabled",
   "requirements": [
@@ -124,8 +124,8 @@
   "progress": {
     "discovery": 100,
     "decisions": 100,
-    "implementation": 20,
-    "testing": 0,
+    "implementation": 100,
+    "testing": 100,
     "certification": 0,
     "release": 0,
     "validation": 0
@@ -160,10 +160,15 @@
   },
   "links": {
     "specification": "docs/slices/VS-04.md",
-    "implementationPr": null,
+    "implementationPr": "https://github.com/ksazid/ziras/pull/5",
     "evidence": [
       "research/oss-qualification/sources.json",
-      "docs/integrations/MALTA-SOURCE-PACK.md"
+      "docs/integrations/MALTA-SOURCE-PACK.md",
+      "https://github.com/ksazid/ziras/actions/runs/33346955619",
+      "tested-sha:36e87e33385a70422e147b826c7f84a247238098",
+      "source-pack: unit tests passed",
+      "database: PostgreSQL 16/PostGIS/pgvector + source-policy migration passed",
+      "pes-preflight: full repository validation passed"
     ]
   },
   "maxAttempts": 3
