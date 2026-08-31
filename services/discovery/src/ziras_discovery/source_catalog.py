@@ -6,6 +6,7 @@ from enum import StrEnum
 import json
 from pathlib import Path
 from typing import Iterable
+from urllib.parse import urlsplit
 
 from .domain import SourceAccessMode, SourcePolicy, SourcePolicyScope
 from .policy import SourcePolicyRegistry
@@ -36,6 +37,18 @@ class SourceCatalogEntry:
     policy: SourcePolicy
     terms_url: str | None = None
     notes: str | None = None
+    route_adapter_kinds: tuple[tuple[str, AdapterKind], ...] = ()
+    minimum_candidates: int = 0
+
+    def adapter_kind_for(self, source_url: str) -> AdapterKind:
+        path = urlsplit(source_url).path or "/"
+        matches = (
+            (prefix, kind)
+            for prefix, kind in self.route_adapter_kinds
+            if path.startswith(prefix)
+        )
+        best = max(matches, key=lambda item: len(item[0]), default=None)
+        return best[1] if best else self.adapter_kind
 
 
 def default_malta_catalog_path() -> Path:
@@ -75,6 +88,13 @@ def load_source_catalog(path: str | Path | None = None) -> tuple[SourceCatalogEn
             attribution_required=bool(policy_raw.get("attribution_required", True)),
             content_storage_allowed=bool(policy_raw.get("content_storage_allowed", False)),
         )
+        route_adapter_kinds = tuple(
+            (str(prefix), AdapterKind(kind))
+            for prefix, kind in raw.get("route_adapter_kinds", {}).items()
+        )
+        minimum_candidates = int(raw.get("minimum_candidates", 0))
+        if minimum_candidates < 0:
+            raise ValueError(f"minimum_candidates must be >= 0 for {source_key}")
         entries.append(
             SourceCatalogEntry(
                 source_key=source_key,
@@ -86,6 +106,8 @@ def load_source_catalog(path: str | Path | None = None) -> tuple[SourceCatalogEn
                 policy=policy,
                 terms_url=raw.get("terms_url"),
                 notes=raw.get("notes"),
+                route_adapter_kinds=route_adapter_kinds,
+                minimum_candidates=minimum_candidates,
             )
         )
     return tuple(entries)
