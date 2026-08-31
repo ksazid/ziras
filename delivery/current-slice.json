@@ -23,8 +23,8 @@
   "owners": {
     "product": "ksazid",
     "engineering": "ksazid",
-    "operations": null,
-    "security": null
+    "operations": "ksazid",
+    "security": "ksazid"
   },
   "dependencies": [
     "VS-02 certified Discovery Kernel",
