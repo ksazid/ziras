@@ -3,7 +3,7 @@
   "sliceId": "VS-06",
   "title": "POC Coverage & Extraction Hardening",
   "status": "active",
-  "lifecycle": "testing",
+  "lifecycle": "certified",
   "riskLevel": "high",
   "implementationMode": "runtime-enabled",
   "requirements": [
@@ -90,12 +90,12 @@
     },
     {
       "type": "certification",
-      "status": "pending",
-      "version": null,
-      "commitSha": null,
-      "by": null,
-      "at": null,
-      "rationale": null
+      "status": "approved",
+      "version": "VS-06",
+      "commitSha": "505695d01c1431c7fc63dd2f770228f432e1495f",
+      "by": "ksazid",
+      "at": "2026-08-31T18:20:00+02:00",
+      "rationale": "Product owner approved VS-06 certification after exact-head PES preflight, kernel/unit, PostgreSQL 16 + PostGIS + pgvector, Eden route semantics, VisitMalta candidate-health, and five-source POC coverage gates passed."
     },
     {
       "type": "release",
@@ -122,14 +122,22 @@
     "decisions": 100,
     "implementation": 100,
     "testing": 100,
-    "certification": 0,
+    "certification": 100,
     "release": 0,
     "validation": 0
   },
   "certification": {
-    "status": "not-started",
-    "commitSha": null,
-    "evidence": []
+    "status": "passed",
+    "commitSha": "505695d01c1431c7fc63dd2f770228f432e1495f",
+    "evidence": [
+      "https://github.com/ksazid/ziras/actions/runs/33400602901",
+      "kernel/unit and VS-02/03/04/05 regression tests passed",
+      "PostgreSQL16/PostGIS/pgvector integration passed",
+      "Eden route-specific semantics passed",
+      "VisitMalta rendered-candidate health gate passed",
+      "five independent POC source classes confirmed",
+      "full PES preflight passed"
+    ]
   },
   "release": {
     "status": "not-authorized",
@@ -159,7 +167,9 @@
       "https://github.com/ksazid/ziras/pull/7",
       "https://github.com/ksazid/ziras/actions/runs/33396940823",
       "https://github.com/ksazid/ziras/actions/runs/33400353705",
+      "https://github.com/ksazid/ziras/actions/runs/33400602901",
       "tested-sha:30416cb09765130efdd93f438e837bc3a29a137b",
+      "certified-sha:505695d01c1431c7fc63dd2f770228f432e1495f",
       "five-poc-source-classes: visitmalta_events, eden_cinemas, homemate_offers, spazju_kreattiv_events, eurosport_malta_sale",
       "kernel/hardening/policy/PostgreSQL/PES: passed",
       "VS-05 conditional POC report: formal product metrics remain post-merge validation"
