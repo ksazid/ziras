@@ -1,6 +1,6 @@
 # Malta Source Pack Operations
 
-Status: implemented as VS-04 candidate source profiles; no review-required source is production-enabled.
+Status: implemented as VS-04 candidate source profiles; no candidate source is production-enabled.
 
 ## Principle
 
@@ -22,6 +22,7 @@ Technical support never overrides policy.
 - Entry: `https://www.visitmalta.com/en/events-in-malta-and-gozo/`
 - Terms: `https://www.visitmalta.com/en/terms-and-conditions/`
 - Initial policy stage: `review_required`
+- Candidate registry: `DENY`
 - Candidate access: public web only after policy + robots review
 - Robots required: yes
 - Browser fallback: permitted technically, but only after policy approval
@@ -33,9 +34,9 @@ Technical support never overrides policy.
 - Kind: deals
 - Entry: `https://deal.com.mt/`
 - Initial policy stage: `partner_required`
-- Runtime mode before explicit permission: `partner_only`
+- Candidate registry: `DENY`
+- Promotion path: after explicit partner/API/feed permission, register a reviewed `PARTNER_ONLY` SourcePolicy; runtime then also requires partner execution context
 - Robots required: yes where web access is used
-- Preferred route: partner feed/API or explicit written automated-access permission
 - Current usefulness evidence: active Malta deal catalogue across food, activities, hotels and retail
 
 ### `scan_malta`
@@ -44,7 +45,7 @@ Technical support never overrides policy.
 - Kind: retail
 - Entry: `https://www.scanmalta.com/`
 - Initial policy stage: `review_required`
-- Default: deny
+- Candidate registry: `DENY`
 - Candidate signals: product availability, special price, price drop, new product
 
 ### `greens_malta`
@@ -53,7 +54,7 @@ Technical support never overrides policy.
 - Kind: retail/supermarket
 - Entry: `https://www.greens.com.mt/`
 - Initial policy stage: `review_required`
-- Default: deny
+- Candidate registry: `DENY`
 - Candidate signals: grocery product availability, promotion, price change
 
 ### `decathlon_malta`
@@ -62,7 +63,7 @@ Technical support never overrides policy.
 - Kind: retail
 - Entry: `https://www.decathlon.mt/`
 - Initial policy stage: `review_required`
-- Default: deny
+- Candidate registry: `DENY`
 - Candidate signals: sale, price drop, new product
 
 ### `atrium_malta`
@@ -71,7 +72,7 @@ Technical support never overrides policy.
 - Kind: retail
 - Entry: `https://www.atrium.com.mt/`
 - Initial policy stage: `review_required`
-- Default: deny
+- Candidate registry: `DENY`
 - Candidate signals: sale, promotion, new product
 
 ### `pizza_hut_malta`
@@ -80,7 +81,7 @@ Technical support never overrides policy.
 - Kind: restaurant
 - Entry: `https://www.pizzahut.com.mt/`
 - Initial policy stage: `review_required`
-- Default: deny
+- Candidate registry: `DENY`
 - Candidate signals: menu offer, limited promotion, new menu item
 
 ### `shows_happening`
@@ -89,24 +90,27 @@ Technical support never overrides policy.
 - Kind: events/ticketing
 - Entry: `https://www.showshappening.com/`
 - Initial policy stage: `partner_required`
-- Runtime mode before explicit permission: `partner_only`
-- Preferred route: official feed/API/partnership
+- Candidate registry: `DENY`
+- Promotion path: approved official feed/API/partnership → reviewed `PARTNER_ONLY` policy → partner execution context
 
 ## Promotion path for a source
 
-A source moves toward production only through the following gates:
+A review-required source moves toward production only through:
 
-`candidate profile` → `terms/robots/licensing review` → `policy record` → `fixture tests` → `live smoke test` → `freshness/error telemetry` → `production-enable approval`
+`candidate profile (DENY)` → `terms/robots/licensing review` → `approved SourcePolicy` → `fixture tests` → `live smoke test` → `freshness/error telemetry` → `production-enable approval`
 
 For partner sources:
 
-`candidate profile` → `partner/API/feed agreement` → `policy record` → `credentials/feed config` → `smoke test` → `production-enable approval`
+`candidate profile (DENY)` → `partner/API/feed agreement` → `PARTNER_ONLY policy approval` → `credentials/feed config` → `partner-context smoke test` → `production-enable approval`
+
+A caller-provided `partner=True` flag is never sufficient without the approved policy record.
 
 ## Runtime invariants
 
 - Unknown source key: deny.
 - Review-required source without approved policy: deny.
-- Partner-only source without partner execution context: deny.
+- Partner-required source without approved `PARTNER_ONLY` policy: deny.
+- Approved partner-only source without partner execution context: deny.
 - Non-HTTPS source URL: reject.
 - Host outside the source profile's domain allowlist: reject.
 - Browser fallback is never permission to bypass source restrictions.

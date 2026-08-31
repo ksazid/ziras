@@ -76,11 +76,16 @@ def test_pack_has_broad_malta_source_classes() -> None:
     assert SOURCE_PROFILES["shows_happening"].policy_stage is PolicyStage.PARTNER_REQUIRED
 
 
-def test_candidate_registry_never_auto_allows_review_required_source() -> None:
+def test_candidate_registry_denies_review_and_partner_candidates() -> None:
     pack = SourcePackAdapter(candidate_policy_registry())
-    readiness = pack.readiness("visitmalta_events")
-    assert readiness.allowed is False
-    assert readiness.mode is SourceAccessMode.DENY
+    for source_key in ("visitmalta_events", "deal_mt", "shows_happening"):
+        assert pack.readiness(source_key).allowed is False
+        assert pack.readiness(source_key, partner=True).allowed is False
+        assert pack.readiness(source_key).mode is SourceAccessMode.DENY
+
+
+def test_review_required_source_cannot_extract_without_explicit_policy() -> None:
+    pack = SourcePackAdapter(candidate_policy_registry())
     with pytest.raises(SourcePackError, match="policy denied"):
         pack.extract(
             source_key="visitmalta_events",
@@ -91,10 +96,29 @@ def test_candidate_registry_never_auto_allows_review_required_source() -> None:
         )
 
 
-def test_partner_source_requires_partner_execution_context() -> None:
-    pack = SourcePackAdapter(candidate_policy_registry())
+def test_partner_source_needs_explicit_partner_policy_and_partner_context() -> None:
+    registry = candidate_policy_registry()
+    registry.register(
+        SourcePolicy(
+            source_key="deal_mt",
+            mode=SourceAccessMode.PARTNER_ONLY,
+            reason="Test-only approved partner feed/web access.",
+            robots_required=True,
+            reviewed_at=NOW,
+        )
+    )
+    pack = SourcePackAdapter(registry)
     assert pack.readiness("deal_mt").allowed is False
     assert pack.readiness("deal_mt", partner=True).allowed is True
+
+    with pytest.raises(SourcePackError, match="Partner access required"):
+        pack.extract(
+            source_key="deal_mt",
+            source_url="https://deal.com.mt/",
+            html=DEAL_HTML,
+            observed_at=NOW,
+            content_hash="deal-hash",
+        )
 
     result = pack.extract(
         source_key="deal_mt",
@@ -193,7 +217,8 @@ def test_unknown_source_is_fail_closed() -> None:
 
 
 def test_duplicate_structured_items_are_removed() -> None:
-    duplicate_html = PRODUCT_HTML.replace("</head>", PRODUCT_HTML.split("<head>", 1)[1].split("</head>", 1)[0] + "</head>")
+    inner_head = PRODUCT_HTML.split("<head>", 1)[1].split("</head>", 1)[0]
+    duplicate_html = PRODUCT_HTML.replace("</head>", inner_head + "</head>", 1)
     registry = SourcePolicyRegistry(
         {
             "greens_malta": SourcePolicy(

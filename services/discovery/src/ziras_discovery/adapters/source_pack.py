@@ -84,7 +84,7 @@ SOURCE_PROFILES: Mapping[str, SourceProfile] = {
         policy_stage=PolicyStage.PARTNER_REQUIRED,
         robots_required=True,
         browser_fallback_allowed=True,
-        notes="High-density Malta deal inventory. Keep partner-only until explicit automated-access permission or partner feed/API is established.",
+        notes="High-density Malta deal inventory. Keep disabled until explicit partner/API/feed permission is approved, then register a PARTNER_ONLY SourcePolicy.",
     ),
     "scan_malta": SourceProfile(
         source_key="scan_malta",
@@ -150,7 +150,7 @@ SOURCE_PROFILES: Mapping[str, SourceProfile] = {
         policy_stage=PolicyStage.PARTNER_REQUIRED,
         robots_required=True,
         browser_fallback_allowed=True,
-        notes="Ticketing/event candidate. Prefer partner/API/feed access rather than unapproved automated extraction.",
+        notes="Ticketing/event candidate. Keep disabled until official feed/API/partnership permission is approved, then register a PARTNER_ONLY SourcePolicy.",
     ),
 }
 
@@ -261,27 +261,31 @@ class SourcePackAdapter:
 def candidate_policy_registry() -> SourcePolicyRegistry:
     """Create the safe default registry for VS-04.
 
-    Review-required sources are DENY. Partner-required sources are PARTNER_ONLY.
-    No source in the production pack is automatically allowed by this function.
+    Every unapproved candidate is DENY, including partner-required sources. A
+    partner source becomes runnable only after an explicit reviewed policy record
+    is registered as PARTNER_ONLY and the caller executes in partner context.
     """
 
     policies: dict[str, SourcePolicy] = {}
     for profile in SOURCE_PROFILES.values():
-        if profile.policy_stage is PolicyStage.PARTNER_REQUIRED:
-            mode = SourceAccessMode.PARTNER_ONLY
-            reason = "Partner/API/feed permission required before automated collection."
-        elif profile.policy_stage is PolicyStage.PROHIBITED:
-            mode = SourceAccessMode.DENY
+        if profile.policy_stage is PolicyStage.PROHIBITED:
             reason = "Automated collection is prohibited for this source."
+        elif profile.policy_stage is PolicyStage.PARTNER_REQUIRED:
+            reason = "Partner/API/feed agreement and explicit PARTNER_ONLY SourcePolicy approval required."
         elif profile.policy_stage is PolicyStage.APPROVED:
-            mode = SourceAccessMode.ALLOW
-            reason = "Source policy has been explicitly approved."
+            policies[profile.source_key] = SourcePolicy(
+                source_key=profile.source_key,
+                mode=SourceAccessMode.ALLOW,
+                reason="Source policy has been explicitly approved.",
+                policy_url=profile.policy_url,
+                robots_required=profile.robots_required,
+            )
+            continue
         else:
-            mode = SourceAccessMode.DENY
             reason = "Source-policy and robots review required before automated collection."
         policies[profile.source_key] = SourcePolicy(
             source_key=profile.source_key,
-            mode=mode,
+            mode=SourceAccessMode.DENY,
             reason=reason,
             policy_url=profile.policy_url,
             robots_required=profile.robots_required,
