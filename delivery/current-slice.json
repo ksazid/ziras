@@ -2,8 +2,8 @@
   "schemaVersion": 2,
   "sliceId": "VS-07",
   "title": "14-Day POC Metrics Validation",
-  "status": "implementing",
-  "lifecycle": "implementing",
+  "status": "certified",
+  "lifecycle": "certified",
   "riskLevel": "high",
   "implementationMode": "runtime-enabled",
   "requirements": [
@@ -63,7 +63,8 @@
       "Existing certified POC source-policy boundaries remain authoritative; no new source permissions are introduced.",
       "Production source access remains OFF.",
       "Scheduler remains OFF; POC measurements are manual/governed unless separately approved.",
-      "Release and production enablement remain not authorized."
+      "Release and production enablement remain not authorized.",
+      "Measurement framework certified at exact implementation SHA 3bc1341dae7991326d16bd10c5a6804585d1748e after Discovery Kernel, PES and PostgreSQL integration passed."
     ]
   },
   "approvals": [
@@ -96,12 +97,12 @@
     },
     {
       "type": "certification",
-      "status": "pending",
-      "version": null,
-      "commitSha": null,
-      "by": null,
-      "at": null,
-      "rationale": null
+      "status": "approved",
+      "version": "VS-07",
+      "commitSha": "3bc1341dae7991326d16bd10c5a6804585d1748e",
+      "by": "ksazid",
+      "at": "2026-08-31T22:10:00+02:00",
+      "rationale": "Product owner explicitly approved VS-07 certification after exact-head Discovery Kernel, PES preflight, PostgreSQL/PostGIS/pgvector integration and POC metric regression tests passed."
     },
     {
       "type": "release",
@@ -126,16 +127,22 @@
   "progress": {
     "discovery": 100,
     "decisions": 100,
-    "implementation": 10,
-    "testing": 0,
-    "certification": 0,
+    "implementation": 100,
+    "testing": 100,
+    "certification": 100,
     "release": 0,
     "validation": 0
   },
   "certification": {
-    "status": "not-started",
-    "commitSha": null,
-    "evidence": []
+    "status": "passed",
+    "commitSha": "3bc1341dae7991326d16bd10c5a6804585d1748e",
+    "evidence": [
+      "https://github.com/ksazid/ziras/actions/runs/33434341657",
+      "Discovery Kernel/unit tests: passed",
+      "PostgreSQL16/PostGIS/pgvector integration: passed",
+      "PES preflight: passed",
+      "POC metrics regression tests: passed"
+    ]
   },
   "release": {
     "status": "not-authorized",
@@ -161,11 +168,13 @@
   },
   "links": {
     "specification": "docs/slices/VS-07.md",
-    "implementationPr": null,
+    "implementationPr": "https://github.com/ksazid/ziras/pull/12",
     "evidence": [
       "product/PRD.md#success-metrics",
       "VS-06-final-main-sha:9fac7f5987c0a6e206c33925d07e3d029a219665",
       "VS-06-final-main-run:https://github.com/ksazid/ziras/actions/runs/33433500467",
+      "VS-07-certified-sha:3bc1341dae7991326d16bd10c5a6804585d1748e",
+      "VS-07-certification-run:https://github.com/ksazid/ziras/actions/runs/33434341657",
       "production-source-access:OFF",
       "scheduler:OFF"
     ]
