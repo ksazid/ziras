@@ -1,9 +1,9 @@
 {
   "schemaVersion": 2,
-  "sliceId": "VS-04",
-  "title": "Malta Production Source Adapter Pack",
+  "sliceId": "VS-05",
+  "title": "POC Ingestion Pipeline",
   "status": "active",
-  "lifecycle": "certified",
+  "lifecycle": "approved",
   "riskLevel": "high",
   "implementationMode": "runtime-enabled",
   "requirements": [
@@ -12,13 +12,14 @@
     "REQ-SRC-003",
     "REQ-SRC-004",
     "REQ-DIS-001",
-    "REQ-DIS-003",
     "REQ-DIS-005",
     "REQ-FRS-001",
     "REQ-FRS-002",
     "REQ-FRS-003",
     "REQ-FRS-004",
-    "REQ-FRS-005"
+    "REQ-FRS-005",
+    "REQ-PER-001",
+    "REQ-PER-004"
   ],
   "owners": {
     "product": "ksazid",
@@ -28,120 +29,139 @@
   },
   "dependencies": [
     "VS-02 certified Discovery Kernel",
-    "VS-03 certified Meta Ad Library adapter",
+    "VS-04 certified Malta source policy/adapter pack",
     "ADR-001 approved discovery-engine architecture",
-    "research/oss-qualification multi-vendor evidence",
-    "per-source terms/robots review"
+    "VS-04 POC/research source-policy matrix"
   ],
-  "blockers": [
-    "Production source enablement remains prohibited until each source has production-scope policy approval.",
-    "Browser-mode live POC acquisition remains disabled until the Scrapy/Playwright runner is wired and policy-gated."
-  ],
+  "blockers": [],
   "allowedPaths": [
     "services/discovery/**",
     ".github/workflows/discovery-kernel.yml",
-    ".github/workflows/source-smoke.yml",
-    "docs/slices/VS-04.md",
-    "docs/integrations/MALTA-SOURCE-PACK.md",
+    ".github/workflows/poc-ingestion.yml",
+    "docs/slices/VS-05.md",
+    "product/TRD.md",
     "delivery/current-slice.json"
   ],
-  "protectedPaths": [".github/workflows/release.yml"],
+  "protectedPaths": [
+    ".github/workflows/release.yml"
+  ],
   "impact": {
-    "areas": ["architecture", "api", "legal-privacy", "operations-support"],
+    "areas": [
+      "architecture",
+      "api",
+      "legal-privacy",
+      "operations-support"
+    ],
     "notes": [
-      "Every vendor is represented by an explicit fail-closed policy record with research/POC/production scope.",
-      "Sources with explicit automated/commercial-use restrictions are blocked or partner-only.",
-      "Live smoke tests are low-rate, robots-aware, fixed-URL, no-login and no anti-bot-bypass.",
-      "Only factual metadata/provenance is retained by default; page creative/assets are not stored."
+      "Pipeline acquisition is constrained to existing VS-04 research/POC policies and approved paths.",
+      "Technical browser capability does not grant production source permission.",
+      "Raw fetched page bodies remain transient; normalized facts/provenance only are persisted.",
+      "No scheduler or production-enable flag is introduced by this slice."
     ]
   },
   "approvals": [
     {
       "type": "scope",
       "status": "approved",
-      "version": "VS-04",
+      "version": "VS-05",
       "commitSha": null,
       "by": "ksazid",
-      "at": "2026-08-31T03:01:26+02:00",
-      "rationale": "Product owner said Go to the proposed VS-04 Production Source Adapter Pack and real Malta volume/freshness validation."
+      "at": "2026-08-31T08:46:00+02:00",
+      "rationale": "Product owner approved VS-05 POC Ingestion Pipeline after VS-04 certification and merge."
     },
     {
       "type": "policy",
       "status": "approved",
       "version": "VS-04-poc-policy-matrix",
-      "commitSha": null,
+      "commitSha": "ac3a166bbaf511335fe2a205d940f98c84919dc0",
       "by": "ksazid",
-      "at": "2026-08-31T03:01:26+02:00",
-      "rationale": "Approval covers the fail-closed research/POC policy matrix and explicit deny/partner decisions only. It does not grant production source access."
+      "at": "2026-08-31T08:46:00+02:00",
+      "rationale": "VS-05 reuses only the already certified VS-04 research/POC policy matrix; this does not approve production source access."
     },
     {
       "type": "implementation",
       "status": "approved",
-      "version": "VS-04",
+      "version": "VS-05",
       "commitSha": null,
       "by": "ksazid",
-      "at": "2026-08-31T03:01:26+02:00",
-      "rationale": "Product owner approved proceeding with the source-adapter implementation and validation work."
+      "at": "2026-08-31T08:46:00+02:00",
+      "rationale": "Product owner approved implementing the POC ingestion pipeline."
     },
     {
       "type": "certification",
-      "status": "approved",
-      "version": "VS-04",
-      "commitSha": "ac3a166bbaf511335fe2a205d940f98c84919dc0",
-      "by": "ksazid",
-      "at": "2026-08-31T08:46:00+02:00",
-      "rationale": "Product owner approved VS-04 certification after exact-head source-pack/kernel/database and PES preflight gates passed."
+      "status": "pending",
+      "version": null,
+      "commitSha": null,
+      "by": null,
+      "at": null,
+      "rationale": null
     },
-    {"type": "release", "status": "pending", "version": null, "commitSha": null, "by": null, "at": null, "rationale": null},
-    {"type": "production-enable", "status": "pending", "version": null, "commitSha": null, "by": null, "at": null, "rationale": null}
+    {
+      "type": "release",
+      "status": "pending",
+      "version": null,
+      "commitSha": null,
+      "by": null,
+      "at": null,
+      "rationale": null
+    },
+    {
+      "type": "production-enable",
+      "status": "pending",
+      "version": null,
+      "commitSha": null,
+      "by": null,
+      "at": null,
+      "rationale": null
+    }
   ],
-  "decisionIds": ["DEC-01"],
+  "decisionIds": [
+    "DEC-01"
+  ],
   "progress": {
     "discovery": 100,
     "decisions": 100,
-    "implementation": 100,
-    "testing": 100,
-    "certification": 100,
+    "implementation": 5,
+    "testing": 0,
+    "certification": 0,
     "release": 0,
     "validation": 0
   },
   "certification": {
-    "status": "passed",
-    "commitSha": "ac3a166bbaf511335fe2a205d940f98c84919dc0",
-    "evidence": [
-      "https://github.com/ksazid/ziras/actions/runs/33347061940",
-      "https://github.com/ksazid/ziras/actions/runs/33365625606",
-      "https://github.com/ksazid/ziras/actions/runs/33365720646",
-      "source-pack/kernel/database and PES preflight passed before certification and after certification governance updates"
-    ]
+    "status": "not-started",
+    "commitSha": null,
+    "evidence": []
   },
-  "release": {"status": "not-authorized", "releaseId": null},
-  "rollback": {"status": "not-applicable", "rollbackId": null},
+  "release": {
+    "status": "not-authorized",
+    "releaseId": null
+  },
+  "rollback": {
+    "status": "not-applicable",
+    "rollbackId": null
+  },
   "postRelease": {
     "status": "not-started",
     "reviewAt": null,
-    "expectedOutcome": "Measure real Malta discovery density and freshness across multiple governed source classes without bypassing vendor policies.",
+    "expectedOutcome": "Measure repeatable policy-governed Malta discovery ingestion with dedupe, freshness and deterministic ranking before any user-facing feed work.",
     "metrics": [
-      "live source success rate",
-      "discovery candidates per source/day",
-      "valid when opened",
-      "stale/expired surfaced rate",
-      "duplicate rate",
-      "source-policy bypass count",
-      "static versus browser fallback rate",
-      "blocked/partner-only source count"
+      "useful discovery candidates/day",
+      "unique discoveries/day",
+      "duplicate rate after processing",
+      "stale/expired rate",
+      "source success/failure/blocked rate",
+      "static versus browser acquisition rate",
+      "candidates per source and source class",
+      "ranked active discovery count"
     ]
   },
   "links": {
-    "specification": "docs/slices/VS-04.md",
-    "implementationPr": "https://github.com/ksazid/ziras/pull/5",
+    "specification": "docs/slices/VS-05.md",
+    "implementationPr": null,
     "evidence": [
-      "research/oss-qualification/sources.json",
+      "docs/slices/VS-05.md",
       "docs/integrations/MALTA-SOURCE-PACK.md",
-      "https://github.com/ksazid/ziras/actions/runs/33347061940",
-      "https://github.com/ksazid/ziras/actions/runs/33365625606",
-      "https://github.com/ksazid/ziras/actions/runs/33365720646",
-      "certified-sha:ac3a166bbaf511335fe2a205d940f98c84919dc0"
+      "certified-vs04-sha:ac3a166bbaf511335fe2a205d940f98c84919dc0"
     ]
   },
   "maxAttempts": 3
