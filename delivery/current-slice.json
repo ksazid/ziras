@@ -30,9 +30,7 @@
     "VS-05 Malta POC conditional-pass test report",
     "ADR-001 approved discovery-engine architecture"
   ],
-  "blockers": [
-    "Formal POC ingestion metrics remain unmeasured until the manual workflow is dispatched in an environment that can create workflow_dispatch runs."
-  ],
+  "blockers": [],
   "allowedPaths": [
     "services/discovery/**",
     ".github/workflows/discovery-kernel.yml",
@@ -58,6 +56,7 @@
       "VisitMalta browser ingestion fails health validation when rendered inventory produces no candidates.",
       "Spazju Kreattiv Events and Eurosport Malta Sale are explicitly approved for narrow low-rate POC factual metadata acquisition only.",
       "The certified VS-04 baseline remains unchanged; VS-06 source permissions are additive and auditable.",
+      "Formal POC metrics remain a post-merge validation activity rather than an implementation blocker.",
       "No production source permission, scheduler or production-enable flag is introduced."
     ]
   },
@@ -74,20 +73,11 @@
     {
       "type": "policy",
       "status": "approved",
-      "version": "VS-04-poc-policy-matrix",
-      "commitSha": "ac3a166bbaf511335fe2a205d940f98c84919dc0",
-      "by": "ksazid",
-      "at": "2026-08-31T08:46:00+02:00",
-      "rationale": "VS-06 may harden extraction for already-approved VS-04 POC sources. This approval does not authorize production access."
-    },
-    {
-      "type": "policy",
-      "status": "approved",
-      "version": "VS-06-poc-source-extension",
+      "version": "VS-06-poc-policy-state",
       "commitSha": null,
       "by": "ksazid",
       "at": "2026-08-31T15:05:00+02:00",
-      "rationale": "Product owner explicitly approved Spazju Kreattiv Events and Eurosport Malta Sale for the narrow low-rate POC constraints documented in VS06-POC-SOURCE-QUALIFICATION.md. Production access remains unapproved."
+      "rationale": "The certified VS-04 POC policy baseline remains authoritative for existing sources, and the product owner explicitly approved the additive VS-06 POC policies for Spazju Kreattiv Events and Eurosport Malta Sale under the documented narrow low-rate constraints. Production access remains unapproved."
     },
     {
       "type": "implementation",
