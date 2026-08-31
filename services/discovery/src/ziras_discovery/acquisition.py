@@ -57,9 +57,16 @@ class ScrapyPlaywrightAcquirer:
     rejected if the final top-level host changes.
     """
 
-    def __init__(self, *, timeout_seconds: int = 30, concurrent_requests: int = 2) -> None:
+    def __init__(
+        self,
+        *,
+        timeout_seconds: int = 30,
+        concurrent_requests: int = 2,
+        browser_settle_ms: int = 2500,
+    ) -> None:
         self.timeout_seconds = timeout_seconds
         self.concurrent_requests = concurrent_requests
+        self.browser_settle_ms = browser_settle_ms
 
     def acquire(self, requests: Sequence[AcquisitionRequest]) -> Sequence[AcquisitionOutcome]:
         if not requests:
@@ -68,6 +75,7 @@ class ScrapyPlaywrightAcquirer:
         try:
             import scrapy
             from scrapy.crawler import CrawlerProcess
+            from scrapy_playwright.page import PageMethod
         except ImportError as exc:  # pragma: no cover - exercised only without optional deps
             raise RuntimeError(
                 "POC acquisition dependencies are missing; install ziras-discovery[acquisition]."
@@ -124,6 +132,9 @@ class ScrapyPlaywrightAcquirer:
                     }
                     if request.fetch_mode is FetchMode.BROWSER:
                         meta["playwright"] = True
+                        meta["playwright_page_methods"] = [
+                            PageMethod("wait_for_timeout", self.browser_settle_ms)
+                        ]
                     yield scrapy.Request(
                         request.url,
                         headers={"Accept": "text/html,application/xhtml+xml"},
