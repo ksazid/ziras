@@ -3,7 +3,7 @@
   "sliceId": "VS-03",
   "title": "Meta Ad Library Source Adapter",
   "status": "active",
-  "lifecycle": "testing",
+  "lifecycle": "certified",
   "riskLevel": "medium",
   "implementationMode": "runtime-enabled",
   "requirements": [
@@ -92,12 +92,12 @@
     },
     {
       "type": "certification",
-      "status": "pending",
-      "version": null,
-      "commitSha": null,
-      "by": null,
-      "at": null,
-      "rationale": null
+      "status": "approved",
+      "version": "VS-03",
+      "commitSha": "fb5923806203661f7dbc4b715fac4f9a7ccc9e1b",
+      "by": "ksazid",
+      "at": "2026-08-31T02:23:46+02:00",
+      "rationale": "Product owner approved VS-03 certification after exact-SHA Meta/kernel/database and PES preflight gates passed."
     },
     {
       "type": "release",
@@ -124,14 +124,19 @@
     "decisions": 100,
     "implementation": 100,
     "testing": 100,
-    "certification": 0,
+    "certification": 100,
     "release": 0,
     "validation": 0
   },
   "certification": {
-    "status": "not-started",
-    "commitSha": null,
-    "evidence": []
+    "status": "passed",
+    "commitSha": "fb5923806203661f7dbc4b715fac4f9a7ccc9e1b",
+    "evidence": [
+      "https://github.com/ksazid/ziras/actions/runs/33344219448",
+      "meta: readiness, Malta/Facebook/Instagram filters, date/media filters, token-leak protection, pagination and API-error tests passed",
+      "kernel/database: PostgreSQL 16/PostGIS/pgvector regression suite passed",
+      "pes-preflight: planning/governance/dashboard/platform/mobile/script validation passed"
+    ]
   },
   "release": {
     "status": "not-authorized",
@@ -160,8 +165,8 @@
     "evidence": [
       "docs/integrations/META-AD-LIBRARY.md",
       "https://www.facebook.com/ads/library/api/",
-      "https://github.com/ksazid/ziras/actions/runs/33344123109",
-      "tested-sha:9ae24caff4ca7b078e1137998469021febae2e4d"
+      "https://github.com/ksazid/ziras/actions/runs/33344219448",
+      "tested-sha:fb5923806203661f7dbc4b715fac4f9a7ccc9e1b"
     ]
   },
   "maxAttempts": 3
