@@ -3,7 +3,7 @@
   "sliceId": "VS-02",
   "title": "Discovery Kernel Foundation",
   "status": "active",
-  "lifecycle": "testing",
+  "lifecycle": "certified",
   "riskLevel": "medium",
   "implementationMode": "runtime-enabled",
   "requirements": [
@@ -88,12 +88,12 @@
     },
     {
       "type": "certification",
-      "status": "pending",
-      "version": null,
-      "commitSha": null,
-      "by": null,
-      "at": null,
-      "rationale": null
+      "status": "approved",
+      "version": "VS-02",
+      "commitSha": "7c61dabe110d84818ae6a277ce191792c9800654",
+      "by": "ksazid",
+      "at": "2026-08-31T02:23:46+02:00",
+      "rationale": "Product owner approved VS-02 certification after exact-SHA kernel/database and PES preflight gates passed."
     },
     {
       "type": "release",
@@ -120,14 +120,18 @@
     "decisions": 100,
     "implementation": 100,
     "testing": 100,
-    "certification": 0,
+    "certification": 100,
     "release": 0,
     "validation": 0
   },
   "certification": {
-    "status": "not-started",
-    "commitSha": null,
-    "evidence": []
+    "status": "passed",
+    "commitSha": "7c61dabe110d84818ae6a277ce191792c9800654",
+    "evidence": [
+      "https://github.com/ksazid/ziras/actions/runs/33343370481",
+      "kernel: unit + PostgreSQL 16/PostGIS/pgvector integration passed",
+      "pes-preflight: planning/governance/dashboard/platform/mobile/script validation passed"
+    ]
   },
   "release": {
     "status": "not-authorized",
@@ -155,8 +159,8 @@
     "evidence": [
       "docs/architecture/ADR-001-DISCOVERY-ENGINE.md",
       "research/oss-qualification/README.md",
-      "https://github.com/ksazid/ziras/actions/runs/33342957975/job/99341773634",
-      "tested-sha:4b3a2379d5c9c3e0829e7abf4fe422404d58c415"
+      "https://github.com/ksazid/ziras/actions/runs/33343370481",
+      "tested-sha:7c61dabe110d84818ae6a277ce191792c9800654"
     ]
   },
   "maxAttempts": 3
