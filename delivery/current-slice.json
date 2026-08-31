@@ -158,9 +158,11 @@
     "evidence": [
       "https://github.com/ksazid/ziras/pull/7",
       "https://github.com/ksazid/ziras/actions/runs/33396940823",
-      "tested-policy-pending-sha:db6afef5482ee609557c68b614bc5206b94ee196",
-      "VS-05 conditional POC report: technical pipeline green, product gates not yet passed",
-      "VS-06 named policy approval: spazju_kreattiv_events + eurosport_malta_sale"
+      "https://github.com/ksazid/ziras/actions/runs/33400353705",
+      "tested-sha:30416cb09765130efdd93f438e837bc3a29a137b",
+      "five-poc-source-classes: visitmalta_events, eden_cinemas, homemate_offers, spazju_kreattiv_events, eurosport_malta_sale",
+      "kernel/hardening/policy/PostgreSQL/PES: passed",
+      "VS-05 conditional POC report: formal product metrics remain post-merge validation"
     ]
   },
   "maxAttempts": 3
