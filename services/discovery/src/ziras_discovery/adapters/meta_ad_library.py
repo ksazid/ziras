@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from dataclasses import dataclass
+from datetime import date, datetime, timezone
 from enum import StrEnum
 from hashlib import sha256
 import json
@@ -68,6 +68,7 @@ class MetaAdsConfig:
     )
     ad_active_status: str = "ACTIVE"
     ad_type: str = "ALL"
+    media_type: str = "ALL"
     request_timeout_seconds: float = 20.0
     fields: tuple[str, ...] = DEFAULT_FIELDS
 
@@ -93,6 +94,7 @@ class MetaAdsConfig:
             publisher_platforms=platforms,
             ad_active_status=values.get("META_AD_LIBRARY_ACTIVE_STATUS", "ACTIVE").upper(),
             ad_type=values.get("META_AD_LIBRARY_AD_TYPE", "ALL").upper(),
+            media_type=values.get("META_AD_LIBRARY_MEDIA_TYPE", "ALL").upper(),
         )
 
     @property
@@ -235,15 +237,20 @@ class MetaAdLibraryClient:
         *,
         search_terms: str = "",
         after_cursor: str | None = None,
+        delivery_date_min: date | None = None,
+        delivery_date_max: date | None = None,
         limit: int = 50,
     ) -> MetaAdPage:
         self.config.require_ready()
         if not 1 <= limit <= 100:
             raise ValueError("limit must be between 1 and 100")
+        if delivery_date_min and delivery_date_max and delivery_date_min > delivery_date_max:
+            raise ValueError("delivery_date_min cannot be after delivery_date_max")
 
         params: dict[str, str | int] = {
             "ad_active_status": self.config.ad_active_status,
             "ad_type": self.config.ad_type,
+            "media_type": self.config.media_type,
             "ad_reached_countries": json.dumps(self.config.reached_countries, separators=(",", ":")),
             "publisher_platforms": json.dumps(
                 tuple(platform.value for platform in self.config.publisher_platforms), separators=(",", ":")
@@ -255,6 +262,10 @@ class MetaAdLibraryClient:
             params["search_terms"] = search_terms[:100]
         if after_cursor:
             params["after"] = after_cursor
+        if delivery_date_min:
+            params["ad_delivery_date_min"] = delivery_date_min.isoformat()
+        if delivery_date_max:
+            params["ad_delivery_date_max"] = delivery_date_max.isoformat()
 
         url = f"https://graph.facebook.com/{self.config.graph_api_version}/ads_archive?{urlencode(params)}"
         payload = self._transport(
