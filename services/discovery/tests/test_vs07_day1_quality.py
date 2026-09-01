@@ -13,6 +13,11 @@ def test_money_parser_accepts_prefix_and_suffix_currency() -> None:
     assert _money_values("€24.00 now 18.00 EUR") == [Decimal("24.00"), Decimal("18.00")]
 
 
+def test_money_parser_preserves_prefixed_decimal_prices() -> None:
+    assert _money_values("€70.00 €100.00") == [Decimal("70.00"), Decimal("100.00")]
+    assert _money_values("€24.00 €18.00") == [Decimal("24.00"), Decimal("18.00")]
+
+
 def test_money_parser_preserves_supermarket_old_and_new_decimal_prices() -> None:
     assert _money_values("1.79 1.39 €") == [Decimal("1.79"), Decimal("1.39")]
 
