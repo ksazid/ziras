@@ -102,24 +102,39 @@ def _stratified_sample(
     ranked: Sequence[Mapping[str, object]],
     sample_size: int,
 ) -> list[dict[str, object]]:
-    groups: dict[tuple[str, str], deque[dict[str, object]]] = defaultdict(deque)
+    groups: dict[str, dict[str, deque[dict[str, object]]]] = defaultdict(
+        lambda: defaultdict(deque)
+    )
     for raw in ranked:
         item = dict(raw)
         source_class = str(item.get("source_class") or "unknown")
         source_key = str(item.get("source_key") or "unknown")
-        groups[(source_class, source_key)].append(item)
+        groups[source_class][source_key].append(item)
 
-    ordered_keys = sorted(groups)
+    classes = sorted(groups)
+    key_cursor = {source_class: 0 for source_class in classes}
     result: list[dict[str, object]] = []
-    while ordered_keys and len(result) < min(sample_size, len(ranked)):
-        next_keys: list[tuple[str, str]] = []
-        for key in ordered_keys:
-            queue = groups[key]
-            if queue and len(result) < sample_size:
-                result.append(queue.popleft())
-            if queue:
-                next_keys.append(key)
-        ordered_keys = next_keys
+    target = min(sample_size, len(ranked))
+
+    while classes and len(result) < target:
+        next_classes: list[str] = []
+        for source_class in classes:
+            available_keys = sorted(
+                source_key
+                for source_key, queue in groups[source_class].items()
+                if queue
+            )
+            if not available_keys:
+                continue
+            cursor = key_cursor[source_class] % len(available_keys)
+            source_key = available_keys[cursor]
+            result.append(groups[source_class][source_key].popleft())
+            key_cursor[source_class] = cursor + 1
+            if any(groups[source_class][key] for key in groups[source_class]):
+                next_classes.append(source_class)
+            if len(result) >= target:
+                break
+        classes = next_classes
     return result
 
 
