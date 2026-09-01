@@ -10,24 +10,24 @@ from ziras_discovery.domain import SourceAccessMode, SourcePolicyScope
 from ziras_discovery.source_catalog import build_policy_registry, load_source_catalog
 
 
-NOW = datetime(2026, 8, 31, 20, 0, tzinfo=timezone.utc)
+NOW = datetime(2026, 9, 1, 8, 0, tzinfo=timezone.utc)
 
-NEW_SOURCES = {
+POC_SOURCES = {
     "lidl_malta_poc_offers": "supermarket",
     "ax_sliema_dining_offers": "restaurant-direct",
     "esplora_family_promotions": "family-kids",
     "heritage_malta_activities": "activities-official",
-    "active_ageing_discounts": "senior-benefits-official",
+    "go_kartanzjan_offers": "senior-benefits-direct",
     "botika_personal_care_sale": "pharmacy-personal-care",
     "ax_verdala_wellness_offers": "spa-wellness",
 }
 
 
-def test_default_catalog_loads_all_household_poc_sources_fail_closed() -> None:
+def test_default_catalog_loads_active_household_poc_sources_fail_closed() -> None:
     entries = load_source_catalog()
     by_key = {entry.source_key: entry for entry in entries}
 
-    for source_key, source_class in NEW_SOURCES.items():
+    for source_key, source_class in POC_SOURCES.items():
         entry = by_key[source_key]
         assert entry.source_class == source_class
         assert entry.policy.mode is SourceAccessMode.ALLOW
@@ -35,6 +35,34 @@ def test_default_catalog_loads_all_household_poc_sources_fail_closed() -> None:
         assert entry.policy.robots_required is True
         assert entry.policy.content_storage_allowed is False
         assert entry.minimum_candidates == 1
+
+
+def test_blocked_active_ageing_is_demoted_without_bypass() -> None:
+    entries = load_source_catalog()
+    by_key = {entry.source_key: entry for entry in entries}
+    registry = build_policy_registry(entries)
+
+    active_ageing = by_key["active_ageing_discounts"]
+    assert active_ageing.policy.scope is SourcePolicyScope.RESEARCH
+    assert active_ageing.policy.robots_required is True
+    assert registry.decide(
+        "active_ageing_discounts",
+        scope=SourcePolicyScope.POC,
+        source_url="https://aacc.gov.mt/en/discounts-for-the-elderly/",
+    ).allowed is False
+
+    go = by_key["go_kartanzjan_offers"]
+    assert go.policy.scope is SourcePolicyScope.POC
+    assert registry.decide(
+        "go_kartanzjan_offers",
+        scope=SourcePolicyScope.POC,
+        source_url="https://www.go.com.mt/offers/kartanzjan/",
+    ).allowed is True
+    assert registry.decide(
+        "go_kartanzjan_offers",
+        scope=SourcePolicyScope.PRODUCTION,
+        source_url="https://www.go.com.mt/offers/kartanzjan/",
+    ).allowed is False
 
 
 def test_household_expansion_does_not_relax_existing_restricted_sources() -> None:
@@ -144,11 +172,36 @@ def test_family_promotion_heading_is_useful_but_generic_promotions_heading_is_no
     assert "Promotions" not in titles
 
 
-def test_dining_offer_heading_produces_candidate_without_inventing_price() -> None:
+def test_generic_numbered_promotion_heading_is_rejected() -> None:
+    html = """
+    <html><body><main>
+      <h2>Promotion 1:</h2>
+      <p>10% discount</p>
+      <h2>Promotion 2: Free Family Entry</h2>
+    </main></body></html>
+    """
+    result = PublicWebSignalAdapter().extract(
+        source_key="esplora_family_promotions",
+        source_url="https://esplora.org.mt/promotions-tcs/",
+        html=html,
+        observed_at=NOW,
+    )
+    titles = [item.title for item in result.discoveries]
+    assert "Promotion 1:" not in titles
+    assert "Promotion 2: Free Family Entry" in titles
+
+
+def test_direct_dining_offer_uses_only_page_h1_and_ignores_related_offer_rail() -> None:
     html = """
     <html><body><main>
       <h1>Penny Sundays Special Offer</h1>
       <p>Sunday lunch at Penny Black, Sliema.</p>
+      <h2>Back to Special Offers</h2>
+      <h2>Taco Thursdays Special Offer</h2>
+      <p>20% discount</p>
+      <script type="application/ld+json">
+        {"@context":"https://schema.org","@type":"Offer","name":"Related Site Offer"}
+      </script>
     </main></body></html>
     """
     result = PublicWebSignalAdapter().extract(
@@ -162,23 +215,22 @@ def test_dining_offer_heading_produces_candidate_without_inventing_price() -> No
     assert result.discoveries[0].current_price is None
 
 
-def test_senior_discount_heading_produces_candidate() -> None:
+def test_go_kartanzjan_detail_page_produces_single_senior_offer() -> None:
     html = """
     <html><body><main>
-      <h1>Discounts for the Elderly</h1>
-      <h2>10% Discount at Example Pharmacy</h2>
-      <p>Sliema - available to eligible 60+ residents.</p>
+      <h1>Kartanzjan Offers</h1>
+      <p>Exclusive offers for residents aged 60+.</p>
+      <h2>Claim Your Offer</h2>
+      <h2>Frequently Asked Questions</h2>
     </main></body></html>
     """
     result = PublicWebSignalAdapter().extract(
-        source_key="active_ageing_discounts",
-        source_url="https://aacc.gov.mt/en/discounts-for-the-elderly/",
+        source_key="go_kartanzjan_offers",
+        source_url="https://www.go.com.mt/offers/kartanzjan/",
         html=html,
         observed_at=NOW,
     )
-
-    titles = [item.title for item in result.discoveries]
-    assert "10% Discount at Example Pharmacy" in titles
+    assert [item.title for item in result.discoveries] == ["Kartanzjan Offers"]
 
 
 def test_botika_sale_product_card_extracts_old_and_current_price() -> None:
@@ -202,6 +254,26 @@ def test_botika_sale_product_card_extracts_old_and_current_price() -> None:
     assert item.current_price == Decimal("18.00")
 
 
+def test_wellness_detail_page_uses_h1_and_rejects_ui_faq_noise() -> None:
+    html = """
+    <html><body><main>
+      <h1>Day by the Pool</h1>
+      <p>Weekday wellness experience.</p>
+      <h2>Book Your Stay</h2>
+      <h2>Claim Your Offer</h2>
+      <h2>FAQs about Gift Vouchers?</h2>
+      <h2>1 / 3</h2>
+    </main></body></html>
+    """
+    result = PublicWebSignalAdapter().extract(
+        source_key="ax_verdala_wellness_offers",
+        source_url="https://axhotelsmalta.com/verdala-wellness/special-offers/leisure/day-by-the-pool/",
+        html=html,
+        observed_at=NOW,
+    )
+    assert [item.title for item in result.discoveries] == ["Day by the Pool"]
+
+
 def test_wellness_package_heading_is_candidate_but_generic_voucher_heading_is_not() -> None:
     html = """
     <html><body><main>
@@ -211,8 +283,8 @@ def test_wellness_package_heading_is_candidate_but_generic_voucher_heading_is_no
     </main></body></html>
     """
     result = PublicWebSignalAdapter().extract(
-        source_key="ax_verdala_wellness_offers",
-        source_url="https://axhotelsmalta.com/gift-vouchers/",
+        source_key="fixture_wellness",
+        source_url="https://example.com/wellness",
         html=html,
         observed_at=NOW,
     )
