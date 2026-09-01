@@ -16,7 +16,7 @@ jobs:
       - name: Check out exact measured candidate
         uses: actions/checkout@v4
         with:
-          ref: 4e1c18164f302b6fb72699b1dd9b8e9493aa90e0
+          ref: fa9e4236efb6cb0991f7060b6d6b23e9baf6a59d
 
       - uses: actions/setup-python@v5
         with:
@@ -68,7 +68,7 @@ jobs:
       - name: Record immutable validation provenance
         if: always()
         env:
-          MEASURED_SHA: 4e1c18164f302b6fb72699b1dd9b8e9493aa90e0
+          MEASURED_SHA: fa9e4236efb6cb0991f7060b6d6b23e9baf6a59d
         run: |
           python - <<'PY'
           import json, os
