@@ -516,6 +516,8 @@ def _useful_promotion_title(value: str) -> bool:
         return False
     if any(noise in folded for noise in _POLICY_NOISE):
         return False
+    if "t&c" in folded or "t & c" in folded or folded.startswith("not valid with"):
+        return False
     if folded.endswith("?") or folded.startswith(("faq", "faqs")):
         return False
     if any(folded.startswith(prefix) for prefix in _PROMOTION_ACTION_PREFIXES):
