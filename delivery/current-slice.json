@@ -2,8 +2,8 @@
   "schemaVersion": 2,
   "sliceId": "VS-07",
   "title": "14-Day POC Metrics Validation",
-  "status": "certified",
-  "lifecycle": "certified",
+  "status": "testing",
+  "lifecycle": "testing",
   "riskLevel": "high",
   "implementationMode": "runtime-enabled",
   "requirements": [
@@ -34,6 +34,7 @@
     "VS-06 certified POC-only source extensions",
     "VS-07 measurement framework certified at 3bc1341dae7991326d16bd10c5a6804585d1748e",
     "VS-07 bounded POC scheduler merged through PR #13",
+    "VS-07 household source pack merged through PR #14 at 745018e2dc5115b65faf3fb363d677fd411dee6a",
     "Discovery Kernel main push CI enabled"
   ],
   "blockers": [],
@@ -60,20 +61,16 @@
       "operations-support"
     ],
     "notes": [
-      "VS-07 measures the approved PRD 14-day discovery-engine POC gates using reproducible daily evidence.",
-      "Missing or partial daily evidence fails closed and cannot silently count as a passing day; complete failing days remain evidence.",
-      "Every accepted daily record is bound to an exact repository SHA and GitHub Actions run ID.",
-      "Product owner approved seven additive household-value POC categories before Day 1: grocery/supermarket, restaurant/takeaway, family/kids, activities, senior discounts, pharmacy/personal care, and spa/wellness.",
-      "The new source pack is POC-only, robots-governed, low-rate, attribution-required and factual-metadata-only; raw page/image retention remains prohibited.",
-      "Each newly approved source has minimum_candidates=1 so HTTP success with zero extracted inventory fails closed.",
-      "Existing restrictions remain unchanged: McDonald's and Pizza Hut denied, Franks denied, Wolt partner-only, and the original Lidl source remains research-only; a separate explicit Lidl POC key carries the approved narrow POC permission.",
-      "Deal.mt remains reference/validation inventory only and Corinthia is not approved for automated acquisition because published terms prohibit automated monitoring without consent.",
-      "Production source access remains OFF.",
-      "Product owner approved a bounded daily POC scheduler for 2026-09-01 through 2026-09-14 at 08:00 Europe/Malta; scheduled runs force scope=poc and cannot select production scope.",
-      "Release and production enablement remain not authorized.",
-      "The measurement framework's prior certification remains historical evidence and is supplemented by the household source amendment certification.",
-      "Household amendment exact certification head 472da5afd628e228ea7ac120c92258b2c3a885f2 passed PES preflight, the full unit/measurement/household regression suite, and PostgreSQL 16 + PostGIS + pgvector in workflow run 33440089417.",
-      "Product owner explicitly authorized the household amendment certification with 'Go' on 2026-08-31."
+      "Day 1 replacement run 33483023566 measured main SHA 745018e2dc5115b65faf3fb363d677fd411dee6a and returned partial evidence: 315 candidates, 246 ranked, 69 duplicates, 0 expired and one HTTP 403 source failure.",
+      "All 69 Day 1 duplicates were traced to repeated AX related-offer extraction: 45 from dining detail pages and 24 from broad wellness/gift-voucher pages.",
+      "Day 1 ranked evidence also exposed AX CTA/FAQ/navigation noise, so direct offer-detail extraction is being bounded to the page H1 and common UI noise is rejected.",
+      "Active Ageing returned HTTP 403. Ziras will not bypass that technical control; the source is demoted to research-only and a bounded GO Kartanzjan public offer source is the POC senior-benefit replacement.",
+      "The POC source-type metric is corrected to count distinct source_class values, not distinct source_key values.",
+      "Merchant onboarding is explicit machine evidence at zero because the POC ingestion path has no merchant-onboarding dependency.",
+      "Each daily ingestion artifact will include a deterministic audit template for usefulness, valid-open and relevance review; missing review labels continue to fail closed.",
+      "The bounded schedule moves from 08:00 to 08:07 Europe/Malta after the Day 1 top-of-hour schedule did not fire; scope remains POC-only and the date guard remains 2026-09-01 through 2026-09-14.",
+      "Previous VS-07 certifications remain historical evidence but are stale for this runtime amendment until a fresh exact-head certification passes.",
+      "Production source access remains OFF and release/production enablement remain not authorized."
     ]
   },
   "approvals": [
@@ -84,25 +81,25 @@
       "commitSha": null,
       "by": "ksazid",
       "at": "2026-08-31T22:45:00+02:00",
-      "rationale": "Product owner approved VS-07 measurement, the bounded scheduler, and explicitly approved adding the seven household-value POC categories before Day 1 with 'Approved, lets add these'."
+      "rationale": "Product owner approved VS-07 measurement, the bounded scheduler and the household-value POC categories."
     },
     {
       "type": "policy",
       "status": "approved",
-      "version": "VS-07-household-poc-policy",
+      "version": "VS-07-day1-policy-hardening",
       "commitSha": null,
       "by": "ksazid",
-      "at": "2026-08-31T22:45:00+02:00",
-      "rationale": "Product owner approved the additive POC-only source policies for grocery/supermarket, restaurant/takeaway, family/kids, activities, senior discounts, pharmacy/personal care and spa/wellness under the documented narrow public-path, robots, rate-cap, attribution and no-content-retention constraints. Existing VS-04/VS-06 restrictions and production denial remain authoritative."
+      "at": "2026-09-01T10:08:00+02:00",
+      "rationale": "Product owner said 'Go ahead' to the Day 1 fix batch, including replacing the HTTP-403 senior source without bypass, hardening AX acquisition boundaries, audit completeness and scheduler reliability. Production remains denied."
     },
     {
       "type": "implementation",
       "status": "approved",
-      "version": "VS-07-household-expansion",
+      "version": "VS-07-day1-quality-hardening",
       "commitSha": null,
       "by": "ksazid",
-      "at": "2026-08-31T22:45:00+02:00",
-      "rationale": "Product owner authorized implementation of the seven approved household-value POC categories and the extraction/catalog hardening required to test them before the formal Day 1 run."
+      "at": "2026-09-01T10:08:00+02:00",
+      "rationale": "Product owner authorized the identified Day 1 corrective implementation and exact-head validation batch with 'Go ahead'."
     },
     {
       "type": "certification",
@@ -111,7 +108,7 @@
       "commitSha": "472da5afd628e228ea7ac120c92258b2c3a885f2",
       "by": "ksazid",
       "at": "2026-08-31T23:21:00+02:00",
-      "rationale": "Product owner authorized the household-source amendment certification with 'Go' after exact-head run 33440089417 passed PES, unit/measurement/household regression tests, and PostgreSQL 16 + PostGIS + pgvector integration. Historical framework certification remains preserved in certification evidence rather than as a second active certification approval."
+      "rationale": "Historical household-source amendment certification. It is retained as evidence but is stale for the Day 1 runtime amendment; this single certification approval record will be rebound to the new exact tested SHA only after fresh gates pass."
     },
     {
       "type": "release",
@@ -137,23 +134,22 @@
     "discovery": 100,
     "decisions": 100,
     "implementation": 100,
-    "testing": 100,
-    "certification": 100,
+    "testing": 50,
+    "certification": 0,
     "release": 0,
     "validation": 0
   },
   "certification": {
-    "status": "passed",
+    "status": "stale",
     "commitSha": "472da5afd628e228ea7ac120c92258b2c3a885f2",
     "evidence": [
-      "historical measurement-framework certification: https://github.com/ksazid/ziras/actions/runs/33434341657",
       "historical measurement-framework certified-sha:3bc1341dae7991326d16bd10c5a6804585d1748e",
-      "household amendment certified-sha:472da5afd628e228ea7ac120c92258b2c3a885f2",
-      "household amendment exact-head run:https://github.com/ksazid/ziras/actions/runs/33440089417",
-      "household amendment PES preflight: passed",
-      "household amendment unit/POC-metrics/household-source regression: passed",
-      "household amendment PostgreSQL16/PostGIS/pgvector integration: passed",
-      "product-owner certification approval:2026-08-31T23:21:00+02:00"
+      "historical household amendment certified-sha:472da5afd628e228ea7ac120c92258b2c3a885f2",
+      "historical household amendment run:https://github.com/ksazid/ziras/actions/runs/33440089417",
+      "household source-pack merge-sha:745018e2dc5115b65faf3fb363d677fd411dee6a",
+      "Day1 replacement run:https://github.com/ksazid/ziras/actions/runs/33483023566",
+      "Day1 result:partial;duplicates=69/315;failed=1;expired=0",
+      "fresh exact-head certification required before merge"
     ]
   },
   "release": {
@@ -173,25 +169,22 @@
       "valid-when-opened rate",
       "stale/expired surfaced rate",
       "post-processing duplicate rate",
-      "independent source-type coverage",
+      "independent source-class coverage",
       "selected-interest relevance rate",
       "merchant-onboarding count"
     ]
   },
   "links": {
     "specification": "docs/slices/VS-07.md",
-    "implementationPr": "https://github.com/ksazid/ziras/pull/14",
+    "implementationPr": null,
     "evidence": [
       "product/PRD.md#success-metrics",
       "docs/integrations/VS07-HOUSEHOLD-CATEGORY-QUALIFICATION.md",
-      "VS-07-certified-measurement-sha:3bc1341dae7991326d16bd10c5a6804585d1748e",
-      "VS-07-certification-run:https://github.com/ksazid/ziras/actions/runs/33434341657",
       "VS-07-scheduler-merge-sha:6b829a7a612befb002565bbcc859d895c1bb0575",
-      "household-amendment-certified-sha:472da5afd628e228ea7ac120c92258b2c3a885f2",
-      "household-amendment-certification-run:https://github.com/ksazid/ziras/actions/runs/33440089417",
+      "VS-07-household-merge-sha:745018e2dc5115b65faf3fb363d677fd411dee6a",
+      "VS-07-Day1-run:33483023566",
       "production-source-access:OFF",
-      "scheduler:POC-ONLY-2026-09-01..2026-09-14@08:00-Europe/Malta",
-      "household-source-expansion:CERTIFIED"
+      "release:not-authorized"
     ]
   },
   "maxAttempts": 3
