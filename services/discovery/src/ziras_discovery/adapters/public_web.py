@@ -60,6 +60,8 @@ _GENERIC_PROMOTION_TITLES = {
     "vouchers",
     "gift voucher",
     "gift vouchers",
+    "the offer",
+    "our offers",
 }
 _GENERIC_EVENT_TITLES = {
     "event",
@@ -75,8 +77,25 @@ _GENERIC_EVENT_TITLES = {
     "view all",
     "skip to content",
 }
-_ACTION_NOISE = ("add to cart", "add to wishlist", "add to compare", "sort by", "display", "search")
+_ACTION_NOISE = (
+    "add to cart",
+    "add to wishlist",
+    "add to compare",
+    "sort by",
+    "display",
+    "search",
+)
 _POLICY_NOISE = ("terms", "conditions", "privacy", "policy")
+_PROMOTION_ACTION_PREFIXES = (
+    "back to ",
+    "book ",
+    "claim ",
+    "explore ",
+    "apply ",
+    "view ",
+    "learn more",
+    "read more",
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -104,6 +123,35 @@ class PublicWebSignalAdapter:
         content_hash: str | None = None,
     ) -> SourceAdapterResult:
         digest = content_hash or sha256(html.encode("utf-8", errors="ignore")).hexdigest()
+
+        # Offer-detail pages frequently contain site-wide related-offer rails and JSON-LD.
+        # For a detail route, the page's own H1 is the authoritative discovery boundary.
+        if not self.config.event_mode and _is_promotion_detail_url(source_url):
+            discoveries = self._promotion_detail_discoveries(
+                html,
+                source_key,
+                source_url,
+                observed_at,
+            )
+            raw_lines = tuple(_clean_lines(_raw_text_nodes(html)))
+            observation = SourceObservation(
+                id=uuid4(),
+                source_key=source_key,
+                source_url=source_url,
+                observed_at=observed_at,
+                content_hash=digest,
+                extracted={
+                    "raw_text_line_count": len(raw_lines),
+                    "candidate_count": len(discoveries),
+                    "mode": "promotion-detail",
+                },
+                adapter=self.name,
+            )
+            return SourceAdapterResult(
+                observation=observation,
+                discoveries=tuple(discoveries[: self.config.maximum_discoveries]),
+            )
+
         structured = self._structured.extract(
             source_key=source_key,
             source_url=source_url,
@@ -158,6 +206,31 @@ class PublicWebSignalAdapter:
             discoveries=tuple(discoveries[: self.config.maximum_discoveries]),
         )
 
+    def _promotion_detail_discoveries(
+        self,
+        html: str,
+        source_key: str,
+        source_url: str,
+        observed_at: datetime,
+    ) -> list[Discovery]:
+        parser = _H1Parser()
+        parser.feed(html)
+        title = next((item for item in parser.values if _useful_promotion_title(item)), None)
+        if not title:
+            return []
+        return [
+            Discovery(
+                id=uuid4(),
+                discovery_type=DiscoveryType.DEAL,
+                entity_id=None,
+                title=title[:180],
+                source_key=source_key,
+                source_url=source_url,
+                observed_at=observed_at,
+                freshness=FreshnessState.UNVERIFIED,
+            )
+        ]
+
     def _promotion_product_block_discoveries(
         self,
         html: str,
@@ -175,9 +248,7 @@ class PublicWebSignalAdapter:
         for title, body in parser.blocks:
             folded = title.casefold()
             body_folded = body.casefold()
-            if folded in _GENERIC_PROMOTION_TITLES:
-                continue
-            if any(noise in folded for noise in _POLICY_NOISE):
+            if not _useful_promotion_title(title):
                 continue
             if not _looks_like_title(title) or "add to cart" not in body_folded:
                 continue
@@ -238,7 +309,7 @@ class PublicWebSignalAdapter:
                 continue
 
             title = _nearest_title(lines, index)
-            if not title:
+            if not title or not _useful_promotion_title(title):
                 continue
 
             original: Decimal | None = None
@@ -288,11 +359,9 @@ class PublicWebSignalAdapter:
             folded = line.casefold()
             if not any(word in folded for word in _PROMOTION_WORDS):
                 continue
-            if any(noise in folded for noise in _POLICY_NOISE):
-                continue
             if re.fullmatch(r"sale\s+\d{1,2}%", folded):
                 continue
-            if folded in _GENERIC_PROMOTION_TITLES or not _looks_like_title(line):
+            if not _useful_promotion_title(line) or not _looks_like_title(line):
                 continue
             if folded in seen:
                 continue
@@ -428,6 +497,33 @@ class PublicWebSignalAdapter:
         return result
 
 
+def _is_promotion_detail_url(source_url: str) -> bool:
+    path = urlsplit(source_url).path.casefold().rstrip("/")
+    for marker in ("/special-offers/", "/offers/"):
+        if marker in path and path.split(marker, 1)[1].strip("/"):
+            return True
+    return False
+
+
+def _useful_promotion_title(value: str) -> bool:
+    folded = re.sub(r"\s+", " ", value.casefold()).strip(" -–|:")
+    if not folded or folded in _GENERIC_PROMOTION_TITLES:
+        return False
+    if any(noise in folded for noise in _POLICY_NOISE):
+        return False
+    if folded.endswith("?") or folded.startswith(("faq", "faqs")):
+        return False
+    if any(folded.startswith(prefix) for prefix in _PROMOTION_ACTION_PREFIXES):
+        return False
+    if re.fullmatch(r"promotion\s+\d+", folded):
+        return False
+    if re.fullmatch(r"\d+\s*/\s*\d+", folded):
+        return False
+    if folded.startswith(("age:", "- age:", "discount when buying")):
+        return False
+    return True
+
+
 def _clean_lines(lines: Iterable[str]) -> Iterable[str]:
     for raw in lines:
         line = re.sub(r"\s+", " ", raw).strip(" \t|•")
@@ -460,6 +556,8 @@ def _nearest_title(lines: tuple[str, ...], index: int) -> str | None:
         if _money_values(candidate) or _PERCENT_RE.search(candidate):
             continue
         if any(noise in folded for noise in _ACTION_NOISE):
+            continue
+        if not _useful_promotion_title(candidate):
             continue
         if len(candidate) < 3:
             continue
@@ -521,6 +619,40 @@ def _raw_text_nodes(html: str) -> tuple[str, ...]:
     parser = _TextNodeParser()
     parser.feed(html)
     return tuple(parser.values)
+
+
+class _H1Parser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.values: list[str] = []
+        self._inside = False
+        self._parts: list[str] = []
+        self._skip_depth = 0
+
+    def handle_starttag(self, tag: str, attrs) -> None:
+        folded = tag.casefold()
+        if folded in {"script", "style", "noscript", "svg"}:
+            self._skip_depth += 1
+            return
+        if not self._skip_depth and folded == "h1":
+            self._inside = True
+            self._parts = []
+
+    def handle_endtag(self, tag: str) -> None:
+        folded = tag.casefold()
+        if folded in {"script", "style", "noscript", "svg"} and self._skip_depth:
+            self._skip_depth -= 1
+            return
+        if not self._skip_depth and folded == "h1" and self._inside:
+            text = re.sub(r"\s+", " ", " ".join(self._parts)).strip()
+            if text:
+                self.values.append(text)
+            self._inside = False
+            self._parts = []
+
+    def handle_data(self, data: str) -> None:
+        if self._inside and not self._skip_depth and data.strip():
+            self._parts.append(data.strip())
 
 
 class _TextNodeParser(HTMLParser):
