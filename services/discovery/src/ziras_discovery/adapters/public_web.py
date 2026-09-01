@@ -19,8 +19,9 @@ from .structured_html import StructuredHtmlAdapter
 
 
 _MONEY_RE = re.compile(
-    r"(?:(?:€|EUR)\s*(?P<prefix>\d{1,4}(?:[.,]\d{1,2})?)|"
-    r"(?P<suffix>\d{1,4}(?:[.,]\d{1,2})?)\s*(?:€|EUR))",
+    r"(?P<decimal>\d{1,4}[.,]\d{1,2})|"
+    r"(?:(?:€|EUR)\s*(?P<prefix_int>\d{1,4})|"
+    r"(?P<suffix_int>\d{1,4})\s*(?:€|EUR))",
     re.IGNORECASE,
 )
 _PERCENT_RE = re.compile(r"\b(\d{1,2})\s*%\s*(?:off)?\b", re.IGNORECASE)
@@ -540,7 +541,7 @@ def _money_values(line: str) -> list[Decimal]:
         return []
     values: list[Decimal] = []
     for match in _MONEY_RE.finditer(line):
-        raw = (match.group("prefix") or match.group("suffix")).replace(",", ".")
+        raw = (match.group("decimal") or match.group("prefix_int") or match.group("suffix_int")).replace(",", ".")
         try:
             values.append(Decimal(raw))
         except Exception:
