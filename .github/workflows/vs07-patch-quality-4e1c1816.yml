@@ -17,7 +17,7 @@ jobs:
           ref: fix/vs07-day1-quality-hardening
           fetch-depth: 0
 
-      - name: Prevent decimal prefix truncation
+      - name: Block partial integer backtracking
         shell: bash
         run: |
           python - <<'PY'
@@ -25,8 +25,8 @@ jobs:
 
           adapter = Path('services/discovery/src/ziras_discovery/adapters/public_web.py')
           text = adapter.read_text(encoding='utf-8')
-          old_re = '''_MONEY_RE = re.compile(\n    r"(?P<decimal>\\d{1,4}[.,]\\d{1,2})|"\n    r"(?:(?:€|EUR)\\s*(?P<prefix_int>\\d{1,4})|"\n    r"(?P<suffix_int>\\d{1,4})\\s*(?:€|EUR))",\n    re.IGNORECASE,\n)'''
-          new_re = '''_MONEY_RE = re.compile(\n    r"(?P<decimal>\\d{1,4}[.,]\\d{1,2})|"\n    r"(?:(?:€|EUR)\\s*(?P<prefix_int>\\d{1,4})(?![.,]\\d)|"\n    r"(?P<suffix_int>\\d{1,4})(?![.,]\\d)\\s*(?:€|EUR))",\n    re.IGNORECASE,\n)'''
+          old_re = '''_MONEY_RE = re.compile(\n    r"(?P<decimal>\\d{1,4}[.,]\\d{1,2})|"\n    r"(?:(?:€|EUR)\\s*(?P<prefix_int>\\d{1,4})(?![.,]\\d)|"\n    r"(?P<suffix_int>\\d{1,4})(?![.,]\\d)\\s*(?:€|EUR))",\n    re.IGNORECASE,\n)'''
+          new_re = '''_MONEY_RE = re.compile(\n    r"(?P<decimal>\\d{1,4}[.,]\\d{1,2})|"\n    r"(?:(?:€|EUR)\\s*(?P<prefix_int>\\d{1,4})(?![\\d.,])|"\n    r"(?P<suffix_int>\\d{1,4})(?![\\d.,])\\s*(?:€|EUR))",\n    re.IGNORECASE,\n)'''
           if old_re not in text:
               raise SystemExit('expected current money regex not found')
           adapter.write_text(text.replace(old_re, new_re, 1), encoding='utf-8')
@@ -39,5 +39,5 @@ jobs:
           git config user.email "47315271+ksazid@users.noreply.github.com"
           git add services/discovery/src/ziras_discovery/adapters/public_web.py
           git diff --cached --check
-          git commit -m "fix(VS-07): prevent decimal price truncation"
+          git commit -m "fix(VS-07): block partial integer price matches"
           git push origin HEAD:fix/vs07-day1-quality-hardening
