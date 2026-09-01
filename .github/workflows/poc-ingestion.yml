@@ -18,6 +18,11 @@ on:
         description: Optional exact source_key
         required: false
         type: string
+  # One-off operational trigger for Day 1 because the 08:00 scheduled event did not fire.
+  # This branch-only workflow explicitly checks out the frozen main baseline below.
+  push:
+    branches:
+      - ops/vs07-day1-manual-2026-09-01
 
 permissions:
   contents: read
@@ -27,10 +32,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
-      SOURCE_SCOPE: ${{ github.event_name == 'schedule' && 'poc' || inputs.scope }}
-      SOURCE_KEY: ${{ github.event_name == 'schedule' && '' || inputs.source }}
+      SOURCE_SCOPE: ${{ github.event_name == 'workflow_dispatch' && inputs.scope || 'poc' }}
+      SOURCE_KEY: ${{ github.event_name == 'workflow_dispatch' && inputs.source || '' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          # The one-off push trigger executes the exact frozen main baseline; the ops
+          # branch changes only how the already-approved workflow is started.
+          ref: ${{ github.event_name == 'push' && '745018e2dc5115b65faf3fb363d677fd411dee6a' || github.sha }}
 
       - name: Enforce approved scheduler window
         id: window
@@ -105,16 +114,19 @@ jobs:
         env:
           POC_SCOPE: ${{ env.SOURCE_SCOPE }}
           POC_SOURCE: ${{ env.SOURCE_KEY }}
+          FROZEN_DAY1_SHA: ${{ github.event_name == 'push' && '745018e2dc5115b65faf3fb363d677fd411dee6a' || github.sha }}
         run: |
           python - <<'PY'
           import json, os
           from datetime import datetime, timezone
           payload = {
               "schema_version": 1,
-              "github_sha": os.environ["GITHUB_SHA"],
+              "github_sha": os.environ["FROZEN_DAY1_SHA"],
               "github_run_id": os.environ["GITHUB_RUN_ID"],
               "github_run_attempt": os.environ["GITHUB_RUN_ATTEMPT"],
               "github_ref": os.environ["GITHUB_REF"],
+              "trigger_sha": os.environ["GITHUB_SHA"],
+              "trigger_event": os.environ["GITHUB_EVENT_NAME"],
               "scope": os.environ.get("POC_SCOPE", ""),
               "source": os.environ.get("POC_SOURCE", ""),
               "recorded_at": datetime.now(timezone.utc).isoformat(),
