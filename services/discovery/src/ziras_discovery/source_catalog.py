@@ -59,6 +59,10 @@ def default_malta_poc_extension_path() -> Path:
     return Path(__file__).resolve().parents[2] / "config" / "malta-source-vs06-poc.json"
 
 
+def default_malta_household_poc_extension_path() -> Path:
+    return Path(__file__).resolve().parents[2] / "config" / "malta-source-vs07-poc.json"
+
+
 def default_malta_hardening_path() -> Path:
     return Path(__file__).resolve().parents[2] / "config" / "malta-source-hardening.json"
 
@@ -74,14 +78,18 @@ def load_source_catalog(
     if not isinstance(payload, list):
         raise ValueError("source catalog must be a JSON array")
 
-    resolved_extension: Path | None = None
-    if path is None or extension_path is not None:
-        resolved_extension = (
-            Path(extension_path)
-            if extension_path is not None
-            else default_malta_poc_extension_path()
+    resolved_extensions: tuple[Path, ...] = ()
+    if extension_path is not None:
+        resolved_extensions = (Path(extension_path),)
+    elif path is None:
+        resolved_extensions = (
+            default_malta_poc_extension_path(),
+            default_malta_household_poc_extension_path(),
         )
-    if resolved_extension is not None and resolved_extension.exists():
+
+    for resolved_extension in resolved_extensions:
+        if not resolved_extension.exists():
+            continue
         extension = _read_json(resolved_extension)
         if not isinstance(extension, list):
             raise ValueError("source catalog extension must be a JSON array")
@@ -89,10 +97,10 @@ def load_source_catalog(
 
     overrides: Mapping[str, object] = {}
     resolved_hardening: Path | None = None
-    if path is None or hardening_path is not None:
-        resolved_hardening = (
-            Path(hardening_path) if hardening_path is not None else default_malta_hardening_path()
-        )
+    if hardening_path is not None:
+        resolved_hardening = Path(hardening_path)
+    elif path is None and extension_path is None:
+        resolved_hardening = default_malta_hardening_path()
 
     if resolved_hardening is not None and resolved_hardening.exists():
         raw_overrides = _read_json(resolved_hardening)

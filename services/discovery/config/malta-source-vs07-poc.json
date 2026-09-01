@@ -1,0 +1,167 @@
+[
+  {
+    "source_key": "lidl_malta_poc_offers",
+    "display_name": "Lidl Malta Public Offers — POC",
+    "source_class": "supermarket",
+    "start_urls": ["https://www.lidl.com.mt/c/"],
+    "fetch_mode": "static",
+    "adapter_kind": "promotion",
+    "terms_url": "https://www.lidl.com.mt/c/terms-of-use-lidl-plus/s10017323",
+    "policy": {
+      "mode": "allow",
+      "scope": "poc",
+      "reason": "Product-owner-approved narrow POC acquisition of public factual weekly offer metadata only. Robots remains mandatory; no Lidl Plus account, personalised coupon, search or protected-path access; no page-body/image retention; production requires fresh review.",
+      "policy_url": "https://www.lidl.com.mt/c/terms-of-use-lidl-plus/s10017323",
+      "robots_required": true,
+      "reviewed_at": "2026-08-31T22:45:00+02:00",
+      "allowed_path_prefixes": ["/c/"],
+      "max_requests_per_hour": 1,
+      "attribution_required": true,
+      "content_storage_allowed": false
+    },
+    "notes": "Additive POC-only policy. Existing research-only Lidl source remains unchanged; this source key is the explicitly approved bounded POC route."
+  },
+  {
+    "source_key": "ax_sliema_dining_offers",
+    "display_name": "AX Hotels Sliema Dining Offers",
+    "source_class": "restaurant-direct",
+    "start_urls": [
+      "https://axhotelsmalta.com/victoria-hotel/special-offers/restaurants/penny-sundays/",
+      "https://axhotelsmalta.com/victoria-hotel/special-offers/restaurants/fish-chips-penny-black/",
+      "https://axhotelsmalta.com/the-palace/offers/restaurants/cake-and-coffee/",
+      "https://axhotelsmalta.com/the-palace/offers/restaurants/taco-thursdays-talk-of-town/"
+    ],
+    "fetch_mode": "static",
+    "adapter_kind": "promotion",
+    "terms_url": "https://axhotelsmalta.com/",
+    "policy": {
+      "mode": "allow",
+      "scope": "poc",
+      "reason": "Low-rate POC factual dining-offer metadata only from selected current public AX offer pages. No booking/payment flows, creative retention or production permission.",
+      "policy_url": "https://axhotelsmalta.com/",
+      "robots_required": true,
+      "reviewed_at": "2026-08-31T22:45:00+02:00",
+      "allowed_path_prefixes": [
+        "/victoria-hotel/special-offers/restaurants/",
+        "/the-palace/offers/restaurants/"
+      ],
+      "max_requests_per_hour": 4,
+      "attribution_required": true,
+      "content_storage_allowed": false
+    },
+    "notes": "Selected direct merchant offer pages expose deterministic Summer 2026 prices/conditions."
+  },
+  {
+    "source_key": "esplora_family_promotions",
+    "display_name": "Esplora Family Promotions",
+    "source_class": "family-kids",
+    "start_urls": ["https://esplora.org.mt/promotions-tcs/"],
+    "fetch_mode": "static",
+    "adapter_kind": "promotion",
+    "terms_url": "https://esplora.org.mt/privacy-policy/",
+    "policy": {
+      "mode": "allow",
+      "scope": "poc",
+      "reason": "Official public family-promotion facts only under a low-rate POC path. No account/ticket-purchase flow or creative retention; robots mandatory; production requires fresh review.",
+      "policy_url": "https://esplora.org.mt/privacy-policy/",
+      "robots_required": true,
+      "reviewed_at": "2026-08-31T22:45:00+02:00",
+      "allowed_path_prefixes": ["/promotions-tcs/"],
+      "max_requests_per_hour": 1,
+      "attribution_required": true,
+      "content_storage_allowed": false
+    },
+    "notes": "Family-specific official promotion inventory, including qualifying-spend family admission benefits."
+  },
+  {
+    "source_key": "heritage_malta_activities",
+    "display_name": "Heritage Malta What's On",
+    "source_class": "activities-official",
+    "start_urls": ["https://heritagemalta.mt/whats-on/"],
+    "fetch_mode": "static",
+    "adapter_kind": "event",
+    "terms_url": "https://heritagemalta.mt/terms-conditions/",
+    "policy": {
+      "mode": "allow",
+      "scope": "poc",
+      "reason": "Official Malta activity/event facts only from the public What's On listing. Low-rate POC use, robots mandatory, no store/cart crawling, no page-body/image retention, production requires fresh review.",
+      "policy_url": "https://heritagemalta.mt/terms-conditions/",
+      "robots_required": true,
+      "reviewed_at": "2026-08-31T22:45:00+02:00",
+      "allowed_path_prefixes": ["/whats-on/"],
+      "max_requests_per_hour": 1,
+      "attribution_required": true,
+      "content_storage_allowed": false
+    },
+    "notes": "Official 2026 activity calendar with dates, locations and ticket/value information."
+  },
+  {
+    "source_key": "active_ageing_discounts",
+    "display_name": "Active Ageing Malta — Discounts for the Elderly",
+    "source_class": "senior-benefits-official",
+    "start_urls": ["https://aacc.gov.mt/en/discounts-for-the-elderly/"],
+    "fetch_mode": "static",
+    "adapter_kind": "promotion",
+    "terms_url": "https://aacc.gov.mt/en/terms-of-use/",
+    "policy": {
+      "mode": "allow",
+      "scope": "poc",
+      "reason": "Official Government of Malta 60+ benefit facts only from the public discount directory. No personal-data/account access; robots mandatory; factual metadata/provenance only; production requires fresh review.",
+      "policy_url": "https://aacc.gov.mt/en/terms-of-use/",
+      "robots_required": true,
+      "reviewed_at": "2026-08-31T22:45:00+02:00",
+      "allowed_path_prefixes": ["/en/discounts-for-the-elderly/"],
+      "max_requests_per_hour": 1,
+      "attribution_required": true,
+      "content_storage_allowed": false
+    },
+    "notes": "Public senior benefit directory includes supermarket, restaurant, transport, optical and leisure discounts across Malta."
+  },
+  {
+    "source_key": "botika_personal_care_sale",
+    "display_name": "Botika Malta Personal Care Sale",
+    "source_class": "pharmacy-personal-care",
+    "start_urls": ["https://botika.mt/collections/sale"],
+    "fetch_mode": "static",
+    "adapter_kind": "promotion",
+    "terms_url": "https://botika.mt/policies/terms-of-service",
+    "policy": {
+      "mode": "allow",
+      "scope": "poc",
+      "reason": "Low-rate POC acquisition of public factual sale-listing metadata only. No login/cart/checkout/customer data, robots mandatory, no page-body/image retention, production requires fresh review.",
+      "policy_url": "https://botika.mt/policies/terms-of-service",
+      "robots_required": true,
+      "reviewed_at": "2026-08-31T22:45:00+02:00",
+      "allowed_path_prefixes": ["/collections/sale"],
+      "max_requests_per_hour": 1,
+      "attribution_required": true,
+      "content_storage_allowed": false
+    },
+    "notes": "Public sale inventory covers health, beauty, skincare, wellness, baby care and personal-care essentials."
+  },
+  {
+    "source_key": "ax_verdala_wellness_offers",
+    "display_name": "AX Verdala Wellness Offers",
+    "source_class": "spa-wellness",
+    "start_urls": [
+      "https://axhotelsmalta.com/verdala-wellness/",
+      "https://axhotelsmalta.com/gift-vouchers/"
+    ],
+    "fetch_mode": "static",
+    "adapter_kind": "promotion",
+    "terms_url": "https://axhotelsmalta.com/gift-vouchers/",
+    "policy": {
+      "mode": "allow",
+      "scope": "poc",
+      "reason": "Low-rate POC factual wellness-experience metadata only from public AX/Verdala pages. No booking/payment flows, robots mandatory, no creative retention, production requires fresh review.",
+      "policy_url": "https://axhotelsmalta.com/gift-vouchers/",
+      "robots_required": true,
+      "reviewed_at": "2026-08-31T22:45:00+02:00",
+      "allowed_path_prefixes": ["/verdala-wellness/", "/gift-vouchers/"],
+      "max_requests_per_hour": 2,
+      "attribution_required": true,
+      "content_storage_allowed": false
+    },
+    "notes": "Public wellness inventory includes V SPA day-pass/retreat experiences and Verdala wellness offers."
+  }
+]
