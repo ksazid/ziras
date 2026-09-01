@@ -1,0 +1,104 @@
+name: VS-07 Live Candidate Validation
+
+on:
+  push:
+    branches:
+      - ops/vs07-live-validate-4e1c1816
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out exact measured candidate
+        uses: actions/checkout@v4
+        with:
+          ref: 4e1c18164f302b6fb72699b1dd9b8e9493aa90e0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install discovery acquisition stack
+        run: python -m pip install -e './services/discovery[dev,acquisition]'
+
+      - name: Install Chromium for browser fallback
+        run: python -m playwright install --with-deps chromium
+
+      - name: Build PostgreSQL 16 with PostGIS and pgvector
+        run: docker build -t ziras-discovery-postgres services/discovery/tests/postgres
+
+      - name: Start ephemeral POC PostgreSQL
+        run: |
+          docker run --rm -d --name ziras-poc-postgres \
+            -e POSTGRES_USER=postgres \
+            -e POSTGRES_PASSWORD=postgres \
+            -e POSTGRES_DB=ziras \
+            -p 5432:5432 \
+            ziras-discovery-postgres
+          for i in {1..30}; do
+            if docker exec ziras-poc-postgres pg_isready -U postgres -d ziras; then
+              exit 0
+            fi
+            sleep 1
+          done
+          docker logs ziras-poc-postgres
+          exit 1
+
+      - name: Run governed POC ingestion
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ziras
+        run: |
+          set -o pipefail
+          python services/discovery/scripts/run_poc_ingestion.py \
+            --scope poc \
+            --apply-migrations | tee poc-ingestion.json
+
+      - name: Prepare deterministic audit template
+        if: always() && hashFiles('poc-ingestion.json') != ''
+        run: |
+          python services/discovery/scripts/prepare_poc_audit.py \
+            --ingestion-json poc-ingestion.json \
+            --sample-size 30 \
+            --output poc-audit-template.json >/dev/null
+
+      - name: Record immutable validation provenance
+        if: always()
+        env:
+          MEASURED_SHA: 4e1c18164f302b6fb72699b1dd9b8e9493aa90e0
+        run: |
+          python - <<'PY'
+          import json, os
+          from datetime import datetime, timezone
+          payload = {
+              'schema_version': 1,
+              'measured_sha': os.environ['MEASURED_SHA'],
+              'trigger_sha': os.environ['GITHUB_SHA'],
+              'github_run_id': os.environ['GITHUB_RUN_ID'],
+              'github_run_attempt': os.environ['GITHUB_RUN_ATTEMPT'],
+              'github_ref': os.environ['GITHUB_REF'],
+              'scope': 'poc',
+              'recorded_at': datetime.now(timezone.utc).isoformat(),
+          }
+          with open('poc-run-provenance.json', 'w', encoding='utf-8') as handle:
+              json.dump(payload, handle, indent=2, sort_keys=True)
+              handle.write('\n')
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: vs07-live-validation-${{ github.run_id }}
+          path: |
+            poc-ingestion.json
+            poc-audit-template.json
+            poc-run-provenance.json
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Stop POC PostgreSQL
+        if: always()
+        run: docker stop ziras-poc-postgres || true
