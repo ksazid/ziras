@@ -20,8 +20,8 @@ from .structured_html import StructuredHtmlAdapter
 
 _MONEY_RE = re.compile(
     r"(?P<decimal>\d{1,4}[.,]\d{1,2})|"
-    r"(?:(?:€|EUR)\s*(?P<prefix_int>\d{1,4})(?![.,]\d)|"
-    r"(?P<suffix_int>\d{1,4})(?![.,]\d)\s*(?:€|EUR))",
+    r"(?:(?:€|EUR)\s*(?P<prefix_int>\d{1,4})(?![\d.,])|"
+    r"(?P<suffix_int>\d{1,4})(?![\d.,])\s*(?:€|EUR))",
     re.IGNORECASE,
 )
 _PERCENT_RE = re.compile(r"\b(\d{1,2})\s*%\s*(?:off)?\b", re.IGNORECASE)
