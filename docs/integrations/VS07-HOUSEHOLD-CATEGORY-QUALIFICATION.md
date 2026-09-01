@@ -1,8 +1,8 @@
-# VS-07 Malta Household-Value Category Qualification — 2026-08-31
+# VS-07 Malta Household-Value Category Qualification
 
-Status: **APPROVED FOR POC — PRODUCTION NOT APPROVED**
+Status: **POC-ONLY — Day 1 hardening under fresh certification; production not approved**
 
-Product owner approved expanding the formal Malta POC before Day 1 with seven household-value categories:
+The product owner approved seven household-value categories for the Malta POC:
 
 1. Grocery & supermarket
 2. Restaurant / takeaway
@@ -12,205 +12,128 @@ Product owner approved expanding the formal Malta POC before Day 1 with seven ho
 6. Pharmacy / personal care
 7. Spa & wellness
 
-The existing five certified source classes remain unchanged. This document records the additive source-policy qualification for the seven categories above.
+## Global policy rules
 
-## Decision rules
+- Public factual metadata only.
+- Exact configured paths and rate caps only.
+- robots.txt remains mandatory.
+- No login/account/cart/checkout/booking/payment/customer-data crawling.
+- No CAPTCHA bypass, anti-bot bypass, stealth/proxy rotation or browser impersonation to defeat technical controls.
+- No raw page/image/creative retention.
+- Attribution/provenance is required.
+- HTTP success with zero expected inventory fails closed where `minimum_candidates=1` is configured.
+- Production always requires a separate fresh review and explicit approval.
 
-- POC approval is limited to public factual metadata and the exact paths/rate caps recorded in configuration.
-- Production always requires a separate current review and approval.
-- No login/account/cart/checkout access, CAPTCHA/anti-bot bypass, stealth/proxy rotation, raw creative retention or image retention.
-- robots.txt remains mandatory for web sources; if robots denies a path, acquisition must fail closed.
-- Store only factual discovery fields such as title, price/discount, validity dates, location where available, source URL and provenance.
-- Deal aggregators are not promoted merely because they have useful inventory; source-policy permission still controls acquisition.
+## Grocery — Lidl Malta public offers
 
-## P0 — Grocery & supermarket
-
-### Lidl Malta public offers
-
-- source key: `lidl_malta_offers`
+- key: `lidl_malta_poc_offers`
 - class: `supermarket`
-- public inventory: `https://www.lidl.com.mt/c/`
-- acquisition: static web; robots mandatory
-- allowed path: `/c/`
-- rate cap: 1 request/hour
-- retained facts: product title, current/original price or percentage saving, offer validity, source URL/provenance
-- no Lidl Plus account, personalised coupons, search/account paths or CAPTCHA-protected areas
-- policy evidence: public offers pages + Lidl terms/privacy material reviewed 2026-08-31
+- public path: `https://www.lidl.com.mt/c/`
+- fetch: static
+- rate: 1/hour
+- POC-only; original `lidl_malta_offers` remains research-only.
 
-Evidence reviewed:
-- public offer pages expose current weekly Malta inventory with explicit EUR prices, savings and validity dates;
-- robots allows the reviewed `/c/` content path while disallowing specific search/technical paths;
-- reviewed public material did not establish permission for broad commercial reuse, so approval remains narrow, low-rate and POC-only.
+Decision: **POC allowed** for narrow factual offer metadata.
 
-**Policy confidence:** medium.  
-**Inventory confidence:** high.  
-**Decision:** APPROVED for POC factual offer metadata only.
+## Restaurant / takeaway — AX Hotels Sliema direct offers
 
-## P0 — Restaurant / takeaway
-
-### AX Hotels Sliema dining offers
-
-- source key: `ax_sliema_dining_offers`
+- key: `ax_sliema_dining_offers`
 - class: `restaurant-direct`
-- public paths: selected current AX The Palace / AX The Victoria restaurant offer pages
-- acquisition: static web; robots mandatory
-- rate cap: 4 requests/hour
-- retained facts: offer title, price/discount, validity text, venue/source URL and provenance
-- no booking/payment paths
-- policy evidence: AX public offer pages and published offer terms reviewed 2026-08-31
+- selected Victoria/The Palace direct offer-detail URLs only
+- fetch: static
+- rate: max 4/hour
+- no booking/payment paths.
 
-Evidence reviewed:
-- current Summer 2026 direct offers expose deterministic prices and conditions, including Penny Sundays, Fish & Chips, Sweet Duo and Taco Thursdays;
-- no blanket automated-access prohibition was located in reviewed public offer/policy material;
-- approval is limited to exact public offer paths and factual metadata.
+Day 1 finding: the broad extractor repeated related-site offers on each detail page, causing 45 duplicates. The approved corrective boundary treats the direct page H1 as the page's authoritative discovery and ignores related-offer rails/site-wide structured inventory.
 
-**Policy confidence:** medium.  
-**Inventory confidence:** high.  
-**Decision:** APPROVED for POC.
+Decision: **POC allowed with detail-page extraction boundary**.
 
-## P1 — Family & kids
+## Family & kids — Esplora promotions
 
-### Esplora family promotions
-
-- source key: `esplora_family_promotions`
+- key: `esplora_family_promotions`
 - class: `family-kids`
-- public inventory: `https://esplora.org.mt/promotions-tcs/`
-- acquisition: static web; robots mandatory
-- allowed path: `/promotions-tcs/`
-- rate cap: 1 request/hour
-- retained facts: promotion title, qualifying spend/value, family entitlement, source URL/provenance
-- policy evidence: official Esplora promotions and privacy/public policy pages reviewed 2026-08-31
+- path: `https://esplora.org.mt/promotions-tcs/`
+- fetch: static
+- rate: 1/hour.
 
-Evidence reviewed:
-- official promotion page exposes family-specific benefits including free family admission tied to qualifying purchases;
-- no blanket automated-access prohibition was located in reviewed public policy material;
-- government/public-interest source, but POC still remains low-rate and factual-only.
+Decision: **POC allowed** for public family-promotion facts. Generic numbered headings such as `Promotion 1:` are noise; descriptive headings remain eligible.
 
-**Policy confidence:** medium-high.  
-**Inventory confidence:** medium.  
-**Decision:** APPROVED for POC.
+## Activities — Heritage Malta What's On
 
-## P0/P1 — Activities
-
-### Heritage Malta What's On
-
-- source key: `heritage_malta_activities`
+- key: `heritage_malta_activities`
 - class: `activities-official`
-- public inventory: `https://heritagemalta.mt/whats-on/`
-- acquisition: static web; robots mandatory
-- allowed path: `/whats-on/`
-- rate cap: 1 request/hour
-- retained facts: event/activity title, date/time, price where available, venue/location, source URL/provenance
-- policy evidence: Heritage Malta What's On + Terms & Conditions reviewed 2026-08-31
+- path: `https://heritagemalta.mt/whats-on/`
+- fetch: static
+- rate: 1/hour
+- no shop/cart access.
 
-Evidence reviewed:
-- official agency inventory currently lists 2026 activities/events and family programmes with dates, locations and ticket prices;
-- Terms govern use/purchases and copyright; no blanket automated-monitoring prohibition was located in the reviewed terms;
-- no shop/cart crawling is permitted by this approval.
+Decision: **POC allowed** for official event/activity metadata.
 
-**Policy confidence:** medium-high.  
-**Inventory confidence:** high.  
-**Decision:** APPROVED for POC.
+## Senior discounts — Day 1 amendment
 
-## P1 — Senior discounts
+### Active Ageing and Community Care
 
-### Active Ageing and Community Care — Discounts for the Elderly
-
-- source key: `active_ageing_discounts`
+- key: `active_ageing_discounts`
 - class: `senior-benefits-official`
-- public inventory: `https://aacc.gov.mt/en/discounts-for-the-elderly/`
-- acquisition: static web; robots mandatory
-- allowed path: `/en/discounts-for-the-elderly/`
-- rate cap: 1 request/hour
-- retained facts: participating business, discount/benefit, locality/address where published, source URL/provenance
-- policy evidence: official Government of Malta programme page reviewed 2026-08-31
+- path: `https://aacc.gov.mt/en/discounts-for-the-elderly/`
+- Day 1 automated POC acquisition returned **HTTP 403**.
 
-Evidence reviewed:
-- the official programme publishes 60+ benefits covering supermarkets, restaurants, transport, eyewear, leisure and other services;
-- examples in the POC geography include Sliema, Gżira, St Julian's, Birkirkara and Valletta;
-- no account/login or personal-data collection is required to read the public list.
+Ziras will not alter user agents, use proxies, browser impersonation or another technique to bypass that observed technical restriction.
 
-**Policy confidence:** high.  
-**Inventory confidence:** high.  
-**Decision:** APPROVED for POC.
+Decision: **demoted to research/reference scope; POC automated acquisition denied** pending a permitted machine-access route or partnership.
 
-## P1 — Pharmacy / personal care
+### GO Malta Kartanzjan offers
 
-### Botika Malta Sale
+- key: `go_kartanzjan_offers`
+- class: `senior-benefits-direct`
+- public path: `https://www.go.com.mt/offers/kartanzjan/`
+- fetch: static
+- rate: 1/hour
+- public factual 60+ Kartanzjan offer metadata only
+- no application form, MyGO/login, account, checkout or customer-data paths.
 
-- source key: `botika_personal_care_sale`
+Decision: **POC replacement allowed**, robots-governed, production denied pending fresh review.
+
+A Servizz.gov automated replacement was not adopted because its published terms prohibit page-scrape/robot/automatic acquisition/monitoring.
+
+## Pharmacy / personal care — Botika Malta sale
+
+- key: `botika_personal_care_sale`
 - class: `pharmacy-personal-care`
-- public inventory: `https://botika.mt/collections/sale`
-- acquisition: static web; robots mandatory
-- allowed path: `/collections/sale`
-- rate cap: 1 request/hour
-- retained facts: product title, current/original price, source URL/provenance
-- no login, cart or checkout access
-- policy evidence: Botika public sale collection and published terms/privacy material reviewed 2026-08-31
+- path: `https://botika.mt/collections/sale`
+- fetch: static
+- rate: 1/hour
+- no login/cart/checkout.
 
-Evidence reviewed:
-- the public sale collection exposes health, beauty, skincare, wellness, baby-care and personal-care products with old/current EUR prices;
-- reviewed public terms/privacy material did not expose a blanket automated-access prohibition;
-- only public sale-listing facts are approved; no customer/account data or checkout behaviour.
+Decision: **POC allowed** for public product title/current/original price metadata.
 
-**Policy confidence:** medium.  
-**Inventory confidence:** high.  
-**Decision:** APPROVED for POC.
+## Spa & wellness — AX Verdala direct offer
 
-## P1 — Spa & wellness
-
-### AX Verdala wellness offers
-
-- source key: `ax_verdala_wellness_offers`
+- key: `ax_verdala_wellness_offers`
 - class: `spa-wellness`
-- public inventory: selected Verdala/AX public wellness and gift-voucher pages
-- acquisition: static web; robots mandatory
-- rate cap: 2 requests/hour
-- retained facts: experience/package title, price/discount, validity where published, source URL/provenance
-- no booking/payment paths
-- policy evidence: AX public wellness/gift-voucher pages and published voucher conditions reviewed 2026-08-31
+- path: `https://axhotelsmalta.com/verdala-wellness/special-offers/leisure/day-by-the-pool/`
+- fetch: static
+- rate: 1/hour
+- no booking/payment paths.
 
-Evidence reviewed:
-- public pages expose concrete wellness experiences such as V SPA day passes and wellness-retreat products with published EUR pricing;
-- reviewed AX public material did not expose a blanket automated-monitoring prohibition;
-- approval is low-rate, factual-only and excludes booking/payment flows.
+Day 1 finding: the previous broad wellness + gift-voucher pages generated 24 duplicates and CTA/FAQ/navigation noise. The POC is therefore narrowed to a current direct offer-detail page and the same detail-page H1 extraction boundary used for AX dining.
 
-**Policy confidence:** medium.  
-**Inventory confidence:** medium-high.  
-**Decision:** APPROVED for POC.
+Decision: **POC allowed on the narrowed direct path**.
 
-## Explicit non-promotion decisions
+## Existing restrictions unchanged
 
-- Deal.mt — useful validation/reference inventory, but not promoted to automated POC acquisition in this batch.
-- Corinthia public offer pages — **not approved** for automated POC acquisition because published Corinthia terms explicitly prohibit robot/spider/automatic monitoring/copying without prior express consent.
-- McDonald's Malta — deny unchanged.
-- Pizza Hut Malta — deny unchanged.
-- Wolt Malta — partner-only unchanged.
-- Franks Malta — deny unchanged.
+- McDonald's Malta — deny.
+- Pizza Hut Malta — deny.
+- Franks Malta — deny.
+- Wolt Malta — partner-only.
+- Deal.mt — reference/validation only.
+- Corinthia — automated acquisition not approved because reviewed terms prohibit robot/spider/automatic monitoring without prior consent.
+- Servizz.gov — not used for automated acquisition because reviewed terms prohibit scrape/robot/automatic access/monitoring.
 
-## Combined POC value stack after this batch
+## Approval and certification state
 
-### Core household value
-1. Grocery & supermarket
-2. Restaurant / takeaway
-3. Events & activities
-4. Family & kids
-5. Senior discounts
-6. Pharmacy / personal care
-7. Spa & wellness
-
-### Existing supporting classes retained
-- home retail
-- sports retail
-- entertainment offers
-- cultural venue events
-
-This expansion occurs before the formal Day 1 measurement run. It does not itself prove any 14-day PRD success metric.
-
-## Approval record
-
-Product owner approval: **Approved — “lets add these”**  
-Date: **2026-08-31**  
-Scope: seven household-value POC categories above only.  
-Production source access: **NOT APPROVED**.  
-Release/production enablement: **NOT APPROVED**.
+- Original seven-category expansion: product-owner approved 2026-08-31.
+- Day 1 corrective policy/implementation batch: product-owner approved with **“Go ahead”** on 2026-09-01.
+- Day 1 amendment still requires fresh exact-head PES, regression, PostgreSQL and live acquisition evidence before certification/merge.
+- Production source access: **OFF / NOT APPROVED**.
+- Release/production enablement: **NOT APPROVED**.

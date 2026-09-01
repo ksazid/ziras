@@ -30,6 +30,7 @@ def main() -> int:
     entries = load_source_catalog()
     registry = build_policy_registry(entries)
     scope = SourcePolicyScope(args.scope)
+    source_class_by_key = {entry.source_key: entry.source_class for entry in entries}
 
     with psycopg.connect(args.database_url, autocommit=True) as connection:
         if args.apply_migrations:
@@ -47,13 +48,22 @@ def main() -> int:
             source_keys=tuple(args.source),
             now=datetime.now(timezone.utc),
         )
-        source_results = _source_results(connection, summary.run_id)
+        source_results = _source_results(
+            connection,
+            summary.run_id,
+            source_class_by_key=source_class_by_key,
+        )
+
+    # POC discovery requires no merchant onboarding. This is machine evidence,
+    # not a reviewer judgement, and remains explicit in every ingestion payload.
+    metrics = dict(summary.metrics)
+    metrics["merchant_onboarding_count"] = 0
 
     payload = {
         "run_id": str(summary.run_id),
         "status": summary.status,
         "scope": scope.value,
-        "metrics": dict(summary.metrics),
+        "metrics": metrics,
         "source_results": source_results,
         "ranked": [
             {
@@ -61,6 +71,7 @@ def main() -> int:
                 "type": item.discovery_type.value,
                 "title": item.title,
                 "source_key": item.source_key,
+                "source_class": source_class_by_key.get(item.source_key),
                 "source_url": item.source_url,
                 "freshness": item.freshness.value,
                 "starts_at": item.starts_at.isoformat() if item.starts_at else None,
@@ -69,14 +80,19 @@ def main() -> int:
                 "current_price": str(item.current_price) if item.current_price is not None else None,
                 "currency": item.currency,
             }
-            for item in summary.ranked[:100]
+            for item in summary.ranked
         ],
     }
     print(json.dumps(payload, indent=2, sort_keys=True))
     return 0 if summary.status in {"completed", "partial"} else 1
 
 
-def _source_results(connection: psycopg.Connection, run_id: object) -> list[dict[str, object]]:
+def _source_results(
+    connection: psycopg.Connection,
+    run_id: object,
+    *,
+    source_class_by_key: dict[str, str],
+) -> list[dict[str, object]]:
     rows = connection.execute(
         """
         SELECT source_key, source_url, fetch_mode, status, http_status,
@@ -102,7 +118,12 @@ def _source_results(connection: psycopg.Connection, run_id: object) -> list[dict
         "error_code",
         "detail",
     )
-    return [dict(zip(columns, row, strict=True)) for row in rows]
+    results: list[dict[str, object]] = []
+    for row in rows:
+        item = dict(zip(columns, row, strict=True))
+        item["source_class"] = source_class_by_key.get(str(item["source_key"]))
+        results.append(item)
+    return results
 
 
 def _apply_migrations(connection: psycopg.Connection) -> None:

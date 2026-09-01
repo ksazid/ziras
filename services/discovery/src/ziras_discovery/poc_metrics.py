@@ -50,11 +50,19 @@ def evaluate_daily(
     ranked_count = _int_metric(ingestion_metrics, "ranked_count")
     failed_count = _int_metric(ingestion_metrics, "failed_count")
 
+    contributing = [
+        item
+        for item in source_results
+        if item.get("status") == "ok" and int(item.get("candidate_count") or 0) > 0
+    ]
+    missing_classes = [item for item in contributing if not str(item.get("source_class") or "").strip()]
+    if missing_classes:
+        reasons.append("source_class evidence is required for every contributing source")
     source_types = len(
         {
-            str(item.get("source_key"))
-            for item in source_results
-            if item.get("status") == "ok" and int(item.get("candidate_count") or 0) > 0
+            str(item.get("source_class")).strip()
+            for item in contributing
+            if str(item.get("source_class") or "").strip()
         }
     )
 
@@ -74,6 +82,13 @@ def evaluate_daily(
         reasons,
     )
 
+    merchant_onboarding_count = audit.merchant_onboarding_count
+    if merchant_onboarding_count is None:
+        merchant_onboarding_count = _optional_int_metric(
+            ingestion_metrics,
+            "merchant_onboarding_count",
+        )
+
     if ingestion_status != "completed":
         reasons.append(f"ingestion_status={ingestion_status}")
     if failed_count:
@@ -82,8 +97,8 @@ def evaluate_daily(
         reasons.append("candidate_count must be > 0")
     if audit.useful_discoveries is None:
         reasons.append("useful_discoveries audit is required")
-    if audit.merchant_onboarding_count is None:
-        reasons.append("merchant_onboarding_count audit is required")
+    if merchant_onboarding_count is None:
+        reasons.append("merchant_onboarding_count evidence is required")
 
     gates: dict[str, bool | None] = {
         "useful_discoveries": (
@@ -111,8 +126,8 @@ def evaluate_daily(
             else None
         ),
         "merchant_onboarding": (
-            audit.merchant_onboarding_count <= POC_THRESHOLDS["merchant_onboarding_max"]
-            if audit.merchant_onboarding_count is not None
+            merchant_onboarding_count <= POC_THRESHOLDS["merchant_onboarding_max"]
+            if merchant_onboarding_count is not None
             else None
         ),
     }
@@ -142,7 +157,7 @@ def evaluate_daily(
             "relevance_sample": audit.relevance_sample,
             "relevant_count": audit.relevant_count,
             "relevance_rate": relevance_rate,
-            "merchant_onboarding_count": audit.merchant_onboarding_count,
+            "merchant_onboarding_count": merchant_onboarding_count,
         },
         reasons=tuple(reasons),
     )
@@ -187,6 +202,20 @@ def _int_metric(metrics: Mapping[str, object], key: str) -> int:
         return int(str(value))
     except (TypeError, ValueError):
         return 0
+
+
+def _optional_int_metric(metrics: Mapping[str, object], key: str) -> int | None:
+    if key not in metrics or metrics.get(key) is None:
+        return None
+    value = metrics.get(key)
+    if isinstance(value, bool):
+        return int(value)
+    if isinstance(value, (int, float)):
+        return int(value)
+    try:
+        return int(str(value))
+    except (TypeError, ValueError):
+        return None
 
 
 def _ratio(

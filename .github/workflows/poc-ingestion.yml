@@ -2,8 +2,9 @@ name: Malta POC Ingestion
 
 on:
   schedule:
-    # 08:00 Europe/Malta during the approved 2026-09-01..2026-09-14 POC window.
-    - cron: '0 6 1-14 9 *'
+    # 08:07 Europe/Malta during the approved 2026-09-01..2026-09-14 POC window.
+    # Avoid the top-of-hour GitHub Actions scheduling hotspot observed on Day 1.
+    - cron: '7 6 1-14 9 *'
   workflow_dispatch:
     inputs:
       scope:
@@ -100,6 +101,14 @@ jobs:
               --apply-migrations | tee poc-ingestion.json
           fi
 
+      - name: Prepare deterministic audit template
+        if: always() && steps.window.outputs.active == 'true' && hashFiles('poc-ingestion.json') != ''
+        run: |
+          python services/discovery/scripts/prepare_poc_audit.py \
+            --ingestion-json poc-ingestion.json \
+            --sample-size 30 \
+            --output poc-audit-template.json >/dev/null
+
       - name: Record immutable run provenance
         if: always() && steps.window.outputs.active == 'true'
         env:
@@ -130,6 +139,7 @@ jobs:
           name: poc-ingestion-${{ github.run_id }}
           path: |
             poc-ingestion.json
+            poc-audit-template.json
             poc-run-provenance.json
           if-no-files-found: warn
           retention-days: 30

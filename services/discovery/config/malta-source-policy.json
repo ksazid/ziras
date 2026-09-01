@@ -3,7 +3,9 @@
     "source_key": "visitmalta_events",
     "display_name": "VisitMalta Events",
     "source_class": "events-official",
-    "start_urls": ["https://www.visitmalta.com/en/events-in-malta-and-gozo/"],
+    "start_urls": [
+      "https://www.visitmalta.com/en/events-in-malta-and-gozo/"
+    ],
     "fetch_mode": "browser",
     "adapter_kind": "event",
     "terms_url": "https://www.visitmalta.com/en/terms-and-conditions/",
@@ -14,7 +16,9 @@
       "policy_url": "https://www.visitmalta.com/en/terms-and-conditions/",
       "robots_required": true,
       "reviewed_at": "2026-08-31T03:01:26+02:00",
-      "allowed_path_prefixes": ["/en/events-in-malta-and-gozo/"],
+      "allowed_path_prefixes": [
+        "/en/events-in-malta-and-gozo/"
+      ],
       "max_requests_per_hour": 2,
       "attribution_required": true,
       "content_storage_allowed": false
@@ -25,8 +29,11 @@
     "source_key": "eden_cinemas",
     "display_name": "Eden Cinemas",
     "source_class": "entertainment-offers",
-    "start_urls": ["https://www.edencinemas.com.mt/special-offers", "https://www.edencinemas.com.mt/whats-on"],
-    "fetch_mode": "static",
+    "start_urls": [
+      "https://www.edencinemas.com.mt/special-offers",
+      "https://www.edencinemas.com.mt/whats-on"
+    ],
+    "fetch_mode": "browser",
     "adapter_kind": "promotion",
     "terms_url": "https://www.edencinemas.com.mt/terms-and-conditions",
     "policy": {
@@ -36,18 +43,23 @@
       "policy_url": "https://www.edencinemas.com.mt/terms-and-conditions",
       "robots_required": true,
       "reviewed_at": "2026-08-31T03:01:26+02:00",
-      "allowed_path_prefixes": ["/special-offers", "/whats-on"],
+      "allowed_path_prefixes": [
+        "/special-offers",
+        "/whats-on"
+      ],
       "max_requests_per_hour": 2,
       "attribution_required": true,
       "content_storage_allowed": false
     },
-    "notes": "Use deep links and factual metadata only; do not copy promotional creative."
+    "notes": "Use deep links and factual metadata only; do not copy promotional creative. Browser acquisition is required because both approved public routes returned HTTP 202 with zero static inventory during VS-07 live validation on 2026-09-01."
   },
   {
     "source_key": "homemate_offers",
     "display_name": "Homemate Special Offers",
     "source_class": "home-retail",
-    "start_urls": ["https://www.homemate.com.mt/special-offers"],
+    "start_urls": [
+      "https://www.homemate.com.mt/special-offers"
+    ],
     "fetch_mode": "static",
     "adapter_kind": "promotion",
     "terms_url": "https://www.homemate.com.mt/terms-conditions",
@@ -58,7 +70,9 @@
       "policy_url": "https://www.homemate.com.mt/terms-conditions",
       "robots_required": true,
       "reviewed_at": "2026-08-31T03:01:26+02:00",
-      "allowed_path_prefixes": ["/special-offers"],
+      "allowed_path_prefixes": [
+        "/special-offers"
+      ],
       "max_requests_per_hour": 2,
       "attribution_required": true,
       "content_storage_allowed": false
@@ -69,7 +83,9 @@
     "source_key": "eurospin_promotions",
     "display_name": "Eurospin Malta Promotions",
     "source_class": "supermarket",
-    "start_urls": ["https://www.eurospin.mt/promotions/"],
+    "start_urls": [
+      "https://www.eurospin.mt/promotions/"
+    ],
     "fetch_mode": "static",
     "adapter_kind": "promotion",
     "terms_url": "https://www.eurospin.mt/privacy-policy/",
@@ -80,7 +96,9 @@
       "policy_url": "https://www.eurospin.mt/privacy-policy/",
       "robots_required": true,
       "reviewed_at": "2026-08-31T03:01:26+02:00",
-      "allowed_path_prefixes": ["/promotions/"],
+      "allowed_path_prefixes": [
+        "/promotions/"
+      ],
       "max_requests_per_hour": 1,
       "attribution_required": true,
       "content_storage_allowed": false
@@ -91,7 +109,9 @@
     "source_key": "lidl_malta_offers",
     "display_name": "Lidl Malta Offers",
     "source_class": "supermarket",
-    "start_urls": ["https://www.lidl.com.mt/c/fresh-offers-every-week/s10038644"],
+    "start_urls": [
+      "https://www.lidl.com.mt/c/fresh-offers-every-week/s10038644"
+    ],
     "fetch_mode": "static",
     "adapter_kind": "promotion",
     "terms_url": "https://www.lidl.com.mt/c/terms-of-use-lidl-plus/s10017323",
@@ -102,7 +122,9 @@
       "policy_url": "https://www.lidl.com.mt/c/terms-of-use-lidl-plus/s10017323",
       "robots_required": true,
       "reviewed_at": "2026-08-31T03:01:26+02:00",
-      "allowed_path_prefixes": ["/c/"],
+      "allowed_path_prefixes": [
+        "/c/"
+      ],
       "max_requests_per_hour": 1,
       "attribution_required": true,
       "content_storage_allowed": false
@@ -113,7 +135,9 @@
     "source_key": "scan_malta",
     "display_name": "SCAN Malta",
     "source_class": "electronics",
-    "start_urls": ["https://www.scanmalta.com/"],
+    "start_urls": [
+      "https://www.scanmalta.com/"
+    ],
     "fetch_mode": "browser",
     "adapter_kind": "promotion",
     "terms_url": "https://www.scanmalta.com/shop/terms",
@@ -135,7 +159,9 @@
     "source_key": "spar_malta",
     "display_name": "SPAR Malta",
     "source_class": "supermarket",
-    "start_urls": ["https://shop.spar.com.mt/"],
+    "start_urls": [
+      "https://shop.spar.com.mt/"
+    ],
     "fetch_mode": "static",
     "adapter_kind": "promotion",
     "terms_url": "https://shop.spar.com.mt/terms-conditions.php",
@@ -157,7 +183,9 @@
     "source_key": "ticketline_malta",
     "display_name": "TicketLine Malta",
     "source_class": "ticketing",
-    "start_urls": ["https://www.ticketline.com.mt/"],
+    "start_urls": [
+      "https://www.ticketline.com.mt/"
+    ],
     "fetch_mode": "browser",
     "adapter_kind": "event",
     "terms_url": "https://www.ticketline.com.mt/Page.aspx?pageId=1",
@@ -179,7 +207,9 @@
     "source_key": "shows_happening_malta",
     "display_name": "ShowsHappening Malta",
     "source_class": "ticketing-marketplace",
-    "start_urls": ["https://www.showshappening.com/country/malta"],
+    "start_urls": [
+      "https://www.showshappening.com/country/malta"
+    ],
     "fetch_mode": "browser",
     "adapter_kind": "event",
     "terms_url": null,
@@ -201,7 +231,9 @@
     "source_key": "franks_malta",
     "display_name": "Franks Malta",
     "source_class": "beauty-promotions",
-    "start_urls": ["https://franks.com.mt/news-promotions/"],
+    "start_urls": [
+      "https://franks.com.mt/news-promotions/"
+    ],
     "fetch_mode": "static",
     "adapter_kind": "promotion",
     "terms_url": "https://franks.com.mt/terms-conditions/",
@@ -223,7 +255,9 @@
     "source_key": "pizzahut_malta",
     "display_name": "Pizza Hut Malta",
     "source_class": "restaurant-direct",
-    "start_urls": ["https://www.pizzahut.com.mt/categories/deals?locale=en-MT"],
+    "start_urls": [
+      "https://www.pizzahut.com.mt/categories/deals?locale=en-MT"
+    ],
     "fetch_mode": "browser",
     "adapter_kind": "promotion",
     "terms_url": "https://www.pizzahut.com.mt/terms_and_conditions",
@@ -245,7 +279,9 @@
     "source_key": "mcdonalds_malta",
     "display_name": "McDonald's Malta",
     "source_class": "restaurant-direct",
-    "start_urls": ["https://mcdonalds.com.mt/"],
+    "start_urls": [
+      "https://mcdonalds.com.mt/"
+    ],
     "fetch_mode": "static",
     "adapter_kind": "promotion",
     "terms_url": "https://mcdonalds.com.mt/mcdonalds-app-terms/",
@@ -267,7 +303,9 @@
     "source_key": "wolt_malta",
     "display_name": "Wolt Malta",
     "source_class": "delivery-marketplace",
-    "start_urls": ["https://wolt.com/en/mlt/malta/promotions-near-you"],
+    "start_urls": [
+      "https://wolt.com/en/mlt/malta/promotions-near-you"
+    ],
     "fetch_mode": "api",
     "adapter_kind": "promotion",
     "terms_url": null,
@@ -289,7 +327,9 @@
     "source_key": "zara_malta",
     "display_name": "Zara Malta",
     "source_class": "fashion",
-    "start_urls": ["https://www.zara.com/mt/"],
+    "start_urls": [
+      "https://www.zara.com/mt/"
+    ],
     "fetch_mode": "api",
     "adapter_kind": "promotion",
     "terms_url": null,
@@ -311,7 +351,9 @@
     "source_key": "cloudigo_malta",
     "display_name": "Cloudigo Malta",
     "source_class": "deal-platform",
-    "start_urls": ["https://www.cloudigo.app/"],
+    "start_urls": [
+      "https://www.cloudigo.app/"
+    ],
     "fetch_mode": "api",
     "adapter_kind": "promotion",
     "terms_url": null,

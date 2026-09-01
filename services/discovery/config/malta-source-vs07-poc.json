@@ -37,10 +37,10 @@
     "policy": {
       "mode": "allow",
       "scope": "poc",
-      "reason": "Low-rate POC factual dining-offer metadata only from selected current public AX offer pages. No booking/payment flows, creative retention or production permission.",
+      "reason": "Low-rate POC factual dining-offer metadata only from selected current public AX offer-detail pages. Extraction is bounded to each detail page so related-site offer rails do not create duplicate discoveries. No booking/payment flows, creative retention or production permission.",
       "policy_url": "https://axhotelsmalta.com/",
       "robots_required": true,
-      "reviewed_at": "2026-08-31T22:45:00+02:00",
+      "reviewed_at": "2026-09-01T10:08:00+02:00",
       "allowed_path_prefixes": [
         "/victoria-hotel/special-offers/restaurants/",
         "/the-palace/offers/restaurants/"
@@ -49,7 +49,7 @@
       "attribution_required": true,
       "content_storage_allowed": false
     },
-    "notes": "Selected direct merchant offer pages expose deterministic Summer 2026 prices/conditions."
+    "notes": "Direct offer-detail pages only; Day 1 exposed repeated related-offer extraction across all four URLs, so detail-page extraction is now mandatory."
   },
   {
     "source_key": "esplora_family_promotions",
@@ -105,17 +105,39 @@
     "terms_url": "https://aacc.gov.mt/en/terms-of-use/",
     "policy": {
       "mode": "allow",
-      "scope": "poc",
-      "reason": "Official Government of Malta 60+ benefit facts only from the public discount directory. No personal-data/account access; robots mandatory; factual metadata/provenance only; production requires fresh review.",
+      "scope": "research",
+      "reason": "Day 1 POC acquisition received HTTP 403 from the official public page. Ziras will not bypass that technical control; this record is retained for research/reference only pending a permitted machine-access route or partnership.",
       "policy_url": "https://aacc.gov.mt/en/terms-of-use/",
       "robots_required": true,
-      "reviewed_at": "2026-08-31T22:45:00+02:00",
+      "reviewed_at": "2026-09-01T10:08:00+02:00",
       "allowed_path_prefixes": ["/en/discounts-for-the-elderly/"],
       "max_requests_per_hour": 1,
       "attribution_required": true,
       "content_storage_allowed": false
     },
-    "notes": "Public senior benefit directory includes supermarket, restaurant, transport, optical and leisure discounts across Malta."
+    "notes": "Research/reference only after observed HTTP 403. No browser-UA spoofing, proxying or other bypass is permitted."
+  },
+  {
+    "source_key": "go_kartanzjan_offers",
+    "display_name": "GO Malta Kartanzjan Offers",
+    "source_class": "senior-benefits-direct",
+    "start_urls": ["https://www.go.com.mt/offers/kartanzjan/"],
+    "fetch_mode": "static",
+    "adapter_kind": "promotion",
+    "terms_url": "https://www.go.com.mt/terms-and-conditions/",
+    "policy": {
+      "mode": "allow",
+      "scope": "poc",
+      "reason": "Low-rate POC acquisition of public factual Kartanzjan offer metadata for Malta/Gozo residents aged 60+. Only the public offer page is accessed; no application form, MyGO/login, account, checkout or customer data is accessed. Robots remains mandatory and production requires fresh review.",
+      "policy_url": "https://www.go.com.mt/terms-and-conditions/",
+      "robots_required": true,
+      "reviewed_at": "2026-09-01T10:08:00+02:00",
+      "allowed_path_prefixes": ["/offers/kartanzjan/"],
+      "max_requests_per_hour": 1,
+      "attribution_required": true,
+      "content_storage_allowed": false
+    },
+    "notes": "POC replacement for the technically blocked Active Ageing page. Public page advertises 60+ Kartanzjan offers; application/account flows remain excluded."
   },
   {
     "source_key": "botika_personal_care_sale",
@@ -144,24 +166,23 @@
     "display_name": "AX Verdala Wellness Offers",
     "source_class": "spa-wellness",
     "start_urls": [
-      "https://axhotelsmalta.com/verdala-wellness/",
-      "https://axhotelsmalta.com/gift-vouchers/"
+      "https://axhotelsmalta.com/verdala-wellness/special-offers/leisure/day-by-the-pool/"
     ],
     "fetch_mode": "static",
     "adapter_kind": "promotion",
-    "terms_url": "https://axhotelsmalta.com/gift-vouchers/",
+    "terms_url": "https://axhotelsmalta.com/verdala-wellness/",
     "policy": {
       "mode": "allow",
       "scope": "poc",
-      "reason": "Low-rate POC factual wellness-experience metadata only from public AX/Verdala pages. No booking/payment flows, robots mandatory, no creative retention, production requires fresh review.",
-      "policy_url": "https://axhotelsmalta.com/gift-vouchers/",
+      "reason": "Low-rate POC factual wellness-offer metadata from a current public Verdala offer-detail page only. The previous broad wellness/gift-voucher pages produced repeated UI/FAQ noise and duplicate discoveries. No booking/payment flows, robots mandatory, no creative retention, production requires fresh review.",
+      "policy_url": "https://axhotelsmalta.com/verdala-wellness/",
       "robots_required": true,
-      "reviewed_at": "2026-08-31T22:45:00+02:00",
-      "allowed_path_prefixes": ["/verdala-wellness/", "/gift-vouchers/"],
-      "max_requests_per_hour": 2,
+      "reviewed_at": "2026-09-01T10:08:00+02:00",
+      "allowed_path_prefixes": ["/verdala-wellness/special-offers/leisure/"],
+      "max_requests_per_hour": 1,
       "attribution_required": true,
       "content_storage_allowed": false
     },
-    "notes": "Public wellness inventory includes V SPA day-pass/retreat experiences and Verdala wellness offers."
+    "notes": "Current direct offer page is Day by the Pool, publicly listed as valid through September 2026. Broad gift-voucher/general wellness pages are no longer automated in the POC."
   }
 ]
