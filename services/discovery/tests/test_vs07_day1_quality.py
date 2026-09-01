@@ -9,6 +9,11 @@ def test_money_parser_ignores_attendee_counts_next_to_real_price() -> None:
     assert _money_values(line) == [Decimal("35")]
 
 
+def test_money_parser_accepts_integer_currency_adjacency_only() -> None:
+    assert _money_values("€35 and 40 EUR") == [Decimal("35"), Decimal("40")]
+    assert _money_values("€35 for 1 adult and 2 children") == [Decimal("35")]
+
+
 def test_money_parser_accepts_prefix_and_suffix_currency() -> None:
     assert _money_values("€24.00 now 18.00 EUR") == [Decimal("24.00"), Decimal("18.00")]
 
