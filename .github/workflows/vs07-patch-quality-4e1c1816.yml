@@ -17,27 +17,42 @@ jobs:
           ref: fix/vs07-day1-quality-hardening
           fetch-depth: 0
 
-      - name: Block partial integer backtracking
+      - name: Harden Eden acquisition and Esplora title quality
         shell: bash
         run: |
           python - <<'PY'
+          import json
           from pathlib import Path
+
+          catalog = Path('services/discovery/config/malta-source-policy.json')
+          items = json.loads(catalog.read_text(encoding='utf-8'))
+          eden = next(item for item in items if item['source_key'] == 'eden_cinemas')
+          eden['fetch_mode'] = 'browser'
+          eden['notes'] = (
+              'Use deep links and factual metadata only; do not copy promotional creative. '
+              'Browser acquisition is required because both approved public routes returned HTTP 202 '
+              'with zero static inventory during VS-07 live validation on 2026-09-01.'
+          )
+          catalog.write_text(json.dumps(items, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
 
           adapter = Path('services/discovery/src/ziras_discovery/adapters/public_web.py')
           text = adapter.read_text(encoding='utf-8')
-          old_re = '''_MONEY_RE = re.compile(\n    r"(?P<decimal>\\d{1,4}[.,]\\d{1,2})|"\n    r"(?:(?:€|EUR)\\s*(?P<prefix_int>\\d{1,4})(?![.,]\\d)|"\n    r"(?P<suffix_int>\\d{1,4})(?![.,]\\d)\\s*(?:€|EUR))",\n    re.IGNORECASE,\n)'''
-          new_re = '''_MONEY_RE = re.compile(\n    r"(?P<decimal>\\d{1,4}[.,]\\d{1,2})|"\n    r"(?:(?:€|EUR)\\s*(?P<prefix_int>\\d{1,4})(?![\\d.,])|"\n    r"(?P<suffix_int>\\d{1,4})(?![\\d.,])\\s*(?:€|EUR))",\n    re.IGNORECASE,\n)'''
-          if old_re not in text:
-              raise SystemExit('expected current money regex not found')
-          adapter.write_text(text.replace(old_re, new_re, 1), encoding='utf-8')
+          anchor = '''    if any(noise in folded for noise in _POLICY_NOISE):\n        return False\n'''
+          replacement = '''    if any(noise in folded for noise in _POLICY_NOISE):\n        return False\n    if "t&c" in folded or "t & c" in folded or folded.startswith("not valid with"):\n        return False\n'''
+          if replacement not in text:
+              if anchor not in text:
+                  raise SystemExit('expected promotion-title policy anchor not found')
+              text = text.replace(anchor, replacement, 1)
+          adapter.write_text(text, encoding='utf-8')
           PY
 
-      - name: Commit parser refinement to PR branch
+      - name: Commit source hardening to PR branch
         shell: bash
         run: |
           git config user.name "Sazid"
           git config user.email "47315271+ksazid@users.noreply.github.com"
-          git add services/discovery/src/ziras_discovery/adapters/public_web.py
+          git add services/discovery/config/malta-source-policy.json \
+                  services/discovery/src/ziras_discovery/adapters/public_web.py
           git diff --cached --check
-          git commit -m "fix(VS-07): block partial integer price matches"
+          git commit -m "fix(VS-07): recover Eden and reject Esplora policy noise"
           git push origin HEAD:fix/vs07-day1-quality-hardening
