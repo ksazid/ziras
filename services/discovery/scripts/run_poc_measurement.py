@@ -5,12 +5,14 @@ from datetime import date
 import json
 from pathlib import Path
 
+from ziras_discovery.poc_audit import audit_counts_from_template
 from ziras_discovery.poc_metrics import AuditCounts, evaluate_daily
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--ingestion-json", required=True)
+    parser.add_argument("--audit-json")
     parser.add_argument("--measurement-date", default=date.today().isoformat())
     parser.add_argument("--github-sha", required=True)
     parser.add_argument("--github-run-id", required=True)
@@ -24,18 +26,28 @@ def main() -> int:
     args = parser.parse_args()
 
     payload = json.loads(Path(args.ingestion_json).read_text(encoding="utf-8"))
-    measurement = evaluate_daily(
-        ingestion_status=str(payload.get("status") or ""),
-        ingestion_metrics=payload.get("metrics") or {},
-        source_results=payload.get("source_results") or [],
-        audit=AuditCounts(
+    if args.audit_json:
+        audit_template = json.loads(Path(args.audit_json).read_text(encoding="utf-8"))
+        try:
+            audit = audit_counts_from_template(audit_template)
+        except ValueError as exc:
+            print(json.dumps({"accepted": False, "error": str(exc)}, indent=2))
+            return 2
+    else:
+        audit = AuditCounts(
             useful_discoveries=args.useful_discoveries,
             valid_open_sample=args.valid_open_sample,
             valid_open_count=args.valid_open_count,
             relevance_sample=args.relevance_sample,
             relevant_count=args.relevant_count,
             merchant_onboarding_count=args.merchant_onboarding_count,
-        ),
+        )
+
+    measurement = evaluate_daily(
+        ingestion_status=str(payload.get("status") or ""),
+        ingestion_metrics=payload.get("metrics") or {},
+        source_results=payload.get("source_results") or [],
+        audit=audit,
     )
 
     result = {
