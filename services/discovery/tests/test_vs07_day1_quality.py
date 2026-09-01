@@ -1,4 +1,5 @@
 from decimal import Decimal
+from pathlib import Path
 
 from ziras_discovery.adapters.public_web import _money_values
 
@@ -10,3 +11,14 @@ def test_money_parser_ignores_attendee_counts_next_to_real_price() -> None:
 
 def test_money_parser_accepts_prefix_and_suffix_currency() -> None:
     assert _money_values("€24.00 now 18.00 EUR") == [Decimal("24.00"), Decimal("18.00")]
+
+
+def test_money_parser_preserves_supermarket_old_and_new_decimal_prices() -> None:
+    assert _money_values("1.79 1.39 €") == [Decimal("1.79"), Decimal("1.39")]
+
+
+def test_poc_ingestion_serializes_full_ranked_inventory_for_audit() -> None:
+    script = Path(__file__).parents[1] / "scripts" / "run_poc_ingestion.py"
+    text = script.read_text(encoding="utf-8")
+    assert "summary.ranked[:100]" not in text
+    assert "for item in summary.ranked" in text
