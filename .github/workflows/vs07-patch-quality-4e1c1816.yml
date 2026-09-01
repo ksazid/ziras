@@ -17,7 +17,7 @@ jobs:
           ref: fix/vs07-day1-quality-hardening
           fetch-depth: 0
 
-      - name: Refine monetary token parsing
+      - name: Prevent decimal prefix truncation
         shell: bash
         run: |
           python - <<'PY'
@@ -25,17 +25,11 @@ jobs:
 
           adapter = Path('services/discovery/src/ziras_discovery/adapters/public_web.py')
           text = adapter.read_text(encoding='utf-8')
-          old_re = '''_MONEY_RE = re.compile(\n    r"(?:(?:€|EUR)\\s*(?P<prefix>\\d{1,4}(?:[.,]\\d{1,2})?)|"\n    r"(?P<suffix>\\d{1,4}(?:[.,]\\d{1,2})?)\\s*(?:€|EUR))",\n    re.IGNORECASE,\n)'''
-          new_re = '''_MONEY_RE = re.compile(\n    r"(?P<decimal>\\d{1,4}[.,]\\d{1,2})|"\n    r"(?:(?:€|EUR)\\s*(?P<prefix_int>\\d{1,4})|"\n    r"(?P<suffix_int>\\d{1,4})\\s*(?:€|EUR))",\n    re.IGNORECASE,\n)'''
+          old_re = '''_MONEY_RE = re.compile(\n    r"(?P<decimal>\\d{1,4}[.,]\\d{1,2})|"\n    r"(?:(?:€|EUR)\\s*(?P<prefix_int>\\d{1,4})|"\n    r"(?P<suffix_int>\\d{1,4})\\s*(?:€|EUR))",\n    re.IGNORECASE,\n)'''
+          new_re = '''_MONEY_RE = re.compile(\n    r"(?P<decimal>\\d{1,4}[.,]\\d{1,2})|"\n    r"(?:(?:€|EUR)\\s*(?P<prefix_int>\\d{1,4})(?![.,]\\d)|"\n    r"(?P<suffix_int>\\d{1,4})(?![.,]\\d)\\s*(?:€|EUR))",\n    re.IGNORECASE,\n)'''
           if old_re not in text:
               raise SystemExit('expected current money regex not found')
-          text = text.replace(old_re, new_re, 1)
-          old_group = 'raw = (match.group("prefix") or match.group("suffix")).replace(",", ".")'
-          new_group = 'raw = (match.group("decimal") or match.group("prefix_int") or match.group("suffix_int")).replace(",", ".")'
-          if old_group not in text:
-              raise SystemExit('expected current money group extraction not found')
-          text = text.replace(old_group, new_group, 1)
-          adapter.write_text(text, encoding='utf-8')
+          adapter.write_text(text.replace(old_re, new_re, 1), encoding='utf-8')
           PY
 
       - name: Commit parser refinement to PR branch
@@ -45,5 +39,5 @@ jobs:
           git config user.email "47315271+ksazid@users.noreply.github.com"
           git add services/discovery/src/ziras_discovery/adapters/public_web.py
           git diff --cached --check
-          git commit -m "fix(VS-07): preserve decimal prices without attendee noise"
+          git commit -m "fix(VS-07): prevent decimal price truncation"
           git push origin HEAD:fix/vs07-day1-quality-hardening
