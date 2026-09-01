@@ -80,7 +80,7 @@ def main() -> int:
                 "current_price": str(item.current_price) if item.current_price is not None else None,
                 "currency": item.currency,
             }
-            for item in summary.ranked[:100]
+            for item in summary.ranked
         ],
     }
     print(json.dumps(payload, indent=2, sort_keys=True))
