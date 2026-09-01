@@ -33,6 +33,9 @@
   "active_ageing_discounts": {
     "minimum_candidates": 1
   },
+  "go_kartanzjan_offers": {
+    "minimum_candidates": 1
+  },
   "botika_personal_care_sale": {
     "minimum_candidates": 1
   },
