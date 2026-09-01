@@ -47,27 +47,16 @@ jobs:
 
           test_file = Path('services/discovery/tests/test_vs07_day1_quality.py')
           test_file.write_text('''from decimal import Decimal\n\nfrom ziras_discovery.adapters.public_web import _money_values\n\n\ndef test_money_parser_ignores_attendee_counts_next_to_real_price() -> None:\n    line = "Spend €35 and receive admission for 1 adult and 2 children"\n    assert _money_values(line) == [Decimal("35")]\n\n\ndef test_money_parser_accepts_prefix_and_suffix_currency() -> None:\n    assert _money_values("€24.00 now 18.00 EUR") == [Decimal("24.00"), Decimal("18.00")]\n''', encoding='utf-8')
-
-          workflow = Path('.github/workflows/discovery-kernel.yml')
-          text = workflow.read_text(encoding='utf-8')
-          anchor = '          services/discovery/tests/test_poc_audit.py\n'
-          addition = anchor + '          services/discovery/tests/test_vs07_day1_quality.py\n'
-          if 'services/discovery/tests/test_vs07_day1_quality.py' not in text:
-              if anchor not in text:
-                  raise SystemExit('expected Discovery Kernel test anchor not found')
-              text = text.replace(anchor, addition, 1)
-          workflow.write_text(text, encoding='utf-8')
           PY
 
-      - name: Commit fixes to PR branch
+      - name: Commit source fixes to PR branch
         shell: bash
         run: |
           git config user.name "Sazid"
           git config user.email "47315271+ksazid@users.noreply.github.com"
           git add services/discovery/src/ziras_discovery/adapters/public_web.py \
                   services/discovery/scripts/run_poc_ingestion.py \
-                  services/discovery/tests/test_vs07_day1_quality.py \
-                  .github/workflows/discovery-kernel.yml
+                  services/discovery/tests/test_vs07_day1_quality.py
           git diff --cached --check
           git commit -m "fix(VS-07): close residual audit quality gaps"
           git push origin HEAD:fix/vs07-day1-quality-hardening
