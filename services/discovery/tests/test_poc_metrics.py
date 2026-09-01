@@ -3,7 +3,12 @@ from ziras_discovery.poc_metrics import AuditCounts, evaluate_daily, evaluate_wi
 
 def _source_results(count: int = 5):
     return [
-        {"source_key": f"source-{index}", "status": "ok", "candidate_count": 10}
+        {
+            "source_key": f"source-{index}",
+            "source_class": f"class-{index}",
+            "status": "ok",
+            "candidate_count": 10,
+        }
         for index in range(count)
     ]
 
@@ -15,6 +20,7 @@ def _metrics(**overrides):
         "failed_count": 0,
         "duplicate_count": 4,
         "expired_count": 4,
+        "merchant_onboarding_count": 0,
     }
     values.update(overrides)
     return values
@@ -27,7 +33,7 @@ def _audit(**overrides):
         "valid_open_count": 18,
         "relevance_sample": 20,
         "relevant_count": 14,
-        "merchant_onboarding_count": 0,
+        "merchant_onboarding_count": None,
     }
     values.update(overrides)
     return AuditCounts(**values)
@@ -44,6 +50,7 @@ def test_daily_measurement_passes_all_thresholds():
     assert result.accepted is True
     assert result.complete is True
     assert result.passed is True
+    assert result.metrics["merchant_onboarding_count"] == 0
     assert all(result.gates.values())
 
 
@@ -66,13 +73,36 @@ def test_missing_human_audit_fails_closed():
         ingestion_status="completed",
         ingestion_metrics=_metrics(),
         source_results=_source_results(),
-        audit=AuditCounts(merchant_onboarding_count=0),
+        audit=AuditCounts(),
     )
 
     assert result.accepted is False
     assert result.complete is False
     assert result.passed is False
     assert "useful_discoveries audit is required" in result.reasons
+
+
+def test_machine_merchant_onboarding_evidence_is_required_when_audit_omits_it():
+    result = evaluate_daily(
+        ingestion_status="completed",
+        ingestion_metrics=_metrics(merchant_onboarding_count=None),
+        source_results=_source_results(),
+        audit=_audit(),
+    )
+    assert result.accepted is False
+    assert "merchant_onboarding_count evidence is required" in result.reasons
+
+
+def test_explicit_merchant_onboarding_audit_can_fail_gate():
+    result = evaluate_daily(
+        ingestion_status="completed",
+        ingestion_metrics=_metrics(),
+        source_results=_source_results(),
+        audit=_audit(merchant_onboarding_count=1),
+    )
+    assert result.accepted is True
+    assert result.gates["merchant_onboarding"] is False
+    assert result.passed is False
 
 
 def test_threshold_boundaries_are_exact():
@@ -93,17 +123,40 @@ def test_threshold_boundaries_are_exact():
     assert duplicate_fail.gates["duplicates"] is False
 
 
-def test_five_distinct_sources_required():
+def test_five_distinct_source_classes_required_not_five_source_keys():
+    source_results = [
+        {
+            "source_key": f"source-{index}",
+            "source_class": f"class-{index % 4}",
+            "status": "ok",
+            "candidate_count": 10,
+        }
+        for index in range(6)
+    ]
     result = evaluate_daily(
         ingestion_status="completed",
         ingestion_metrics=_metrics(),
-        source_results=_source_results(4),
+        source_results=source_results,
         audit=_audit(),
     )
 
     assert result.accepted is True
-    assert result.passed is False
+    assert result.metrics["source_types"] == 4
     assert result.gates["source_types"] is False
+    assert result.passed is False
+
+
+def test_missing_source_class_fails_closed():
+    source_results = _source_results()
+    source_results[0].pop("source_class")
+    result = evaluate_daily(
+        ingestion_status="completed",
+        ingestion_metrics=_metrics(),
+        source_results=source_results,
+        audit=_audit(),
+    )
+    assert result.accepted is False
+    assert "source_class evidence is required for every contributing source" in result.reasons
 
 
 def test_fourteen_complete_passing_days_pass_window():
