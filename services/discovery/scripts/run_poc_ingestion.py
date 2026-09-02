@@ -16,6 +16,9 @@ from ziras_discovery.ranking import DeterministicRanker
 from ziras_discovery.source_catalog import build_policy_registry, load_source_catalog
 
 
+POC_ACQUISITION_TIMEOUT_SECONDS = 60
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--scope", choices=("research", "poc"), default="poc")
@@ -38,7 +41,9 @@ def main() -> int:
         pipeline = PocIngestionPipeline(
             entries=entries,
             policy_registry=registry,
-            acquisition=ScrapyPlaywrightAcquirer(),
+            acquisition=ScrapyPlaywrightAcquirer(
+                timeout_seconds=POC_ACQUISITION_TIMEOUT_SECONDS,
+            ),
             store=store,
             ranker=DeterministicRanker(),
         )
