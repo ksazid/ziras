@@ -1,5 +1,28 @@
 [
   {
+    "source_key": "eden_cinemas_coming_soon",
+    "display_name": "Eden Cinemas Coming Soon — POC",
+    "source_class": "entertainment-events",
+    "start_urls": ["https://www.edencinemas.com.mt/coming-soon"],
+    "fetch_mode": "static",
+    "adapter_kind": "event",
+    "minimum_candidates": 1,
+    "terms_url": "https://www.edencinemas.com.mt/terms-and-conditions",
+    "policy": {
+      "mode": "allow",
+      "scope": "poc",
+      "reason": "Low-rate POC factual cinema-event metadata from Eden's public Coming Soon listing. This replaces the unhealthy 202-response special-offers/whats-on routes for POC measurement only; robots remains mandatory and production requires fresh review.",
+      "policy_url": "https://www.edencinemas.com.mt/terms-and-conditions",
+      "robots_required": true,
+      "reviewed_at": "2026-09-02T12:19:00+02:00",
+      "allowed_path_prefixes": ["/coming-soon"],
+      "max_requests_per_hour": 1,
+      "attribution_required": true,
+      "content_storage_allowed": false
+    },
+    "notes": "Current public Coming Soon route exposes dated cinema inventory while the previous special-offers and whats-on routes returned HTTP 202 with zero candidates in GitHub Actions."
+  },
+  {
     "source_key": "lidl_malta_poc_offers",
     "display_name": "Lidl Malta Public Offers — POC",
     "source_class": "supermarket",

@@ -4,6 +4,7 @@
   },
   "eden_cinemas": {
     "minimum_candidates": 1,
+    "disabled": true,
     "route_adapter_kinds": {
       "/special-offers": "promotion",
       "/whats-on": "event"
@@ -19,7 +20,8 @@
     "minimum_candidates": 1
   },
   "lidl_malta_poc_offers": {
-    "minimum_candidates": 1
+    "minimum_candidates": 1,
+    "disabled": true
   },
   "ax_sliema_dining_offers": {
     "minimum_candidates": 1
@@ -28,13 +30,16 @@
     "minimum_candidates": 1
   },
   "heritage_malta_activities": {
-    "minimum_candidates": 1
+    "minimum_candidates": 1,
+    "disabled": true
   },
   "active_ageing_discounts": {
-    "minimum_candidates": 1
+    "minimum_candidates": 1,
+    "disabled": true
   },
   "botika_personal_care_sale": {
-    "minimum_candidates": 1
+    "minimum_candidates": 1,
+    "disabled": true
   },
   "ax_verdala_wellness_offers": {
     "minimum_candidates": 1
