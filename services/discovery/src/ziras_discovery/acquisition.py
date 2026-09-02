@@ -116,6 +116,7 @@ class ScrapyPlaywrightAcquirer:
             },
             "TWISTED_REACTOR": "twisted.internet.asyncioreactor.AsyncioSelectorReactor",
             "PLAYWRIGHT_BROWSER_TYPE": "chromium",
+            "PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT": self.timeout_seconds * 1000,
         }
 
         collected: list[AcquisitionOutcome] = []
