@@ -20,9 +20,16 @@ from .structured_html import StructuredHtmlAdapter
 
 _MONEY_RE = re.compile(r"(?:(?:€|EUR)\s*)?(\d{1,4}(?:[.,]\d{1,2})?)\s*(?:€|EUR)?", re.IGNORECASE)
 _PERCENT_RE = re.compile(r"\b(\d{1,2})\s*%\s*(?:off)?\b", re.IGNORECASE)
+_FOR_EUR_RE = re.compile(
+    r"^(?P<title>.+?)\s+for\s+EUR\s+(?P<price>\d{1,4}(?:[.,]\d{1,2})?)$",
+    re.IGNORECASE,
+)
 _DATE_RANGE_RE = re.compile(
-    r"(?P<start_day>\d{1,2})[./](?P<start_month>\d{1,2})\s*[-–]\s*"
-    r"(?P<end_day>\d{1,2})[./](?P<end_month>\d{1,2})"
+    r"(?P<start_day>\d{1,2})[./](?P<start_month>\d{1,2})\.?\s*[-–]\s*"
+    r"(?P<end_day>\d{1,2})[./](?P<end_month>\d{1,2})\.?"
+)
+_NUMERIC_EVENT_DATE_RE = re.compile(
+    r"\b(?P<day>\d{1,2})[./](?P<month>\d{1,2})[./](?P<year>\d{4})\b"
 )
 _EVENT_DATE_RE = re.compile(
     r"\b(?:\d{1,2}\s+)?(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|"
@@ -74,6 +81,18 @@ _GENERIC_EVENT_TITLES = {
     "view all events",
     "view all",
     "skip to content",
+    "store",
+}
+_EXACT_PROMOTION_NOISE = {
+    "back to special offers",
+    "book your stay",
+    "claim your offer",
+    "explore offer",
+    "gift vouchers",
+    "hot deals",
+    "hotel deals",
+    "menu",
+    "the offer",
 }
 _ACTION_NOISE = ("add to cart", "add to wishlist", "add to compare", "sort by", "display", "search")
 _POLICY_NOISE = ("terms", "conditions", "privacy", "policy")
@@ -112,7 +131,10 @@ class PublicWebSignalAdapter:
             content_hash=digest,
         )
         if structured.discoveries:
-            return structured
+            return SourceAdapterResult(
+                observation=structured.observation,
+                discoveries=tuple(_source_quality_filter(source_key, structured.discoveries)),
+            )
 
         text = trafilatura.extract(
             html,
@@ -134,11 +156,14 @@ class PublicWebSignalAdapter:
         else:
             discoveries = _merge_discoveries(
                 self._promotion_product_block_discoveries(html, source_key, source_url, observed_at),
+                self._promotion_named_price_discoveries(precision_lines, source_key, source_url, observed_at),
+                self._promotion_named_price_discoveries(raw_lines, source_key, source_url, observed_at),
                 self._promotion_discoveries(precision_lines, source_key, source_url, observed_at),
                 self._promotion_discoveries(raw_lines, source_key, source_url, observed_at),
                 self._promotion_heading_discoveries(raw_lines, source_key, source_url, observed_at),
             )
 
+        discoveries = _source_quality_filter(source_key, discoveries)
         observation = SourceObservation(
             id=uuid4(),
             source_key=source_key,
@@ -209,6 +234,55 @@ class PublicWebSignalAdapter:
                     source_url=source_url,
                     observed_at=observed_at,
                     original_price=original,
+                    current_price=current,
+                    currency="EUR",
+                    freshness=FreshnessState.UNVERIFIED,
+                )
+            )
+        return result
+
+    def _promotion_named_price_discoveries(
+        self,
+        lines: tuple[str, ...],
+        source_key: str,
+        source_url: str,
+        observed_at: datetime,
+    ) -> list[Discovery]:
+        result: list[Discovery] = []
+        seen: set[tuple[str, Decimal]] = set()
+        for index, line in enumerate(lines):
+            match = _FOR_EUR_RE.fullmatch(line)
+            if match is None:
+                continue
+            title = re.sub(r"\s+", " ", match.group("title")).strip()
+            if not _looks_like_title(title):
+                continue
+            try:
+                current = Decimal(match.group("price").replace(",", "."))
+            except Exception:
+                continue
+            key = (title.casefold(), current)
+            if key in seen:
+                continue
+            seen.add(key)
+
+            expires_at: datetime | None = None
+            for candidate in lines[index + 1 : index + 10]:
+                range_match = _DATE_RANGE_RE.search(candidate)
+                if range_match is not None:
+                    expires_at = _range_end(range_match, observed_at)
+                    break
+
+            result.append(
+                Discovery(
+                    id=uuid4(),
+                    discovery_type=DiscoveryType.DEAL,
+                    entity_id=None,
+                    title=title[:180],
+                    source_key=source_key,
+                    source_url=source_url,
+                    observed_at=observed_at,
+                    expires_at=expires_at,
                     current_price=current,
                     currency="EUR",
                     freshness=FreshnessState.UNVERIFIED,
@@ -322,13 +396,15 @@ class PublicWebSignalAdapter:
         seen: set[str] = set()
 
         for index, line in enumerate(lines):
-            if not (_EVENT_DATE_RE.search(line) or _DATE_RANGE_RE.search(line)):
+            range_match = _DATE_RANGE_RE.search(line)
+            numeric_match = _NUMERIC_EVENT_DATE_RE.search(line)
+            if not (_EVENT_DATE_RE.search(line) or numeric_match or range_match):
                 continue
             title = _nearest_title(lines, index)
             if not title or title.casefold() in seen:
                 continue
-            starts_at = parse_discovery_date(line, observed_at=observed_at)
-            if starts_at is None and not _DATE_RANGE_RE.search(line):
+            starts_at = _numeric_event_date(numeric_match, observed_at) if numeric_match else parse_discovery_date(line, observed_at=observed_at)
+            if starts_at is None and range_match is None:
                 continue
             seen.add(title.casefold())
             result.append(
@@ -356,9 +432,9 @@ class PublicWebSignalAdapter:
         result: list[Discovery] = []
         seen: set[str] = set()
         for index, line in enumerate(lines):
-            if "buy tickets" not in line.casefold():
+            if re.search(r"\b(?:buy|book) tickets\b", line, flags=re.IGNORECASE) is None:
                 continue
-            title = re.sub(r"\bbuy tickets\b", "", line, flags=re.IGNORECASE).strip(" -–|:")
+            title = re.sub(r"\b(?:buy|book) tickets\b", "", line, flags=re.IGNORECASE).strip(" -–|:")
             if not _looks_like_title(title) or title.casefold() in _GENERIC_EVENT_TITLES:
                 title = _nearest_title(lines, index) or ""
             folded = title.casefold()
@@ -455,7 +531,7 @@ def _nearest_title(lines: tuple[str, ...], index: int) -> str | None:
             break
         candidate = lines[candidate_index]
         folded = candidate.casefold()
-        if _DATE_RANGE_RE.fullmatch(candidate):
+        if _DATE_RANGE_RE.fullmatch(candidate) or _NUMERIC_EVENT_DATE_RE.fullmatch(candidate):
             continue
         if _money_values(candidate) or _PERCENT_RE.search(candidate):
             continue
@@ -486,6 +562,53 @@ def _range_end(match: re.Match[str], observed_at: datetime) -> datetime | None:
         )
     except ValueError:
         return None
+
+
+def _numeric_event_date(match: re.Match[str] | None, observed_at: datetime) -> datetime | None:
+    if match is None:
+        return None
+    try:
+        return observed_at.replace(
+            year=int(match.group("year")),
+            month=int(match.group("month")),
+            day=int(match.group("day")),
+            hour=0,
+            minute=0,
+            second=0,
+            microsecond=0,
+        )
+    except ValueError:
+        return None
+
+
+def _source_quality_filter(source_key: str, discoveries: Iterable[Discovery]) -> list[Discovery]:
+    result: list[Discovery] = []
+    for item in discoveries:
+        folded = re.sub(r"\s+", " ", item.title).casefold().strip()
+        normalized = folded.lstrip("-– ").strip()
+
+        if item.discovery_type is DiscoveryType.DEAL and folded in _EXACT_PROMOTION_NOISE:
+            continue
+        if normalized.startswith("age:"):
+            continue
+
+        if source_key == "lidl_malta_poc_offers" and item.current_price is None:
+            continue
+        if source_key == "botika_personal_care_sale" and item.current_price is None:
+            continue
+        if source_key == "heritage_malta_activities":
+            if folded in {"store", "shop"} or "/store" in urlsplit(item.source_url).path.casefold():
+                continue
+        if source_key == "esplora_family_promotions":
+            if re.fullmatch(r"promotion\s+\d+\s*:?", folded):
+                continue
+            if folded.startswith("not valid with "):
+                continue
+            if "t&c" in folded or "terms and conditions" in folded:
+                continue
+
+        result.append(item)
+    return result
 
 
 def _looks_like_title(value: str) -> bool:

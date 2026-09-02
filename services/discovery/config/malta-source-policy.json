@@ -3,7 +3,7 @@
     "source_key": "visitmalta_events",
     "display_name": "VisitMalta Events",
     "source_class": "events-official",
-    "start_urls": ["https://www.visitmalta.com/en/events-in-malta-and-gozo/"],
+    "start_urls": ["https://www.visitmalta.com/en/events-in-malta-and-gozo/?startD=2026-09-01%2F&endD=2026-09-30%2F"],
     "fetch_mode": "browser",
     "adapter_kind": "event",
     "terms_url": "https://www.visitmalta.com/en/terms-and-conditions/",
@@ -19,7 +19,7 @@
       "attribution_required": true,
       "content_storage_allowed": false
     },
-    "notes": "Browser fallback was required in qualification. Store facts/provenance only, not page assets."
+    "notes": "VS-07 September POC uses a bounded September date query because the unfiltered browser route returned only the Browse Events shell in Day 2 evidence. Store facts/provenance only, not page assets; production remains separately gated."
   },
   {
     "source_key": "eden_cinemas",
