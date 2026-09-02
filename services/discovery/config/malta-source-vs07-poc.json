@@ -26,10 +26,7 @@
     "display_name": "AX Hotels Sliema Dining Offers",
     "source_class": "restaurant-direct",
     "start_urls": [
-      "https://axhotelsmalta.com/victoria-hotel/special-offers/restaurants/penny-sundays/",
-      "https://axhotelsmalta.com/victoria-hotel/special-offers/restaurants/fish-chips-penny-black/",
-      "https://axhotelsmalta.com/the-palace/offers/restaurants/cake-and-coffee/",
-      "https://axhotelsmalta.com/the-palace/offers/restaurants/taco-thursdays-talk-of-town/"
+      "https://axhotelsmalta.com/victoria-hotel/special-offers/restaurants/penny-sundays/"
     ],
     "fetch_mode": "static",
     "adapter_kind": "promotion",
@@ -45,11 +42,11 @@
         "/victoria-hotel/special-offers/restaurants/",
         "/the-palace/offers/restaurants/"
       ],
-      "max_requests_per_hour": 4,
+      "max_requests_per_hour": 1,
       "attribution_required": true,
       "content_storage_allowed": false
     },
-    "notes": "Selected direct merchant offer pages expose deterministic Summer 2026 prices/conditions."
+    "notes": "VS-07 Day 2 evidence showed the additional AX dining URLs reproduced the same site-wide candidate set. POC acquisition is restricted to one canonical offer page until a site-specific page-local extractor is certified."
   },
   {
     "source_key": "esplora_family_promotions",
@@ -143,10 +140,7 @@
     "source_key": "ax_verdala_wellness_offers",
     "display_name": "AX Verdala Wellness Offers",
     "source_class": "spa-wellness",
-    "start_urls": [
-      "https://axhotelsmalta.com/verdala-wellness/",
-      "https://axhotelsmalta.com/gift-vouchers/"
-    ],
+    "start_urls": [],
     "fetch_mode": "static",
     "adapter_kind": "promotion",
     "terms_url": "https://axhotelsmalta.com/gift-vouchers/",
@@ -158,10 +152,10 @@
       "robots_required": true,
       "reviewed_at": "2026-08-31T22:45:00+02:00",
       "allowed_path_prefixes": ["/verdala-wellness/", "/gift-vouchers/"],
-      "max_requests_per_hour": 2,
+      "max_requests_per_hour": 1,
       "attribution_required": true,
       "content_storage_allowed": false
     },
-    "notes": "Public wellness inventory includes V SPA day-pass/retreat experiences and Verdala wellness offers."
+    "notes": "Temporarily quarantined from active VS-07 acquisition after Day 2 evidence showed duplicated site-wide headings and non-offer navigation/FAQ noise. Source definition and POC policy remain fail-closed; re-enable only after a page-local extractor is certified."
   }
 ]
