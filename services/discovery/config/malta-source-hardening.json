@@ -10,6 +10,10 @@
       "/whats-on": "event"
     }
   },
+  "eden_cinemas_coming_soon": {
+    "minimum_candidates": 1,
+    "disabled": true
+  },
   "homemate_offers": {
     "minimum_candidates": 1
   },

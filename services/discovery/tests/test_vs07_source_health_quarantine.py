@@ -9,6 +9,7 @@ from ziras_discovery.source_catalog import AdapterKind, load_source_catalog
 
 QUARANTINED = {
     "eden_cinemas",
+    "eden_cinemas_coming_soon",
     "lidl_malta_poc_offers",
     "heritage_malta_activities",
     "active_ageing_discounts",
@@ -29,10 +30,10 @@ def test_day2_unhealthy_sources_are_fail_closed_without_changing_policy() -> Non
         assert entry.policy.content_storage_allowed is False
 
 
-def test_eden_replacement_uses_current_public_coming_soon_inventory() -> None:
+def test_eden_replacement_remains_defined_but_is_quarantined_after_unhealthy_evidence() -> None:
     entry = next(item for item in load_source_catalog() if item.source_key == "eden_cinemas_coming_soon")
 
-    assert entry.start_urls == ("https://www.edencinemas.com.mt/coming-soon",)
+    assert entry.start_urls == ()
     assert entry.adapter_kind is AdapterKind.EVENT
     assert entry.minimum_candidates == 1
     assert entry.policy.scope is SourcePolicyScope.POC
@@ -41,7 +42,7 @@ def test_eden_replacement_uses_current_public_coming_soon_inventory() -> None:
     assert entry.policy.content_storage_allowed is False
 
 
-def test_active_poc_inventory_keeps_six_independent_source_classes() -> None:
+def test_active_poc_inventory_keeps_exact_five_independent_source_classes() -> None:
     active = [
         entry
         for entry in load_source_catalog()
@@ -55,7 +56,6 @@ def test_active_poc_inventory_keeps_six_independent_source_classes() -> None:
         "home-retail",
         "cultural-venue-events",
         "sports-retail",
-        "entertainment-events",
         "family-kids",
     }
 
