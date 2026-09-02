@@ -2,8 +2,8 @@ name: Malta POC Ingestion
 
 on:
   schedule:
-    # 08:00 Europe/Malta during the approved 2026-09-01..2026-09-14 POC window.
-    - cron: '0 6 1-14 9 *'
+    # 08:17 Europe/Malta during the approved 2026-09-01..2026-09-14 POC window.
+    - cron: '17 6 1-14 9 *'
   workflow_dispatch:
     inputs:
       scope:
