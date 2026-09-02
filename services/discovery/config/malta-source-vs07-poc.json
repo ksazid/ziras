@@ -4,7 +4,7 @@
     "display_name": "Lidl Malta Public Offers — POC",
     "source_class": "supermarket",
     "start_urls": ["https://www.lidl.com.mt/c/"],
-    "fetch_mode": "static",
+    "fetch_mode": "browser",
     "adapter_kind": "promotion",
     "terms_url": "https://www.lidl.com.mt/c/terms-of-use-lidl-plus/s10017323",
     "policy": {
@@ -19,15 +19,13 @@
       "attribution_required": true,
       "content_storage_allowed": false
     },
-    "notes": "Additive POC-only policy. Existing research-only Lidl source remains unchanged; this source key is the explicitly approved bounded POC route."
+    "notes": "VS-07 Day 2 static evidence returned category-shell headings instead of item-level weekly offers. Browser acquisition is now required for the same approved public /c/ route; policy scope and production gate are unchanged."
   },
   {
     "source_key": "ax_sliema_dining_offers",
     "display_name": "AX Hotels Sliema Dining Offers",
     "source_class": "restaurant-direct",
-    "start_urls": [
-      "https://axhotelsmalta.com/victoria-hotel/special-offers/restaurants/penny-sundays/"
-    ],
+    "start_urls": [],
     "fetch_mode": "static",
     "adapter_kind": "promotion",
     "terms_url": "https://axhotelsmalta.com/",
@@ -46,7 +44,7 @@
       "attribution_required": true,
       "content_storage_allowed": false
     },
-    "notes": "VS-07 Day 2 evidence showed the additional AX dining URLs reproduced the same site-wide candidate set. POC acquisition is restricted to one canonical offer page until a site-specific page-local extractor is certified."
+    "notes": "Quarantined from active VS-07 acquisition after the single canonical Day 2 page still produced 15 site-wide/navigation candidates and no page-local Penny Sundays candidate. Re-enable only after a page-local extractor is certified."
   },
   {
     "source_key": "esplora_family_promotions",
@@ -75,7 +73,7 @@
     "display_name": "Heritage Malta What's On",
     "source_class": "activities-official",
     "start_urls": ["https://heritagemalta.mt/whats-on/"],
-    "fetch_mode": "static",
+    "fetch_mode": "browser",
     "adapter_kind": "event",
     "terms_url": "https://heritagemalta.mt/terms-conditions/",
     "policy": {
@@ -90,7 +88,7 @@
       "attribution_required": true,
       "content_storage_allowed": false
     },
-    "notes": "Official 2026 activity calendar with dates, locations and ticket/value information."
+    "notes": "VS-07 Day 2 static evidence produced only the navigation title Store. Browser rendering is required to expose the actual What's On inventory; acquisition remains restricted to the approved listing URL."
   },
   {
     "source_key": "active_ageing_discounts",
@@ -119,7 +117,7 @@
     "display_name": "Botika Malta Personal Care Sale",
     "source_class": "pharmacy-personal-care",
     "start_urls": ["https://botika.mt/collections/sale"],
-    "fetch_mode": "static",
+    "fetch_mode": "browser",
     "adapter_kind": "promotion",
     "terms_url": "https://botika.mt/policies/terms-of-service",
     "policy": {
@@ -134,7 +132,7 @@
       "attribution_required": true,
       "content_storage_allowed": false
     },
-    "notes": "Public sale inventory covers health, beauty, skincare, wellness, baby care and personal-care essentials."
+    "notes": "VS-07 Day 2 static evidence exposed only the collection title. Browser rendering is required to expose item-level sale cards while retaining the same approved public sale path and POC-only policy."
   },
   {
     "source_key": "ax_verdala_wellness_offers",
