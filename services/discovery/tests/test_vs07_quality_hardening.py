@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from decimal import Decimal
+from pathlib import Path
 
 from ziras_discovery.adapters.public_web import PublicWebSignalAdapter, TextSignalConfig
 from ziras_discovery.domain import SourcePolicyScope
+from ziras_discovery.pipeline import _is_poc_quality_candidate
 from ziras_discovery.source_catalog import FetchMode, load_source_catalog
 
 
@@ -91,6 +93,30 @@ def test_esplora_generic_policy_and_numbered_promotion_noise_is_removed() -> Non
     assert "Not valid with any other offer or Group discount" not in titles
 
 
+def test_esplora_spend_thresholds_are_not_treated_as_sale_price_deltas() -> None:
+    html = """
+    <html><body><main>
+      <h2>The Model Shop</h2>
+      <p>Spend €35 and receive a benefit valued at €1.</p>
+      <p>Spend €70 and receive a benefit valued at €2.</p>
+    </main></body></html>
+    """
+    result = PublicWebSignalAdapter().extract(
+        source_key="esplora_family_promotions",
+        source_url="https://esplora.org.mt/promotions-tcs/",
+        html=html,
+        observed_at=NOW,
+    )
+
+    false_price_deltas = [
+        item
+        for item in result.discoveries
+        if item.original_price is not None or item.current_price is not None
+    ]
+    assert false_price_deltas
+    assert all(not _is_poc_quality_candidate(item) for item in false_price_deltas)
+
+
 def test_heritage_store_navigation_is_not_an_event_candidate() -> None:
     html = """
     <html><body><main>
@@ -116,3 +142,12 @@ def test_dynamic_household_sources_remain_poc_only() -> None:
     for key in ("lidl_malta_poc_offers", "heritage_malta_activities", "botika_personal_care_sale"):
         assert entries[key].fetch_mode is FetchMode.BROWSER
         assert entries[key].policy.scope is SourcePolicyScope.POC
+
+
+def test_poc_artifact_serializes_every_ranked_record() -> None:
+    script = Path(__file__).parents[1] / "scripts" / "run_poc_ingestion.py"
+    text = script.read_text(encoding="utf-8")
+
+    assert "summary.ranked[:100]" not in text
+    assert "for item in summary.ranked" in text
+    assert '"ranked_record_count": len(summary.ranked)' in text

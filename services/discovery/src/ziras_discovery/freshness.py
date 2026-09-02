@@ -14,6 +14,7 @@ class FreshnessInput:
     expires_at: datetime | None = None
     explicitly_active: bool = False
     verified_at: datetime | None = None
+    is_event: bool = False
 
 
 def classify_freshness(value: FreshnessInput) -> FreshnessState:
@@ -25,6 +26,17 @@ def classify_freshness(value: FreshnessInput) -> FreshnessState:
 
     # Expiry is absolute: relevance/value cannot override an explicit expiry.
     if expires_at is not None and expires_at <= now:
+        return FreshnessState.EXPIRED
+
+    # A text-extracted event date is an occurrence date unless an explicit end/expiry
+    # says otherwise. Once that calendar day has passed, observing the page again must
+    # not revive the event as likely-live.
+    if (
+        value.is_event
+        and starts_at is not None
+        and expires_at is None
+        and starts_at.date() < now.date()
+    ):
         return FreshnessState.EXPIRED
 
     if starts_at is not None and starts_at > now:

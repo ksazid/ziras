@@ -8,7 +8,7 @@ from uuid import UUID
 from .acquisition import AcquisitionBackend, AcquisitionRequest
 from .adapters.public_web import PublicWebSignalAdapter, TextSignalConfig
 from .adapters.structured_html import StructuredHtmlAdapter
-from .domain import Discovery, FreshnessState, SourceAccessMode, SourcePolicyScope
+from .domain import Discovery, DiscoveryType, FreshnessState, SourceAccessMode, SourcePolicyScope
 from .freshness import FreshnessInput, classify_freshness
 from .persistence import (
     PersistenceDelta,
@@ -219,9 +219,12 @@ class PocIngestionPipeline:
                 source_url=page.final_url,
                 http_status=page.http_status,
             )
+            quality_discoveries = tuple(
+                item for item in normalized.discoveries if _is_poc_quality_candidate(item)
+            )
             discoveries = tuple(
                 _with_freshness(item, now=max(started_at, page.observed_at))
-                for item in normalized.discoveries
+                for item in quality_discoveries
             )
             delta = self.store.persist_normalized(
                 run_id=run_id,
@@ -319,6 +322,18 @@ def _adapter_for(entry: SourceCatalogEntry, source_url: str) -> SourceAdapter:
     raise ValueError(f"Adapter kind {adapter_kind.value} is not supported by web POC ingestion")
 
 
+def _is_poc_quality_candidate(discovery: Discovery) -> bool:
+    # Esplora's promotion T&C page contains spend thresholds and entitlement counts.
+    # They are not old/current sale prices; preserving them as price deltas creates false deals.
+    if (
+        discovery.source_key == "esplora_family_promotions"
+        and discovery.discovery_type is DiscoveryType.DEAL
+        and (discovery.original_price is not None or discovery.current_price is not None)
+    ):
+        return False
+    return True
+
+
 def _with_freshness(discovery: Discovery, *, now: datetime) -> Discovery:
     freshness = classify_freshness(
         FreshnessInput(
@@ -326,6 +341,7 @@ def _with_freshness(discovery: Discovery, *, now: datetime) -> Discovery:
             now=now,
             starts_at=discovery.starts_at,
             expires_at=discovery.expires_at,
+            is_event=discovery.discovery_type is DiscoveryType.EVENT,
         )
     )
     return replace(discovery, freshness=freshness)

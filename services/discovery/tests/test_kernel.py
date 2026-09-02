@@ -50,6 +50,30 @@ def test_explicit_expiry_always_wins() -> None:
     assert state is FreshnessState.EXPIRED
 
 
+def test_past_event_occurrence_does_not_revive_when_observed_today() -> None:
+    state = classify_freshness(
+        FreshnessInput(
+            observed_at=NOW - timedelta(minutes=5),
+            starts_at=NOW - timedelta(days=2),
+            now=NOW,
+            is_event=True,
+        )
+    )
+    assert state is FreshnessState.EXPIRED
+
+
+def test_non_event_valid_from_date_does_not_imply_expiry() -> None:
+    state = classify_freshness(
+        FreshnessInput(
+            observed_at=NOW - timedelta(minutes=5),
+            starts_at=NOW - timedelta(days=2),
+            now=NOW,
+            is_event=False,
+        )
+    )
+    assert state is FreshnessState.LIKELY_LIVE
+
+
 def test_newer_observation_only() -> None:
     current = NOW
     assert should_accept_observation(current_observed_at=current, incoming_observed_at=NOW + timedelta(seconds=1))
