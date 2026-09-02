@@ -16,6 +16,7 @@ NOW = datetime(2026, 8, 31, 18, 0, tzinfo=timezone.utc)
 
 def test_scrapy_218_start_schedules_static_and_browser_requests(monkeypatch) -> None:
     scheduled = []
+    crawler_settings = []
 
     class FakeSpider:
         pass
@@ -54,6 +55,7 @@ def test_scrapy_218_start_schedules_static_and_browser_requests(monkeypatch) -> 
     class FakeCrawlerProcess:
         def __init__(self, *, settings) -> None:
             self.settings = settings
+            crawler_settings.append(settings)
             self.spider_cls = None
 
         def crawl(self, spider_cls) -> None:
@@ -90,7 +92,10 @@ def test_scrapy_218_start_schedules_static_and_browser_requests(monkeypatch) -> 
         AcquisitionRequest("browser", "https://browser.example/events", FetchMode.BROWSER),
     )
 
-    outcomes = ScrapyPlaywrightAcquirer(browser_settle_ms=2500).acquire(requests)
+    outcomes = ScrapyPlaywrightAcquirer(
+        timeout_seconds=60,
+        browser_settle_ms=2500,
+    ).acquire(requests)
 
     assert len(scheduled) == 2
     assert scheduled[0].meta.get("playwright") is None
@@ -98,6 +103,9 @@ def test_scrapy_218_start_schedules_static_and_browser_requests(monkeypatch) -> 
     page_method = scheduled[1].meta["playwright_page_methods"][0]
     assert page_method.method == "wait_for_timeout"
     assert page_method.args == (2500,)
+    assert crawler_settings[0]["DOWNLOAD_TIMEOUT"] == 60
+    assert crawler_settings[0]["PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT"] == 60000
+    assert crawler_settings[0]["RETRY_ENABLED"] is False
     assert all(outcome.ok for outcome in outcomes)
     assert [outcome.request for outcome in outcomes] == list(requests)
 
