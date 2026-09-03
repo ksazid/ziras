@@ -112,3 +112,5 @@ jobs:
       - name: Stop POC PostgreSQL
         if: always()
         run: docker stop ziras-poc-postgres || true
+
+# Day 3 replacement trigger issued 2026-09-03.
