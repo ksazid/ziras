@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "measurement_date": "2026-09-02",
+  "poc_day": 2,
+  "ingestion_run_id": "33629134040",
+  "measured_sha": "1402319c9740d3d60f861977fe05ea07d48b65cc",
+  "audit_method": "VS07-AUDIT-METHOD-V1",
+  "audit_method_commit": "fcdb662788d5a69d30e9446d2d681d2e93bf83fd",
+  "ingestion_status": "partial",
+  "audit": {
+    "useful_discoveries": {
+      "census_size": 142,
+      "useful_count": 140,
+      "rate": 0.985915,
+      "status": "pass",
+      "excluded_noise": [
+        {"id": "e7bd62a4-cadb-48c1-88be-029bd4fd3509", "title": "More Info", "source_key": "visitmalta_events"},
+        {"id": "a6c42013-e36f-44cd-9c90-3d0f128fe2bd", "title": "Show Offers", "source_key": "visitmalta_events"}
+      ]
+    },
+    "valid_when_opened": {
+      "sample_size": 29,
+      "valid_count": null,
+      "rate": null,
+      "status": "pending",
+      "reason": "The deterministic sample was reconstructed, but a complete item-by-item official-source confirmation was not present in the original Day 2 evidence. This retrospective record fails closed rather than inferring a validity rate."
+    },
+    "relevance": {
+      "census_size": 142,
+      "relevant_count": 140,
+      "rate": 0.985915,
+      "status": "pass",
+      "profile": ["Food & drink", "Fashion/retail", "Events/activities", "New openings"],
+      "excluded_noise_ids": ["e7bd62a4-cadb-48c1-88be-029bd4fd3509", "a6c42013-e36f-44cd-9c90-3d0f128fe2bd"]
+    },
+    "merchant_onboarding": {
+      "count": 0,
+      "status": "pass"
+    }
+  },
+  "machine_metrics": {
+    "candidate_count": 142,
+    "ranked_count": 142,
+    "duplicate_count": 0,
+    "duplicate_rate": 0.0,
+    "expired_count": 0,
+    "expired_rate": 0.0,
+    "failed_count": 1,
+    "contributing_source_types": 5
+  },
+  "failures": [
+    {
+      "source_key": "eden_cinemas_coming_soon",
+      "source_url": "https://www.edencinemas.com.mt/coming-soon",
+      "http_status": 202,
+      "error_code": "insufficient_candidates",
+      "detail": "minimum_candidates=1"
+    }
+  ],
+  "gates": {
+    "POC-01": "PASS",
+    "POC-02": "PENDING",
+    "POC-03": "PASS",
+    "POC-04": "PASS",
+    "POC-05": "PASS",
+    "POC-06": "PASS",
+    "POC-07": "PASS"
+  },
+  "accepted": false,
+  "complete": false,
+  "passed": false,
+  "reasons": [
+    "ingestion_status=partial",
+    "failed_count=1",
+    "POC-02 audit evidence remains incomplete"
+  ],
+  "notes": [
+    "Day 2 remains invalid despite passing the machine gates that are measurable from its artifact.",
+    "The Eden Coming Soon source failure is preserved and is not discarded after its later quarantine.",
+    "Production source access remained OFF."
+  ]
+}
