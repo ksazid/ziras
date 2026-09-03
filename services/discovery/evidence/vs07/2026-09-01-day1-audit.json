@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "measurement_date": "2026-09-01",
+  "poc_day": 1,
+  "ingestion_run_id": "33483023566",
+  "measured_sha": "745018e2dc5115b65faf3fb363d677fd411dee6a",
+  "trigger_wrapper_sha": "6e51a61c55ff90f7b8330320ef4d1d597d550138",
+  "audit_method": "VS07-AUDIT-METHOD-V1",
+  "audit_method_commit": "fcdb662788d5a69d30e9446d2d681d2e93bf83fd",
+  "ingestion_status": "partial",
+  "audit": {
+    "useful_discoveries": {
+      "expected_census_size": 246,
+      "retained_ranked_records": 100,
+      "useful_count": null,
+      "rate": null,
+      "status": "pending",
+      "reason": "The ingestion artifact reports ranked_count=246 but retains only 100 ranked records. The frozen method requires a full census, so the missing 146 records prevent a truthful retrospective count."
+    },
+    "valid_when_opened": {
+      "sample_size": null,
+      "valid_count": null,
+      "rate": null,
+      "status": "pending",
+      "sample_ids": [],
+      "reason": "The deterministic sample cannot be reconstructed from an incomplete ranked set because missing discovery IDs can change both per-source minima and global SHA256 ordering."
+    },
+    "relevance": {
+      "expected_census_size": 246,
+      "retained_ranked_records": 100,
+      "relevant_count": null,
+      "rate": null,
+      "status": "pending",
+      "reason": "The frozen method requires a full ranked-set census; 146 ranked records are absent from the artifact."
+    },
+    "merchant_onboarding": {
+      "count": 0,
+      "status": "pass"
+    }
+  },
+  "machine_metrics": {
+    "candidate_count": 315,
+    "ranked_count": 246,
+    "duplicate_count": 69,
+    "duplicate_rate": 0.21904761904761905,
+    "expired_count": 0,
+    "expired_rate": 0.0,
+    "failed_count": 1,
+    "contributing_source_keys": 11
+  },
+  "failures": [
+    {
+      "source_key": "active_ageing_discounts",
+      "source_url": "https://aacc.gov.mt/en/discounts-for-the-elderly/",
+      "error_code": "http_403",
+      "detail": "non_success_response"
+    }
+  ],
+  "gates": {
+    "POC-01": "PENDING",
+    "POC-02": "PENDING",
+    "POC-03": "PASS",
+    "POC-04": "FAIL",
+    "POC-05": "PENDING",
+    "POC-06": "PENDING",
+    "POC-07": "PASS"
+  },
+  "accepted": false,
+  "complete": false,
+  "passed": false,
+  "reasons": [
+    "ingestion_status=partial",
+    "failed_count=1",
+    "duplicate_rate=21.9% exceeds the <5% PRD gate",
+    "full ranked audit census is not recoverable from the retained artifact"
+  ],
+  "notes": [
+    "Day 1 remains invalid and is not rewritten as a passing day.",
+    "11 contributing source keys are preserved as machine evidence and are not silently re-labelled as 11 independent source types.",
+    "Production source access remained OFF."
+  ]
+}
