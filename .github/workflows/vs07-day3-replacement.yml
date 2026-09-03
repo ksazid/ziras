@@ -1,0 +1,114 @@
+name: VS-07 Day 3 Replacement
+
+on:
+  push:
+    paths:
+      - '.github/workflows/vs07-day3-replacement.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      SOURCE_SCOPE: poc
+      MEASURED_SHA: 2ddeed65687467185980a11d00fea087c0f75fb9
+      MEASUREMENT_DATE: '2026-09-03'
+      POC_DAY: '3'
+    steps:
+      - name: Checkout frozen measured main SHA
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.MEASURED_SHA }}
+
+      - name: Verify measured checkout
+        shell: bash
+        run: |
+          actual="$(git rev-parse HEAD)"
+          test "$actual" = "$MEASURED_SHA"
+          echo "Measured code SHA: $actual"
+          echo "Trigger wrapper SHA: $GITHUB_SHA"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install discovery acquisition stack
+        run: python -m pip install -e './services/discovery[dev,acquisition]'
+
+      - name: Install Chromium for browser fallback
+        run: python -m playwright install --with-deps chromium
+
+      - name: Build PostgreSQL 16 with PostGIS and pgvector
+        run: docker build -t ziras-discovery-postgres services/discovery/tests/postgres
+
+      - name: Start ephemeral POC PostgreSQL
+        run: |
+          docker run --rm -d --name ziras-poc-postgres \
+            -e POSTGRES_USER=postgres \
+            -e POSTGRES_PASSWORD=postgres \
+            -e POSTGRES_DB=ziras \
+            -p 5432:5432 \
+            ziras-discovery-postgres
+          for i in {1..30}; do
+            if docker exec ziras-poc-postgres pg_isready -U postgres -d ziras; then
+              exit 0
+            fi
+            sleep 1
+          done
+          docker logs ziras-poc-postgres
+          exit 1
+
+      - name: Run governed POC ingestion
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ziras
+        run: |
+          set -o pipefail
+          python services/discovery/scripts/run_poc_ingestion.py \
+            --scope "$SOURCE_SCOPE" \
+            --apply-migrations | tee poc-ingestion.json
+
+      - name: Record replacement provenance
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, subprocess
+          from datetime import datetime, timezone
+          measured = subprocess.check_output(['git','rev-parse','HEAD'], text=True).strip()
+          expected = os.environ['MEASURED_SHA']
+          if measured != expected:
+              raise SystemExit(f'measured SHA mismatch: {measured} != {expected}')
+          payload = {
+              'schema_version': 1,
+              'measurement_date': os.environ['MEASUREMENT_DATE'],
+              'poc_day': int(os.environ['POC_DAY']),
+              'trigger_type': 'replacement/push-wrapper',
+              'measured_sha': measured,
+              'trigger_wrapper_sha': os.environ['GITHUB_SHA'],
+              'github_run_id': os.environ['GITHUB_RUN_ID'],
+              'github_run_attempt': os.environ['GITHUB_RUN_ATTEMPT'],
+              'scope': os.environ['SOURCE_SCOPE'],
+              'production_source_access': 'OFF',
+              'recorded_at': datetime.now(timezone.utc).isoformat(),
+          }
+          with open('poc-run-provenance.json','w',encoding='utf-8') as handle:
+              json.dump(payload, handle, indent=2, sort_keys=True)
+              handle.write('\n')
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: vs07-day3-replacement-${{ github.run_id }}
+          path: |
+            poc-ingestion.json
+            poc-run-provenance.json
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Stop POC PostgreSQL
+        if: always()
+        run: docker stop ziras-poc-postgres || true
