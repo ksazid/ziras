@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "measurement_date": "2026-09-03",
+  "poc_day": 3,
+  "ingestion_run_id": "33729222069",
+  "measured_sha": "2ddeed65687467185980a11d00fea087c0f75fb9",
+  "trigger_wrapper_sha": "6e06873f3f884b47d293310be2c5320c0df3c162",
+  "audit_method": "VS07-AUDIT-METHOD-V1",
+  "audit_method_commit": "fcdb662788d5a69d30e9446d2d681d2e93bf83fd",
+  "audit": {
+    "useful_discoveries": {
+      "census_size": 142,
+      "useful_count": 142,
+      "rate": 1.0,
+      "status": "pass"
+    },
+    "valid_when_opened": {
+      "sample_size": 29,
+      "valid_count": 28,
+      "rate": 0.965517,
+      "status": "pass",
+      "sample_ids": [
+        "af55f14f-5b04-429a-97b8-3bc40c68ece2",
+        "d8fbb6ca-61d8-453a-ae90-f15379ca05e8",
+        "3c20bbe5-0412-43cd-8802-963d2ecd2d3e",
+        "409e6383-1b3e-4659-bdd1-e2b294f8e917",
+        "0d0bcc2f-7492-4483-a6a5-21a44d78081e",
+        "b3d03592-f3bf-4dcb-a018-44f5d4754afd",
+        "8fec400b-56ce-4411-83b7-85717b604b6f",
+        "2f4ba5ec-728d-4ad0-bb44-be670fddc11b",
+        "6cf7c6c8-4362-45e4-9f59-3e75cb199090",
+        "d7097ca7-9f4b-4223-836d-28ed131f10fa",
+        "ca1a936e-c698-4332-9781-64d3cae1e32d",
+        "2a1a1238-a61c-410e-b1d1-2cc8491ebbcf",
+        "4323a4c1-51e2-4a6d-b7f3-89e48730ca8b",
+        "76f29e7b-3a20-4ce9-9a17-db0470dc53b5",
+        "9d9bc5f9-8cb4-48d0-8f13-4b5265ecf603",
+        "3863c3ff-eccf-46ff-a01e-ed13e2e58fc3",
+        "e2a69abb-dae5-4e5a-a9e9-c7a34b53cb03",
+        "f8954e19-e53b-427e-8014-62ce9a575691",
+        "db0bae3d-f9e7-4481-86fe-7cff0e987f53",
+        "97bc58ff-1b32-4c86-b9a4-1be6a26b9f99",
+        "086bdb8d-ad73-4456-95fd-b9bc6d0b7b1b",
+        "56deacc2-e0ec-4502-9a66-e1e96bf17102",
+        "9063e404-bc67-4131-9650-6dd8a39de563",
+        "83e7bf46-70b6-40ef-be85-b778c6128749",
+        "eaa8aa83-6386-4511-9516-5392161df973",
+        "559f91dd-e0d7-4a56-8c3e-0d5594db63e1",
+        "eed62fb9-b0c5-41cc-a761-0e6ce7d567c8",
+        "e32888d1-ef73-45ad-88cb-96f3a4ffdb5b",
+        "a6372195-84e5-4dbf-afd2-c718d45d2eda"
+      ],
+      "invalid_items": [
+        {
+          "id": "3c20bbe5-0412-43cd-8802-963d2ecd2d3e",
+          "source_key": "homemate_offers",
+          "title": "Rewall Globo Automatic Wall-mounted Hose Reel 20m",
+          "reason": "Official Homemate special-offers page was reachable but the sampled item could not be confirmed at audit time; failed closed."
+        }
+      ]
+    },
+    "relevance": {
+      "census_size": 142,
+      "relevant_count": 142,
+      "rate": 1.0,
+      "status": "pass",
+      "profile": [
+        "Food & drink",
+        "Fashion/retail",
+        "Events/activities",
+        "New openings"
+      ]
+    },
+    "merchant_onboarding": {
+      "count": 0,
+      "status": "pass"
+    }
+  },
+  "machine_metrics": {
+    "blocked_count": 9,
+    "browser_request_count": 2,
+    "candidate_count": 142,
+    "duplicate_count": 0,
+    "duplicate_rate": 0.0,
+    "expired_count": 0,
+    "expired_rate": 0.0,
+    "failed_count": 0,
+    "inserted_count": 142,
+    "observation_count": 5,
+    "ranked_count": 142,
+    "skipped_count": 11,
+    "source_count": 25,
+    "static_request_count": 3,
+    "updated_count": 0
+  },
+  "gates": {
+    "POC-01": "PASS",
+    "POC-02": "PASS",
+    "POC-03": "PASS",
+    "POC-04": "PASS",
+    "POC-05": "PASS",
+    "POC-06": "PASS",
+    "POC-07": "PASS"
+  },
+  "accepted": true,
+  "complete": true,
+  "passed": true,
+  "notes": [
+    "Audit metrics are distinct from machine ingestion metrics.",
+    "Workflow success alone is not acceptance.",
+    "Production source access remained OFF."
+  ]
+}
