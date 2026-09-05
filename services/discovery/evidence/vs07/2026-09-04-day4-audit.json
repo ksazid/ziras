@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "measurement_date": "2026-09-04",
+  "poc_day": 4,
+  "ingestion_run_id": "33867808987",
+  "measured_sha": "2da83d2e26b49a630c65745c8377fe29be5dc95d",
+  "trigger_type": "schedule",
+  "audit_method": "VS07-AUDIT-METHOD-V1",
+  "audit": {
+    "useful_discoveries": {"census_size": 142, "useful_count": 140, "rate": 0.985915, "status": "pass", "rejected_items": [{"id": "4c13c440-a923-4d98-acd0-e0b4a00157c1", "title": "More Info", "reason": "generic navigation label"}, {"id": "760c7c0c-c59f-484c-a28e-4cf89b360e4c", "title": "Show Offers", "reason": "generic navigation label"}]},
+    "valid_when_opened": {"sample_size": 29, "valid_count": 28, "rate": 0.965517, "status": "pass", "sample_ids": ["59f8a986-a67e-4f5c-af82-3e875803a8be","6cb5fe75-5e77-4c58-b437-15b5687a6b74","e91df820-f47d-4aa0-a775-6b0499796fbc","9123d10c-7ab2-45b7-972e-da9a3f087791","302582d4-eb45-47a4-ac80-4503362a22e4","127e2b42-f93a-447b-8849-33abc11df08d","63830ecd-f918-4fe8-8e6e-88accd82e91b","86b7bcc7-a9af-4970-8d6b-f178fd686d25","185f15c5-4d9e-42e3-bc53-c4b3e49057e1","592941d6-eb0c-4d9e-aeb0-7fce0988502f","6bac8a6b-e4ec-404c-9b97-a36a1927a759","6fb69477-76c8-4804-822a-03c87f68c083","d90e4c36-ed9e-402f-94f8-8f9d73c51061","4ce76597-094e-4c00-a9c4-a2f6252be4c3","5ef1b606-4cca-4897-a8ba-3ea1715f4172","81516467-598b-4be4-bb18-36f77a0cb085","5b96152d-0a4e-4ff8-83f9-c8a4334a3e8e","5cf1fe32-c402-45b1-a8e0-60e90cb581f0","58541599-0971-48dc-9581-f30a9bca74b8","5c852878-daf6-46ee-8edf-b1ca1aefb186","fa6c78cb-c571-4a4e-8d4b-a11949a2fac9","553958c6-b7ed-4f73-8d8f-dd46ea0a58a7","37ad4340-137b-4adb-8a9f-7e6e6505b317","13ba0863-829b-4587-b7d0-a90da7c645ed","b810326e-f637-43f5-be05-430c2fae7dbe","d20c789b-eee8-4a39-854a-50ca0cef5c01","29b5f4e8-2f2f-42c0-a458-7503688c429b","1d107e4c-9dc3-4f6f-acee-8a3d013c52ef","3855eb6b-f48e-4a37-8162-684fa5e47b4b"], "invalid_items": [{"id": "9123d10c-7ab2-45b7-972e-da9a3f087791", "source_key": "homemate_offers", "title": "Jokey Lenja Led Illuminated Mirror 50cm x 70cm", "reason": "Official Homemate offers page/item could not be independently confirmed at audit time; failed closed."}]},
+    "relevance": {"census_size": 142, "relevant_count": 140, "rate": 0.985915, "status": "pass"},
+    "merchant_onboarding": {"count": 0, "status": "pass"}
+  },
+  "machine_metrics": {"blocked_count": 9,"browser_request_count": 2,"candidate_count": 142,"duplicate_count": 0,"duplicate_rate": 0.0,"expired_count": 0,"expired_rate": 0.0,"failed_count": 0,"inserted_count": 142,"observation_count": 5,"ranked_count": 142,"skipped_count": 11,"source_count": 25,"static_request_count": 3,"updated_count": 0},
+  "gates": {"POC-01":"PASS","POC-02":"PASS","POC-03":"PASS","POC-04":"PASS","POC-05":"PASS","POC-06":"PASS","POC-07":"PASS"},
+  "accepted": true,
+  "complete": true,
+  "passed": true,
+  "notes": ["Workflow success is distinct from measurement acceptance.","Audit metrics are distinct from machine ingestion metrics.","Two generic VisitMalta navigation labels were excluded from useful/relevant census.","Production source access remained OFF."]
+}
