@@ -107,7 +107,9 @@ class ScrapyPlaywrightAcquirer:
             "CONCURRENT_REQUESTS": self.concurrent_requests,
             "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
             "REDIRECT_ENABLED": False,
-            "RETRY_ENABLED": False,
+            "RETRY_ENABLED": True,
+            "RETRY_TIMES": 1,
+            "RETRY_HTTP_CODES": [408, 429, 500, 502, 503, 504],
             "LOG_ENABLED": False,
             "TELNETCONSOLE_ENABLED": False,
             "DOWNLOAD_HANDLERS": {

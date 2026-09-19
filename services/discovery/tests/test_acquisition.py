@@ -105,7 +105,9 @@ def test_scrapy_218_start_schedules_static_and_browser_requests(monkeypatch) -> 
     assert page_method.args == (2500,)
     assert crawler_settings[0]["DOWNLOAD_TIMEOUT"] == 60
     assert crawler_settings[0]["PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT"] == 60000
-    assert crawler_settings[0]["RETRY_ENABLED"] is False
+    assert crawler_settings[0]["RETRY_ENABLED"] is True
+    assert crawler_settings[0]["RETRY_TIMES"] == 1
+    assert crawler_settings[0]["RETRY_HTTP_CODES"] == [408, 429, 500, 502, 503, 504]
     assert all(outcome.ok for outcome in outcomes)
     assert [outcome.request for outcome in outcomes] == list(requests)
 
