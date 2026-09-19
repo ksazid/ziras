@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import date, timedelta
 from typing import Iterable, Mapping, Sequence
 
 
@@ -52,9 +53,11 @@ def evaluate_daily(
 
     source_types = len(
         {
-            str(item.get("source_key"))
+            str(item.get("source_class"))
             for item in source_results
-            if item.get("status") == "ok" and int(item.get("candidate_count") or 0) > 0
+            if item.get("status") == "ok"
+            and int(item.get("candidate_count") or 0) > 0
+            and item.get("source_class")
         }
     )
 
@@ -159,6 +162,24 @@ def evaluate_window(records: Iterable[Mapping[str, object]]) -> dict[str, object
     if len(unique_dates) != len(rows):
         reasons.append("measurement dates must be unique and non-empty")
 
+    parsed_dates: list[date] = []
+    try:
+        parsed_dates = sorted(date.fromisoformat(value) for value in unique_dates)
+    except ValueError:
+        reasons.append("measurement dates must be ISO calendar dates")
+    if len(parsed_dates) == 14:
+        expected = [parsed_dates[0] + timedelta(days=offset) for offset in range(14)]
+        if parsed_dates != expected:
+            reasons.append("measurement dates must be 14 consecutive calendar days")
+
+    missing_provenance = [
+        item for item in rows
+        if not str(item.get("github_run_id") or "").strip()
+        or not str(item.get("measured_sha") or "").strip()
+    ]
+    if missing_provenance:
+        reasons.append(f"{len(missing_provenance)} record(s) missing immutable run/SHA provenance")
+
     rejected = [item for item in rows if item.get("accepted") is not True]
     failed = [item for item in rows if item.get("passed") is not True]
     if rejected:
@@ -166,7 +187,14 @@ def evaluate_window(records: Iterable[Mapping[str, object]]) -> dict[str, object
     if failed:
         reasons.append(f"{len(failed)} record(s) failed one or more POC gates")
 
-    complete = len(rows) == 14 and len(unique_dates) == 14 and not rejected
+    complete = (
+        len(rows) == 14
+        and len(unique_dates) == 14
+        and len(parsed_dates) == 14
+        and not any("consecutive calendar days" in reason for reason in reasons)
+        and not missing_provenance
+        and not rejected
+    )
     passed = complete and not failed
     return {
         "complete": complete,

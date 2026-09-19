@@ -3,7 +3,7 @@ from ziras_discovery.poc_metrics import AuditCounts, evaluate_daily, evaluate_wi
 
 def _source_results(count: int = 5):
     return [
-        {"source_key": f"source-{index}", "status": "ok", "candidate_count": 10}
+        {"source_key": f"source-{index}", "source_class": f"class-{index}", "status": "ok", "candidate_count": 10}
         for index in range(count)
     ]
 
@@ -110,6 +110,8 @@ def test_fourteen_complete_passing_days_pass_window():
     records = [
         {
             "measurement_date": f"2026-09-{day:02d}",
+            "github_run_id": str(day),
+            "measured_sha": "a" * 40,
             "accepted": True,
             "passed": True,
         }
@@ -125,6 +127,8 @@ def test_window_cannot_drop_a_complete_failed_day():
     records = [
         {
             "measurement_date": f"2026-09-{day:02d}",
+            "github_run_id": str(day),
+            "measured_sha": "a" * 40,
             "accepted": True,
             "passed": day != 7,
         }
@@ -139,7 +143,7 @@ def test_window_cannot_drop_a_complete_failed_day():
 
 def test_window_requires_fourteen_unique_accepted_days():
     records = [
-        {"measurement_date": "2026-09-01", "accepted": True, "passed": True}
+        {"measurement_date": "2026-09-01", "github_run_id": "1", "measured_sha": "a" * 40, "accepted": True, "passed": True}
         for _ in range(14)
     ]
 

@@ -109,12 +109,15 @@ jobs:
           python - <<'PY'
           import json, os
           from datetime import datetime, timezone
+          from zoneinfo import ZoneInfo
           payload = {
               "schema_version": 1,
               "github_sha": os.environ["GITHUB_SHA"],
               "github_run_id": os.environ["GITHUB_RUN_ID"],
               "github_run_attempt": os.environ["GITHUB_RUN_ATTEMPT"],
               "github_ref": os.environ["GITHUB_REF"],
+              "measurement_date": datetime.now(ZoneInfo("Europe/Malta")).date().isoformat(),
+              "trigger_type": os.environ.get("GITHUB_EVENT_NAME", ""),
               "scope": os.environ.get("POC_SCOPE", ""),
               "source": os.environ.get("POC_SOURCE", ""),
               "recorded_at": datetime.now(timezone.utc).isoformat(),
@@ -123,6 +126,15 @@ jobs:
               json.dump(payload, handle, indent=2, sort_keys=True)
               handle.write("\n")
           PY
+
+      - name: Build daily measurement evidence
+        if: always() && steps.window.outputs.active == 'true'
+        run: |
+          if [ -s poc-ingestion.json ] && [ -s poc-run-provenance.json ]; then
+            python services/discovery/scripts/build_poc_measurement_evidence.py
+          else
+            echo '{"schema_version":1,"evidence_kind":"vs07-daily-measurement","accepted":false,"passed":false,"complete":false,"reasons":["ingestion or provenance evidence missing"],"audit":{"status":"pending"}}' > poc-measurement-evidence.json
+          fi
 
       - name: Build durable machine-evidence record
         if: always() && steps.window.outputs.active == 'true'
@@ -161,6 +173,7 @@ jobs:
             poc-ingestion.json
             poc-run-provenance.json
             poc-machine-evidence.json
+            poc-measurement-evidence.json
           if-no-files-found: warn
           retention-days: 90
 
@@ -171,10 +184,12 @@ jobs:
           evidence_dir="services/discovery/evidence/vs07/machine"
           mkdir -p "$evidence_dir"
           evidence_path="$evidence_dir/$(date -u +%F)-run-${GITHUB_RUN_ID}.json"
+          measurement_path="$evidence_dir/$(date -u +%F)-run-${GITHUB_RUN_ID}-measurement.json"
           cp poc-machine-evidence.json "$evidence_path"
+          cp poc-measurement-evidence.json "$measurement_path"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "$evidence_path"
+          git add "$evidence_path" "$measurement_path"
           if git diff --cached --quiet; then
             echo "No evidence change to commit"
             exit 0
