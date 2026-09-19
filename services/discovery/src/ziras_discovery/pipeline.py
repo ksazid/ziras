@@ -287,6 +287,11 @@ class PocIngestionPipeline:
         context.setdefault("now", datetime.now(timezone.utc))
         ranked = tuple(self.ranker.rank(rank_input, context=context))
         metrics["ranked_count"] = len(ranked)
+        contributing_source_count = len({
+            item.source_key for item in ranked
+        })
+        metrics["contributing_source_count"] = contributing_source_count
+        metrics["source_coverage_ok"] = contributing_source_count >= 5
         candidate_count = int(metrics["candidate_count"])
         # POC-04 measures duplicates that survive processing into the surfaced set.
         # Persistence updates of a discovery seen on a previous run are repeat observations,
