@@ -73,6 +73,7 @@ class PocIngestionPipeline:
             "inserted_count": 0,
             "updated_count": 0,
             "duplicate_count": 0,
+            "repeat_seen_count": 0,
             "expired_count": 0,
             "ranked_count": 0,
             "static_request_count": 0,
@@ -287,6 +288,13 @@ class PocIngestionPipeline:
         ranked = tuple(self.ranker.rank(rank_input, context=context))
         metrics["ranked_count"] = len(ranked)
         candidate_count = int(metrics["candidate_count"])
+        # POC-04 measures duplicates that survive processing into the surfaced set.
+        # Persistence updates of a discovery seen on a previous run are repeat observations,
+        # not same-run duplicates. Keep both metrics explicit so routine daily re-observation
+        # cannot inflate the duplicate gate.
+        surfaced_count = len(ranked)
+        metrics["repeat_seen_count"] = int(metrics["duplicate_count"])
+        metrics["duplicate_count"] = max(candidate_count - surfaced_count - int(metrics["expired_count"]), 0)
         metrics["duplicate_rate"] = (
             int(metrics["duplicate_count"]) / candidate_count if candidate_count else 0.0
         )
