@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "measurement_date": "2026-09-11",
+  "poc_day": 11,
+  "ingestion_run_id": "34594186979",
+  "measured_sha": "37526e5f93c257da80b168bbf36103e52ab818e2",
+  "trigger_type": "schedule",
+  "audit_method": "VS07-AUDIT-METHOD-V1",
+  "ingestion_status": "partial",
+  "audit": {
+    "useful_discoveries": {
+      "status": "pending",
+      "reason": "Required frozen full-ranked-set audit was not stored; no retrospective labels are invented."
+    },
+    "valid_when_opened": {
+      "status": "pending",
+      "reason": "Required deterministic valid-open audit was not stored; current re-opening cannot substitute for the missing daily audit."
+    },
+    "relevance": {
+      "status": "pending",
+      "reason": "Required frozen full-ranked-set audit was not stored; no retrospective labels are invented."
+    },
+    "merchant_onboarding": {
+      "count": 0,
+      "status": "pass"
+    }
+  },
+  "machine_metrics": {
+    "candidate_count": 28,
+    "ranked_count": 28,
+    "duplicate_count": 0,
+    "duplicate_rate": 0,
+    "expired_count": 0,
+    "expired_rate": 0,
+    "failed_count": 2,
+    "contributing_source_keys": 3
+  },
+  "source_errors": [
+    "spazju_kreattiv_events: insufficient_candidates",
+    "visitmalta_events: acquisition_error"
+  ],
+  "gates": {
+    "POC-01": "PENDING",
+    "POC-02": "PENDING",
+    "POC-03": "PASS",
+    "POC-04": "PASS",
+    "POC-05": "FAIL",
+    "POC-06": "PENDING",
+    "POC-07": "PASS"
+  },
+  "accepted": false,
+  "complete": false,
+  "passed": false,
+  "notes": [
+    "Workflow success is distinct from measurement acceptance.",
+    "Machine metrics reconstructed from the preserved GitHub Actions artifact.",
+    "Missing audit evidence fails closed.",
+    "Production source access remained OFF."
+  ]
+}
