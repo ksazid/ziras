@@ -53,6 +53,9 @@ def main() -> int:
             now=datetime.now(timezone.utc),
         )
         source_results = _source_results(connection, summary.run_id)
+        source_classes = {entry.source_key: entry.source_class for entry in entries}
+        for result in source_results:
+            result["source_class"] = source_classes.get(str(result.get("source_key")))
 
     payload = {
         "run_id": str(summary.run_id),
