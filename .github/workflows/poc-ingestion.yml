@@ -20,7 +20,7 @@ on:
         type: string
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   ingest:
@@ -124,6 +124,35 @@ jobs:
               handle.write("\n")
           PY
 
+      - name: Build durable machine-evidence record
+        if: always() && steps.window.outputs.active == 'true'
+        run: |
+          python - <<'PY'
+          import json, os
+          from datetime import datetime, timezone
+          from pathlib import Path
+          ingestion_path = Path("poc-ingestion.json")
+          provenance_path = Path("poc-run-provenance.json")
+          ingestion = json.loads(ingestion_path.read_text(encoding="utf-8")) if ingestion_path.exists() else None
+          provenance = json.loads(provenance_path.read_text(encoding="utf-8")) if provenance_path.exists() else {}
+          record = {
+              "schema_version": 1,
+              "evidence_kind": "machine-ingestion",
+              "measurement_date": datetime.now(timezone.utc).date().isoformat(),
+              "github_run_id": provenance.get("github_run_id", os.environ.get("GITHUB_RUN_ID")),
+              "measured_sha": provenance.get("github_sha", os.environ.get("GITHUB_SHA")),
+              "github_run_attempt": provenance.get("github_run_attempt"),
+              "trigger_type": os.environ.get("GITHUB_EVENT_NAME"),
+              "scope": provenance.get("scope"),
+              "source": provenance.get("source"),
+              "ingestion": ingestion,
+              "audit_status": "pending",
+              "measurement_accepted": False,
+              "note": "Machine evidence only. Workflow success does not imply VS-07 measurement acceptance.",
+          }
+          Path("poc-machine-evidence.json").write_text(json.dumps(record, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+          PY
+
       - uses: actions/upload-artifact@v4
         if: always() && steps.window.outputs.active == 'true'
         with:
@@ -131,8 +160,27 @@ jobs:
           path: |
             poc-ingestion.json
             poc-run-provenance.json
+            poc-machine-evidence.json
           if-no-files-found: warn
-          retention-days: 30
+          retention-days: 90
+
+      - name: Commit durable machine evidence
+        if: always() && steps.window.outputs.active == 'true' && github.event_name == 'schedule'
+        shell: bash
+        run: |
+          evidence_dir="services/discovery/evidence/vs07/machine"
+          mkdir -p "$evidence_dir"
+          evidence_path="$evidence_dir/$(date -u +%F)-run-${GITHUB_RUN_ID}.json"
+          cp poc-machine-evidence.json "$evidence_path"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$evidence_path"
+          if git diff --cached --quiet; then
+            echo "No evidence change to commit"
+            exit 0
+          fi
+          git commit -m "evidence(vs07): retain machine run ${GITHUB_RUN_ID}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
 
       - name: Stop POC PostgreSQL
         if: always() && steps.window.outputs.active == 'true'
